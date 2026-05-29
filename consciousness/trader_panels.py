@@ -1,11 +1,18 @@
 """Trader-facing dashboard summaries with plain-language labels."""
 from __future__ import annotations
 
+import threading
 import time
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Mapping, Optional
+from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple
 
 ROOT = Path(__file__).resolve().parent.parent
+
+# Live broker refresh can be slow or stall against a remote bridge. Cap the
+# wait so /api/state always responds; a slow refresh keeps running in the
+# background and warms the cache for the next poll.
+PORTFOLIO_PANEL_TIMEOUT_SEC = 1.2
+GATE_REPORT_PATH = ROOT / "intel" / "edge_gate_report.json"
 
 STAGE_LABELS = {
     "pattern_scan": "Pattern scan",
@@ -366,10 +373,466 @@ def readiness_table(preflight: Optional[Mapping[str, Any]] = None, *, enabled_on
     }
 
 
-def _safe_panel(name: str, builder, fallback: Dict[str, Any]) -> Dict[str, Any]:
+def _safe_float(value: Any) -> Optional[float]:
     try:
-        return builder()
+        if value is None:
+            return None
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+_TIMEFRAME_SECONDS = {
+    "M1": 60,
+    "M5": 300,
+    "M15": 900,
+    "M30": 1800,
+    "H1": 3600,
+    "H4": 14400,
+    "D1": 86400,
+    "D": 86400,
+    "W1": 604800,
+}
+
+_BULLISH_WORDS = {"up", "buy", "bullish", "long"}
+_BEARISH_WORDS = {"down", "sell", "bearish", "short"}
+_RESTRICTIVE_RECS = {"halt_symbols", "halt_new", "hold", "block", "reduce_size"}
+
+
+def _timeframe_seconds(timeframe: Any) -> Optional[int]:
+    return _TIMEFRAME_SECONDS.get(str(timeframe or "").upper().strip())
+
+
+def _event_payload(event: Mapping[str, Any]) -> Dict[str, Any]:
+    payload = event.get("payload")
+    return payload if isinstance(payload, dict) else {}
+
+
+def _is_forecast_topic(topic: Any) -> bool:
+    text = str(topic or "")
+    return text == "market.forecast" or text.startswith("market.forecast.")
+
+
+def _forecast_symbol(payload: Mapping[str, Any], topic: Any = "") -> Optional[str]:
+    for key in ("symbol", "ticker", "instrument"):
+        val = payload.get(key)
+        if val:
+            return str(val).upper().strip()
+    text = str(topic or "")
+    if text.startswith("market.forecast."):
+        suffix = text.split("market.forecast.", 1)[1].strip()
+        if suffix:
+            return suffix.split(".")[0].upper()
+    return None
+
+
+def _forecast_timeframe(payload: Mapping[str, Any]) -> Optional[str]:
+    tf = payload.get("timeframe") or payload.get("tf")
+    if tf:
+        return str(tf).upper().strip()
+    return None
+
+
+def _forecast_sort_key(event: Mapping[str, Any], index: int) -> Tuple[float, float, int]:
+    payload = _event_payload(event)
+    ts = _safe_float(event.get("ts"))
+    if ts is None:
+        ts = _safe_float(payload.get("ts"))
+    seq = _safe_float(event.get("seq"))
+    if seq is None:
+        seq = 0.0
+    if ts is None:
+        ts = 0.0
+    return (ts, seq, -index)
+
+
+def _forecast_value(payload: Mapping[str, Any], *keys: str) -> Any:
+    nested = payload.get("forecast")
+    nested_dict = nested if isinstance(nested, dict) else {}
+    for key in keys:
+        if payload.get(key) not in (None, ""):
+            val = payload.get(key)
+            if key in ("predicted_close", "forecast_close") and isinstance(val, list) and val:
+                return val[-1]
+            return val
+        if nested_dict.get(key) not in (None, ""):
+            val = nested_dict.get(key)
+            if key in ("predicted_close", "forecast_close") and isinstance(val, list) and val:
+                return val[-1]
+            return val
+    return None
+
+
+def _forecast_staleness(age_sec: Optional[float], timeframe: Any) -> Tuple[str, str]:
+    """Classify a forecast by age relative to its timeframe cadence."""
+    if age_sec is None:
+        return "unknown", "Age unknown"
+    bar = _timeframe_seconds(timeframe)
+    if bar:
+        if age_sec <= bar * 1.5:
+            return "fresh", "Fresh"
+        if age_sec <= bar * 4:
+            return "aging", "Aging"
+        return "stale", "Stale"
+    if age_sec <= 300:
+        return "fresh", "Fresh"
+    if age_sec <= 1800:
+        return "aging", "Aging"
+    return "stale", "Stale"
+
+
+def _direction_sign(direction: Any) -> int:
+    value = str(direction or "").lower().strip()
+    if value in _BULLISH_WORDS:
+        return 1
+    if value in _BEARISH_WORDS:
+        return -1
+    return 0
+
+
+def _macro_pressure(macro: Optional[Mapping[str, Any]]) -> int:
+    """Net macro/news pressure: +1 risk-on, -1 cautious/risk-off, 0 neutral."""
+    if not macro:
+        return 0
+    if macro.get("halted"):
+        return -1
+    rec = str(macro.get("recommendation") or "").lower().strip()
+    if rec in _RESTRICTIVE_RECS:
+        return -1
+    assessment = str(macro.get("assessment") or "").lower()
+    if any(word in assessment for word in ("risk_off", "risk off", "bearish", "caution", "stress")):
+        return -1
+    if any(word in assessment for word in ("risk_on", "risk on", "bullish")):
+        return 1
+    return 0
+
+
+def _forecast_macro_conflict(direction: Any, macro: Optional[Mapping[str, Any]]) -> Dict[str, Any]:
+    """Flag when the forecast direction disagrees with macro/news pressure."""
+    if not macro:
+        return {"conflict": False, "label": "No macro context", "severity": "none"}
+    if macro.get("halted"):
+        return {"conflict": True, "label": "Macro halt on symbol", "severity": "high"}
+    sign = _direction_sign(direction)
+    pressure = _macro_pressure(macro)
+    if sign > 0 and pressure < 0:
+        return {"conflict": True, "label": "Bullish forecast vs macro caution", "severity": "medium"}
+    if sign < 0 and pressure > 0:
+        return {"conflict": True, "label": "Bearish forecast vs risk-on macro", "severity": "medium"}
+    if sign != 0 and pressure != 0:
+        return {"conflict": False, "label": "Aligned with macro", "severity": "none"}
+    return {"conflict": False, "label": "No macro conflict", "severity": "none"}
+
+
+def _compact_forecast_entry(record: Mapping[str, Any]) -> Dict[str, Any]:
+    return {
+        "ts": record.get("ts"),
+        "direction": record.get("direction"),
+        "confidence": record.get("confidence"),
+        "predicted_close": record.get("predicted_close"),
+    }
+
+
+def _research_symbol_candidates(symbol: Any) -> List[str]:
+    sym = str(symbol or "").upper().strip()
+    return [sym] if sym else []
+
+
+def _research_context_by_symbol() -> Dict[str, Dict[str, Any]]:
+    try:
+        from research.snapshot import load_snapshot
+    except ImportError:
+        return {}
+    snapshot = load_snapshot()
+    if not snapshot.get("available"):
+        return {}
+    out: Dict[str, Dict[str, Any]] = {}
+    for bucket in ("multibagger_candidates", "top_picks", "accumulate"):
+        for row in snapshot.get(bucket) or []:
+            sym = str(row.get("symbol") or "").upper()
+            if sym and sym not in out:
+                out[sym] = {
+                    "tier": row.get("tier"),
+                    "tier_label": human_tier(row.get("tier")),
+                    "confidence": row.get("confidence"),
+                    "thesis": row.get("thesis"),
+                }
+    return out
+
+
+def _latest_symbol_decision_context(events: Iterable[dict]) -> Dict[str, Dict[str, Any]]:
+    out: Dict[str, Dict[str, Any]] = {}
+    for event in events:
+        if event.get("topic") != "cortex.decision":
+            continue
+        payload = event.get("payload") or {}
+        affected = payload.get("affected_symbols") or {}
+        halt_symbols = {str(s).upper() for s in (payload.get("halt_symbols") or [])}
+        rec = payload.get("recommendation")
+        rec_label = human_recommendation(rec)
+        if isinstance(affected, dict):
+            for sym, rel in affected.items():
+                s = str(sym).upper()
+                out[s] = {
+                    "recommendation": rec,
+                    "recommendation_label": rec_label,
+                    "assessment": payload.get("assessment"),
+                    "relevance": rel,
+                    "halted": s in halt_symbols,
+                }
+        for sym in halt_symbols:
+            out.setdefault(
+                sym,
+                {
+                    "recommendation": rec or "halt_symbols",
+                    "recommendation_label": rec_label,
+                    "assessment": payload.get("assessment"),
+                    "relevance": 1.0,
+                    "halted": True,
+                },
+            )
+    return out
+
+
+def forecast_thesis_panel(
+    events: Iterable[dict],
+    *,
+    limit: int = 30,
+    history_limit: int = 6,
+    now: Optional[float] = None,
+) -> Dict[str, Any]:
+    forecasts: Dict[Tuple[str, str], Dict[str, Any]] = {}
+    history_map: Dict[Tuple[str, str], List[Dict[str, Any]]] = {}
+    event_list = [event for event in events if isinstance(event, Mapping)]
+    reference_ts = float(now) if now is not None else time.time()
+    macro_summary = macro_news_impact(event_list)
+
+    for index, event in enumerate(event_list):
+        if not _is_forecast_topic(event.get("topic")):
+            continue
+        payload = _event_payload(event)
+        symbol = _forecast_symbol(payload, event.get("topic"))
+        timeframe = _forecast_timeframe(payload)
+        if not symbol or not timeframe:
+            continue
+
+        key = (symbol, timeframe)
+        sort_key = _forecast_sort_key(event, index)
+        record = {
+            "_sort_key": sort_key,
+            "ts": event.get("ts") if event.get("ts") is not None else payload.get("ts"),
+            "symbol": symbol,
+            "timeframe": timeframe,
+            "direction": _forecast_value(payload, "direction", "bias", "signal"),
+            "confidence": _forecast_value(payload, "confidence"),
+            "model": payload.get("model") or payload.get("model_name") or _forecast_value(payload, "source"),
+            "last_close": _forecast_value(payload, "last_close", "close"),
+            "predicted_close": _forecast_value(payload, "predicted_close", "forecast_close"),
+            "advisory_only": bool(payload.get("advisory_only")),
+            "ok": payload.get("ok"),
+            "error": payload.get("error"),
+        }
+        history_map.setdefault(key, []).append(record)
+
+        existing = forecasts.get(key)
+        if existing and sort_key <= existing["_sort_key"]:
+            continue
+        forecasts[key] = record
+
+    research = _research_context_by_symbol()
+    decision_context = _latest_symbol_decision_context(event_list)
+    rows = sorted(forecasts.values(), key=lambda row: row["_sort_key"], reverse=True)[:limit]
+    conflict_count = 0
+    stale_count = 0
+    for row in rows:
+        key = (row["symbol"], row["timeframe"])
+
+        row_ts = _safe_float(row.get("ts"))
+        age_sec = round(reference_ts - row_ts, 1) if row_ts is not None else None
+        if age_sec is not None and age_sec < 0:
+            age_sec = 0.0
+        staleness, staleness_label = _forecast_staleness(age_sec, row.get("timeframe"))
+        row["age_sec"] = age_sec
+        row["staleness"] = staleness
+        row["staleness_label"] = staleness_label
+        if staleness == "stale":
+            stale_count += 1
+
+        for candidate in _research_symbol_candidates(row.get("symbol")):
+            if candidate in research:
+                row["research"] = research[candidate]
+                break
+        for candidate in _research_symbol_candidates(row.get("symbol")):
+            if candidate in decision_context:
+                row["macro_news"] = decision_context[candidate]
+                row["macro"] = decision_context[candidate]
+                break
+
+        conflict = _forecast_macro_conflict(row.get("direction"), row.get("macro_news"))
+        row["macro_conflict"] = conflict
+        if conflict.get("conflict"):
+            conflict_count += 1
+
+        history = sorted(
+            history_map.get(key, []),
+            key=lambda item: item["_sort_key"],
+            reverse=True,
+        )[:history_limit]
+        row["history"] = [_compact_forecast_entry(item) for item in history]
+        row.pop("_sort_key", None)
+
+    symbols = sorted({row["symbol"] for row in rows})
+    if not rows:
+        return {
+            "available": False,
+            "count": 0,
+            "symbols": [],
+            "rows": [],
+            "macro_summary": macro_summary,
+            "message": "No recent forecasts in the current window.",
+        }
+
+    advisory_values = [row.get("advisory_only") for row in rows]
+    return {
+        "available": True,
+        "count": len(rows),
+        "symbols": symbols,
+        "latest_ts": rows[0]["ts"] if rows else None,
+        "advisory_only": all(value is not False for value in advisory_values),
+        "conflict_count": conflict_count,
+        "stale_count": stale_count,
+        "rows": rows,
+        "macro_summary": macro_summary,
+        "message": f"{len(rows)} latest forecast thesis row{'s' if len(rows) != 1 else ''}",
+    }
+
+
+def edge_validation_panel(*, path: Path = GATE_REPORT_PATH) -> Dict[str, Any]:
+    empty = {
+        "available": False,
+        "candidate_count": 0,
+        "label_count": 0,
+        "group_count": 0,
+        "promotable_count": 0,
+        "groups": [],
+        "message": "No edge gate report yet. Run the edge ledger daemon or scripts/edge_ledger_run.py.",
+    }
+    if not path.exists():
+        return empty
+    report = _read_json_file(path)
+    if not report:
+        out = dict(empty)
+        out["message"] = "Edge gate report is unreadable."
+        return out
+
+    groups = []
+    for group in report.get("groups") or []:
+        groups.append(
+            {
+                "symbol": group.get("symbol"),
+                "timeframe": group.get("timeframe"),
+                "samples": group.get("samples", 0),
+                "win_rate": group.get("win_rate"),
+                "edge": group.get("edge"),
+                "profit_factor": group.get("profit_factor"),
+                "promotable": bool(group.get("promotable")),
+                "reasons": list(group.get("reasons") or []),
+            }
+        )
+    promotable = int(report.get("promotable_count") or 0)
+    group_count = int(report.get("group_count") or len(groups))
+    return {
+        "available": True,
+        "candidate_count": report.get("candidate_count", 0),
+        "label_count": report.get("label_count", 0),
+        "group_count": group_count,
+        "promotable_count": promotable,
+        "groups": groups,
+        "message": f"{promotable} of {group_count} group(s) clear the promotion gate",
+    }
+
+
+class _PanelTimeout(Exception):
+    """Raised when a panel builder exceeds its time budget."""
+
+
+# Last successful result per panel name. A slow live dependency (broker
+# refresh, readiness probe) should never leave the UI in a skeleton state;
+# we serve the most recent good payload while the refresh keeps running in the
+# background and warms this cache for the next request.
+_PANEL_CACHE: Dict[str, Dict[str, Any]] = {}
+_PANEL_CACHE_LOCK = threading.Lock()
+
+
+def _store_panel_cache(name: str, result: Dict[str, Any]) -> None:
+    if isinstance(result, dict) and result.get("available"):
+        with _PANEL_CACHE_LOCK:
+            _PANEL_CACHE[name] = dict(result)
+
+
+def _read_panel_cache(name: str) -> Optional[Dict[str, Any]]:
+    with _PANEL_CACHE_LOCK:
+        cached = _PANEL_CACHE.get(name)
+        return dict(cached) if cached is not None else None
+
+
+def _run_panel_with_timeout(name: str, builder: Callable[[], Dict[str, Any]], timeout: float) -> Dict[str, Any]:
+    """Run ``builder`` but give up after ``timeout`` seconds."""
+    box: Dict[str, Any] = {}
+    done = threading.Event()
+
+    def worker() -> None:
+        try:
+            value = builder()
+            box["value"] = value
+            _store_panel_cache(name, value)
+        except Exception as exc:  # noqa: BLE001 - surfaced via box["error"]
+            box["error"] = exc
+        finally:
+            done.set()
+
+    thread = threading.Thread(target=worker, name=f"panel-{name}", daemon=True)
+    thread.start()
+    if not done.wait(timeout):
+        raise _PanelTimeout(name)
+    if "error" in box:
+        raise box["error"]
+    return box["value"]
+
+
+def _safe_panel(
+    name: str,
+    builder: Callable[[], Dict[str, Any]],
+    fallback: Dict[str, Any],
+    *,
+    timeout: Optional[float] = None,
+    cache: bool = False,
+) -> Dict[str, Any]:
+    try:
+        if timeout is None:
+            result = builder()
+            if cache:
+                _store_panel_cache(name, result)
+            return result
+        return _run_panel_with_timeout(name, builder, timeout)
+    except _PanelTimeout:
+        cached = _read_panel_cache(name) if cache else None
+        if cached is not None:
+            cached["stale"] = True
+            base = cached.get("message") or name
+            cached["message"] = f"{base} (showing cached data; live refresh is slow)"
+            return cached
+        out = dict(fallback)
+        out["stale"] = True
+        out["message"] = f"{out.get('message', name)} (live refresh timed out)"
+        return out
     except Exception as exc:
+        cached = _read_panel_cache(name) if cache else None
+        if cached is not None:
+            cached["stale"] = True
+            base = cached.get("message") or name
+            cached["message"] = f"{base} (showing cached data; refresh failed)"
+            return cached
         out = dict(fallback)
         out["message"] = f"{out.get('message', name)} ({exc})"
         return out
@@ -391,8 +854,10 @@ def build_trader_panels(
         ),
         "portfolio_pnl": _safe_panel(
             "portfolio_pnl",
-            lambda: portfolio_summary(refresh=False),
+            lambda: portfolio_summary(refresh=True),
             {"available": False, "message": "Portfolio metrics unavailable"},
+            timeout=PORTFOLIO_PANEL_TIMEOUT_SEC,
+            cache=True,
         ),
         "signal_drilldown": _safe_panel(
             "signal_drilldown",
@@ -423,6 +888,16 @@ def build_trader_panels(
             "pending_promotions",
             pending_promotions_panel,
             {"available": False, "items": [], "message": "Promotion queue unavailable"},
+        ),
+        "forecast_thesis": _safe_panel(
+            "forecast_thesis",
+            lambda: forecast_thesis_panel(event_list),
+            {"available": False, "rows": [], "message": "Forecast thesis unavailable"},
+        ),
+        "edge_validation": _safe_panel(
+            "edge_validation",
+            edge_validation_panel,
+            {"available": False, "groups": [], "message": "Edge validation unavailable"},
         ),
     }
 

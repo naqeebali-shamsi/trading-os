@@ -219,6 +219,138 @@ function renderPositionsPanel(panel) {
     ${tableWrap(`<thead><tr><th>Symbol</th><th>Side</th><th>Size</th><th>Entry</th><th>Last</th><th>P&amp;L</th></tr></thead><tbody>${rows}</tbody>`, { scroll: true })}`;
 }
 
+function directionVariant(direction) {
+  const value = String(direction || "").toLowerCase();
+  if (["up", "buy", "bullish", "long"].includes(value)) return "safe";
+  if (["down", "sell", "bearish", "short"].includes(value)) return "warn";
+  return "neutral";
+}
+
+function formatForecastPath(pathValue) {
+  if (pathValue == null || pathValue === "") return "—";
+  if (Array.isArray(pathValue)) {
+    const nums = pathValue.map((v) => Number(v)).filter((v) => Number.isFinite(v));
+    if (!nums.length) return "—";
+    if (nums.length === 1) return nums[0].toFixed(5);
+    return `${nums[0].toFixed(5)} → ${nums[nums.length - 1].toFixed(5)} (${nums.length} pts)`;
+  }
+  const num = Number(pathValue);
+  return Number.isFinite(num) ? num.toFixed(5) : asText(pathValue);
+}
+
+function stalenessVariant(staleness) {
+  if (staleness === "fresh") return "safe";
+  if (staleness === "aging") return "live";
+  if (staleness === "stale") return "warn";
+  return "neutral";
+}
+
+function directionArrow(direction) {
+  const value = String(direction || "").toLowerCase();
+  if (["up", "buy", "bullish", "long"].includes(value)) return "\u2191";
+  if (["down", "sell", "bearish", "short"].includes(value)) return "\u2193";
+  return "\u2192";
+}
+
+function formatForecastHistory(history) {
+  if (!Array.isArray(history) || history.length <= 1) return "";
+  const trail = history
+    .slice(0, 6)
+    .map((item) => directionArrow(item.direction))
+    .join(" ");
+  return `<br><span class="atom-muted">Recent: ${trail}</span>`;
+}
+
+function renderForecastThesisPanel(panel) {
+  if (!panel || !panel.available) {
+    return emptyState(panel?.message || "Forecasts will appear after candle data produces model context.");
+  }
+  const rows = Array.isArray(panel.rows) ? panel.rows : [];
+  if (!rows.length) {
+    return emptyState(panel.message || "No recent forecasts in the current window.");
+  }
+  const body = rows.slice(0, 12).map((row) => {
+    const direction = row.direction || row.forecast?.direction || "flat";
+    const variant = directionVariant(direction);
+    const conf = row.confidence != null ? formatPct(row.confidence) : "Not available";
+    const staleness = row.staleness && row.staleness !== "fresh"
+      ? ` ${pill(asText(row.staleness_label || row.staleness), stalenessVariant(row.staleness))}`
+      : "";
+    const conflict = row.macro_conflict?.conflict
+      ? `<br>${pill(asText(row.macro_conflict.label), row.macro_conflict.severity === "high" ? "live" : "warn")}`
+      : "";
+    const research = row.research
+      ? `<br><span class="atom-muted">${asText(row.research.tier_label || row.research.tier)} ${row.research.confidence != null ? formatPct(row.research.confidence) : ""}</span>`
+      : "";
+    const macroContext = row.macro_news || row.macro;
+    const macro = macroContext
+      ? `<br><span class="atom-muted">${asText(macroContext.recommendation_label || macroContext.recommendation)}${macroContext.relevance != null ? ` (${formatPct(macroContext.relevance)})` : ""}</span>`
+      : "";
+    const status = row.error ? `<br>${pill(asText(row.error), "warn")}` : "";
+    return `
+      <tr>
+        <td><strong>${asText(row.symbol)}</strong><br><span class="atom-muted">${asText(row.timeframe)} ${formatTs(row.ts)}</span>${staleness}</td>
+        <td>${pill(asText(direction), variant)}${conflict}${research}${macro}${status}</td>
+        <td>${conf}<br><span class="atom-muted">${asText(row.model || "model unknown")}</span>${formatForecastHistory(row.history)}</td>
+        <td>${asText(row.last_close)}</td>
+        <td><div class="organism-table-cell-clamp">${formatForecastPath(row.predicted_close || row.forecast?.predicted_close)}</div></td>
+        <td><div class="organism-table-cell-clamp">${asText(row.thesis || row.research?.thesis || "No thesis attached")}</div></td>
+      </tr>`;
+  }).join("");
+  const meta = [
+    pill(`${rows.length} symbol views`, "safe"),
+    panel.advisory_only === false ? pill("May influence orders", "warn") : pill("Advisory context", "safe"),
+  ];
+  if (panel.conflict_count) {
+    meta.push(pill(`${panel.conflict_count} macro conflict${panel.conflict_count === 1 ? "" : "s"}`, "warn"));
+  }
+  if (panel.stale_count) {
+    meta.push(pill(`${panel.stale_count} stale`, "neutral"));
+  }
+  if (panel.macro_summary?.recommendation_label) {
+    meta.push(pill(panel.macro_summary.recommendation_label, directionVariant(panel.macro_summary.assessment)));
+  }
+  return `
+    ${pillRow(...meta)}
+    <p class="atom-muted">${asText(panel.message || "Latest forecast context from the live bus.")}</p>
+    ${tableWrap(`<thead><tr><th>Symbol</th><th>View</th><th>Confidence</th><th>Last</th><th>Path</th><th>Thesis</th></tr></thead><tbody>${body}</tbody>`, { scroll: true })}`;
+}
+
+function renderEdgeValidationPanel(panel) {
+  if (!panel?.available) {
+    return emptyState(panel?.message || "Edge validation report not available yet.");
+  }
+  const groups = Array.isArray(panel.groups) ? panel.groups : [];
+  if (!groups.length) {
+    return emptyState(panel.message || "No labelled edge groups yet.");
+  }
+  const meta = [
+    pill(`${panel.promotable_count || 0} promotable`, panel.promotable_count ? "safe" : "warn"),
+    pill(`${panel.group_count || groups.length} groups`, "neutral"),
+    pill(`${panel.label_count || 0} labels`, "neutral"),
+  ];
+  const rows = groups.slice(0, 20).map((row) => {
+    const variant = row.promotable ? "safe" : "warn";
+    const reasons = (row.reasons || []).length ? (row.reasons || []).join(", ") : "cleared";
+    const pf = row.profit_factor;
+    const pfText = pf != null && Number.isFinite(Number(pf)) ? Number(pf).toFixed(2) : "∞";
+    return `
+      <tr>
+        <td><strong>${asText(row.symbol)}</strong><br><span class="atom-muted">${asText(row.timeframe)}</span></td>
+        <td>${pill(row.promotable ? "Promotable" : "Hold", variant)}</td>
+        <td>${asText(row.samples)}</td>
+        <td>${row.win_rate != null ? formatPct(row.win_rate) : "—"}</td>
+        <td>${row.edge != null ? Number(row.edge).toFixed(4) : "—"}</td>
+        <td>${pfText}</td>
+        <td>${asText(reasons)}</td>
+      </tr>`;
+  }).join("");
+  return `
+    ${pillRow(...meta)}
+    <p class="atom-muted">${asText(panel.message)}</p>
+    ${tableWrap(`<thead><tr><th>Symbol</th><th>Gate</th><th>Samples</th><th>Win rate</th><th>Edge</th><th>PF</th><th>Reasons</th></tr></thead><tbody>${rows}</tbody>`, { scroll: true })}`;
+}
+
 function renderMacroNewsPanel(panel) {
   if (!panel) return emptyState("No news or macro context in the current window.");
   const riskVariant = panel.risk_level === "elevated" ? "live" : panel.risk_level === "caution" ? "warn" : "safe";
@@ -599,6 +731,7 @@ function humanTradeState(state) {
     filled: "Filled",
     opened: "Open",
     closed: "Closed",
+    reviewed: "Reviewed",
     rejected: "Rejected",
     blocked: "Blocked",
     vetted: "Risk cleared",
@@ -613,7 +746,7 @@ function humanTradeState(state) {
 }
 
 function tradeStateVariant(state) {
-  if (["filled", "opened", "closed", "vetted"].includes(state)) return "safe";
+  if (["filled", "opened", "closed", "reviewed", "vetted"].includes(state)) return "safe";
   if (["rejected", "blocked", "error", "timeout_unknown_broker_state"].includes(state)) return "warn";
   return "live";
 }
@@ -628,8 +761,36 @@ function humanStagePath(names) {
     sent: "Sent",
     filled: "Filled",
     rejected: "Rejected",
+    position_opened: "Position open",
+    position_closed: "Position closed",
+    memory_opened: "Logged open",
+    memory_closed: "Logged close",
+    outcome: "Outcome",
+    post_trade_review: "Reviewed",
   };
   return (names || []).map((n) => map[n] || n).join(" → ") || "—";
+}
+
+const DEFECT_LABELS = {
+  fill_without_position_join: "Fill not joined to a position",
+  missing_trade_outcome: "Closed without trade outcome",
+  missing_post_trade_review: "Closed without post-trade review",
+};
+
+function reviewLine(review) {
+  if (!review) return "";
+  const matched = review.matched ? "matched on order_id" : `join: ${asText(review.join_status || "unmatched")}`;
+  const verdict = review.verdict ? ` · ${asText(review.verdict)}` : "";
+  return `<div class="atom-muted">Post-trade review (${matched})${verdict}</div>`;
+}
+
+function immuneLine(immune) {
+  if (!immune) return "";
+  if (immune.decision === "block") {
+    const reasons = (immune.reasons || []).length ? (immune.reasons || []).join(", ") : "no reason given";
+    return `<div class="atom-muted">Immune block: ${asText(reasons)}</div>`;
+  }
+  return `<div class="atom-muted">Immune: cleared</div>`;
 }
 
 function renderTradeLifecycle(lifecycle) {
@@ -647,8 +808,9 @@ function renderTradeLifecycle(lifecycle) {
       : state === "intent"
         ? "Intent recorded — risk review pending."
         : "";
+    const defects = (trade.defects || []).map((d) => pill(DEFECT_LABELS[d] || d, "warn")).join("");
     return `
-      <div class="organism-feed-item">
+      <div class="organism-feed-item${trade.has_defect ? " is-blocked" : ""}">
         <div class="atom-row atom-row--spread">
           ${pill(humanTradeState(state), variant)}
           <span class="event-symbol">${asText(trade.symbol)}</span>
@@ -657,12 +819,18 @@ function renderTradeLifecycle(lifecycle) {
         </div>
         <div class="atom-muted">${asText(stages)}</div>
         <div class="atom-muted">${asText(timing)}</div>
+        ${immuneLine(trade.immune)}
+        ${reviewLine(trade.review)}
         ${waiting ? `<div class="atom-muted">${waiting}</div>` : ""}
         ${trade.reason ? `<div class="atom-muted">${asText(trade.reason)}</div>` : ""}
+        ${defects ? `<div class="atom-row">${defects}</div>` : ""}
       </div>
     `;
   }).join("");
-  return `<div class="organism-feed organism-feed--compact">${items}</div>`;
+  const defectBanner = lifecycle.defect_count
+    ? `<p class="atom-muted">${pill(`${lifecycle.defect_count} join defect${lifecycle.defect_count === 1 ? "" : "s"}`, "warn")} flagged in this window.</p>`
+    : "";
+  return `${defectBanner}<div class="organism-feed organism-feed--compact">${items}</div>`;
 }
 
 async function applyPreset(preset) {
@@ -875,6 +1043,8 @@ async function refresh(options = {}) {
     mountPortfolioSparkline(trader.portfolio_pnl);
     document.getElementById("positions-panel").innerHTML = renderPositionsPanel(trader.positions);
     document.getElementById("macro-news-panel").innerHTML = renderMacroNewsPanel(trader.macro_news);
+    document.getElementById("forecast-thesis-panel").innerHTML = renderForecastThesisPanel(trader.forecast_thesis);
+    document.getElementById("edge-validation-panel").innerHTML = renderEdgeValidationPanel(trader.edge_validation);
     document.getElementById("signal-drilldown").innerHTML = renderSignalDrilldown(trader.signal_drilldown);
     document.getElementById("readiness-panel").innerHTML = renderReadinessPanel(trader.readiness);
     document.getElementById("pending-promotions").innerHTML = renderPendingPromotions(trader.pending_promotions);
@@ -910,7 +1080,8 @@ async function refresh(options = {}) {
   } catch (error) {
     if (!hasLoadedOnce) {
       for (const id of [
-        "research-watchlist", "portfolio-pnl-panel", "positions-panel", "macro-news-panel", "signal-drilldown", "readiness-panel",
+        "research-watchlist", "portfolio-pnl-panel", "positions-panel", "macro-news-panel",
+        "forecast-thesis-panel", "edge-validation-panel", "signal-drilldown", "readiness-panel",
         "pending-promotions", "dream-lab-status", "live-events-feed",
         "system-health", "operator-status", "runtime-controls", "telemetry-summary", "bridge-status",
         "safety-flags", "why-trade", "brain-summary", "signals-summary", "orders-summary", "trade-lifecycle", "activity-feed",

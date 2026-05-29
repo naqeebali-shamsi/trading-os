@@ -11,6 +11,7 @@ Dashboard v0 with:
 import json
 import os
 import sys
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -272,8 +273,10 @@ def _trade_lifecycle_summary(events, limit=20):
         "memory.trade_opened": "memory_opened",
         "memory.trade_closed": "memory_closed",
         "memory.trade_outcome": "outcome",
+        "introspect.post_trade_review": "post_trade_review",
     }
     final_priority = [
+        ("post_trade_review", "reviewed"),
         ("position_closed", "closed"),
         ("memory_closed", "closed"),
         ("outcome", "review_pending"),
@@ -314,9 +317,24 @@ def _trade_lifecycle_summary(events, limit=20):
         reason = payload.get("reason") or payload.get("error_type") or payload.get("message") or payload.get("blocked_reason")
         if reason:
             row["reason"] = reason
+        if stage == "immune_pass":
+            row["immune"] = {"decision": "pass", "reasons": []}
+        elif stage == "immune_block":
+            block_reasons = payload.get("reasons")
+            if not isinstance(block_reasons, list):
+                block_reasons = [block_reasons] if block_reasons else []
+            row["immune"] = {"decision": "block", "reasons": [str(r) for r in block_reasons if r]}
+        elif stage == "post_trade_review":
+            row["review"] = {
+                "join_status": payload.get("join_status"),
+                "review_required": payload.get("review_required"),
+                "verdict": payload.get("verdict") or payload.get("summary"),
+                "matched": payload.get("join_status") == "order_id",
+            }
 
     counts = {}
     rows = []
+    defect_total = 0
     for row in by_order.values():
         stages = row.get("stages", {})
         state = "unknown"
@@ -330,12 +348,36 @@ def _trade_lifecycle_summary(events, limit=20):
             row.setdefault("latency", {})["intent_to_sent_sec"] = round(float(stages["sent"].get("ts") or 0) - float(stages["intent"].get("ts") or 0), 3)
         if "sent" in stages and "filled" in stages:
             row.setdefault("latency", {})["sent_to_filled_sec"] = round(float(stages["filled"].get("ts") or 0) - float(stages["sent"].get("ts") or 0), 3)
+        row["defects"] = _lifecycle_defects(stages)
+        row["has_defect"] = bool(row["defects"])
+        defect_total += len(row["defects"])
         # Keep API compact: callers need stage presence and payload for latest stage only.
         row["stage_names"] = list(dict.fromkeys(row.pop("stage_sequence", [])))
         row["stages"] = {name: {k: v for k, v in stage.items() if k != "payload"} for name, stage in stages.items()}
         rows.append(row)
     rows.sort(key=lambda row: row.get("last_ts") or 0, reverse=True)
-    return {"trades": rows[:limit], "counts": counts, "uncorrelated_events": uncorrelated, "total_tracked": len(rows)}
+    return {
+        "trades": rows[:limit],
+        "counts": counts,
+        "uncorrelated_events": uncorrelated,
+        "total_tracked": len(rows),
+        "defect_count": defect_total,
+    }
+
+
+def _lifecycle_defects(stages):
+    """Flag broken joins. The roadmap treats a missing join as an operational defect."""
+    defects = []
+    has_fill = "filled" in stages
+    has_position = "position_opened" in stages or "position_closed" in stages
+    if has_fill and not has_position:
+        defects.append("fill_without_position_join")
+    is_closed = "position_closed" in stages or "memory_closed" in stages
+    if is_closed and "outcome" not in stages:
+        defects.append("missing_trade_outcome")
+    if (is_closed or "outcome" in stages) and "post_trade_review" not in stages:
+        defects.append("missing_post_trade_review")
+    return defects
 
 
 def _status_summary(bridge_status, controls, signals, brain, orders):
@@ -422,6 +464,42 @@ def _preflight_state(max_heartbeat_age=DEFAULT_MAX_HEARTBEAT_AGE_SEC, *, strict_
     return result.as_dict()
 
 
+# Live readiness probes touch the broker bridge and can stall. The /api/state
+# response must never block on them, so cap the wait and serve the last good
+# preflight while a slow probe finishes in the background.
+PREFLIGHT_TIMEOUT_SEC = 1.2
+_PREFLIGHT_CACHE: dict = {}
+_PREFLIGHT_CACHE_LOCK = threading.Lock()
+
+
+def _preflight_cached(max_heartbeat_age=DEFAULT_MAX_HEARTBEAT_AGE_SEC, *, timeout=PREFLIGHT_TIMEOUT_SEC):
+    """Best-effort preflight that times out instead of hanging the dashboard."""
+    box: dict = {}
+    done = threading.Event()
+
+    def worker():
+        try:
+            value = _preflight_state(max_heartbeat_age=max_heartbeat_age)
+            box["value"] = value
+            with _PREFLIGHT_CACHE_LOCK:
+                _PREFLIGHT_CACHE["value"] = value
+        except Exception:
+            box["value"] = None
+        finally:
+            done.set()
+
+    threading.Thread(target=worker, name="dashboard-preflight", daemon=True).start()
+    if done.wait(timeout) and box.get("value") is not None:
+        return box["value"]
+    with _PREFLIGHT_CACHE_LOCK:
+        cached = _PREFLIGHT_CACHE.get("value")
+    if cached is not None:
+        out = dict(cached)
+        out["stale"] = True
+        return out
+    return None
+
+
 def _health_alerts(limit=30):
     topics = {"ops.health_alert", "ops.health.alert", "ops.layer.restarted"}
     rows = [ev for ev in tail(max(limit * 4, 40)) if ev.get("topic") in topics]
@@ -448,7 +526,7 @@ def _dashboard_state(limit=DEFAULT_EVENT_LIMIT, topic_filters=None, max_heartbea
     preflight = None
     try:
         if get_ipc_dir is not None:
-            preflight = _preflight_state(max_heartbeat_age=max_heartbeat_age)
+            preflight = _preflight_cached(max_heartbeat_age=max_heartbeat_age)
     except Exception:
         preflight = None
     trader_panels = build_trader_panels(events, preflight=preflight, max_heartbeat_age=max_heartbeat_age)

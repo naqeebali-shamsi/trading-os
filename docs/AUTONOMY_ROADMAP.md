@@ -20,6 +20,11 @@ Phases A–D implemented in code; use this doc as the operator checklist.
 - `muscle/pnl_sync_daemon.py` in supervisor boot
 - Supervisor publishes `ops.layer.restarted` on child restart
 - Dashboard: `GET /api/preflight`, `GET /api/health/alerts`, `GET /api/agent/context`
+- `/api/state` uses `_preflight_cached()` and portfolio panel timeouts (1.2s) with last-good cache so slow broker readiness never blocks polling
+- Trader Desk **Forecast Thesis** panel (`market.forecast*`) shows staleness, macro conflict, and recent direction history
+- Trader Desk **Edge Validation** panel reads `intel/edge_gate_report.json` from the edge ledger daemon
+- Trade lifecycle panel joins `introspect.post_trade_review`, surfaces immune block reasons, and flags missing joins as defects
+- `nervous/bus.py` `tail(n)` reads backward from EOF for unfiltered tails (large bus files)
 - MCP: `bridge/context_mcp_server.py` (read-only), `bridge/mt5_mcp_server.py` (hook-gated trade tools)
 
 ## Phase D — Bounded learning

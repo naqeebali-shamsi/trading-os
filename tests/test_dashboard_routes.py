@@ -118,6 +118,53 @@ def test_trade_lifecycle_summary_handles_rejection_and_missing_order_id():
     assert summary["trades"][0]["reason"] == "invalid_lot"
 
 
+def test_trade_lifecycle_joins_review_and_immune_reasons():
+    events = [
+        {"ts": 1.0, "seq": 1, "topic": "muscle.order.intent", "payload": {"order_id": "o1", "symbol": "EURUSD", "side": "BUY", "qty": 0.01}},
+        {"ts": 2.0, "seq": 2, "topic": "immune.pass", "payload": {"type": "order_pass", "intent": {"order_id": "o1"}}},
+        {"ts": 3.0, "seq": 3, "topic": "muscle.order.sent", "payload": {"order_id": "o1"}},
+        {"ts": 4.0, "seq": 4, "topic": "muscle.order.filled", "payload": {"order_id": "o1", "fill_price": 1.1}},
+        {"ts": 5.0, "seq": 5, "topic": "position.opened", "payload": {"order_id": "o1", "ticket": 7}},
+        {"ts": 6.0, "seq": 6, "topic": "position.closed", "payload": {"order_id": "o1", "ticket": 7}},
+        {"ts": 7.0, "seq": 7, "topic": "memory.trade_outcome", "payload": {"order_id": "o1", "pnl": 4.2}},
+        {"ts": 8.0, "seq": 8, "topic": "introspect.post_trade_review", "payload": {"order_id": "o1", "join_status": "order_id", "review_required": False}},
+    ]
+    summary = dashboard._trade_lifecycle_summary(events)
+    trade = summary["trades"][0]
+    assert trade["state"] == "reviewed"
+    assert trade["review"]["join_status"] == "order_id"
+    assert trade["review"]["matched"] is True
+    assert trade["defects"] == []
+    assert summary["defect_count"] == 0
+
+
+def test_trade_lifecycle_flags_missing_post_trade_review():
+    events = [
+        {"ts": 1.0, "seq": 1, "topic": "muscle.order.intent", "payload": {"order_id": "o9", "symbol": "GBPUSD"}},
+        {"ts": 2.0, "seq": 2, "topic": "muscle.order.filled", "payload": {"order_id": "o9", "fill_price": 1.25}},
+        {"ts": 3.0, "seq": 3, "topic": "position.opened", "payload": {"order_id": "o9", "ticket": 11}},
+        {"ts": 4.0, "seq": 4, "topic": "position.closed", "payload": {"order_id": "o9", "ticket": 11}},
+        {"ts": 5.0, "seq": 5, "topic": "memory.trade_outcome", "payload": {"order_id": "o9", "pnl": -2.0}},
+    ]
+    summary = dashboard._trade_lifecycle_summary(events)
+    trade = summary["trades"][0]
+    assert "missing_post_trade_review" in trade["defects"]
+    assert trade["has_defect"] is True
+    assert summary["defect_count"] == 1
+
+
+def test_trade_lifecycle_captures_immune_block_reasons():
+    events = [
+        {"ts": 1.0, "seq": 1, "topic": "muscle.order.intent", "payload": {"order_id": "o3", "symbol": "XAUUSD"}},
+        {"ts": 2.0, "seq": 2, "topic": "immune.block", "payload": {"intent": {"order_id": "o3"}, "reasons": ["position_size_too_large", "daily_loss_limit"]}},
+    ]
+    summary = dashboard._trade_lifecycle_summary(events)
+    trade = summary["trades"][0]
+    assert trade["state"] == "blocked"
+    assert trade["immune"]["decision"] == "block"
+    assert trade["immune"]["reasons"] == ["position_size_too_large", "daily_loss_limit"]
+
+
 def test_dashboard_routes_smoke(monkeypatch):
     monkeypatch.setattr(dashboard, "tail", lambda _n: [])
     monkeypatch.setattr(dashboard, "_telemetry_summary", lambda: {"endpoint": "mock", "reachable": False, "health": {}, "metrics": {}})
@@ -152,6 +199,8 @@ def test_dashboard_routes_smoke(monkeypatch):
         assert "refresh();" in body
         assert "renderTradeLifecycle" in body
         assert "renderResearchWatchlist" in body
+        assert "renderForecastThesisPanel" in body
+        assert "renderEdgeValidationPanel" in body
 
         status, headers, body = _request(port, "/api/state")
         assert status == 200
@@ -162,6 +211,8 @@ def test_dashboard_routes_smoke(monkeypatch):
         assert "trade_lifecycle" in payload
         assert "trader_panels" in payload
         assert "research_watchlist" in payload["trader_panels"]
+        assert "forecast_thesis" in payload["trader_panels"]
+        assert "edge_validation" in payload["trader_panels"]
 
         status, headers, body = _request(port, "/api/bridge/status?max_heartbeat_age=45")
         assert status == 200

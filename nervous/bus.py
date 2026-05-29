@@ -121,24 +121,51 @@ def subscribe(topic, since_seq=0, limit=100):
                 continue
     return events[-limit:]
 
+def _tail_lines_from_end(path: Path, n: int, *, chunk_size: int = 65536) -> list:
+    """Read the last *n* non-empty lines from a file without scanning from BOF."""
+    if n <= 0:
+        return []
+    with open(path, "rb") as handle:
+        handle.seek(0, os.SEEK_END)
+        end = handle.tell()
+        if end == 0:
+            return []
+        offset = end
+        remainder = b""
+        collected_rev: list = []
+        while offset > 0 and len(collected_rev) < n:
+            read_size = min(chunk_size, offset)
+            offset -= read_size
+            handle.seek(offset)
+            block = handle.read(read_size) + remainder
+            lines = block.split(b"\n")
+            remainder = lines[0]
+            for raw_line in reversed(lines[1:]):
+                line = raw_line.strip()
+                if not line:
+                    continue
+                collected_rev.append(line)
+                if len(collected_rev) >= n:
+                    break
+        if len(collected_rev) < n and offset == 0 and remainder.strip():
+            collected_rev.append(remainder.strip())
+    collected_rev.reverse()
+    return collected_rev[:n]
+
+
 # ------------------------------------------------------------------
 def tail(n=20, topics=None):
     """Tail last N events across bus, optionally filtered by topics."""
     if not BUS_FILE.exists():
         return []
     if topics is None:
-        lines = deque(maxlen=n)
-        with open(BUS_FILE, "r") as f:
-            for line in f:
-                lines.append(line)
+        lines = _tail_lines_from_end(BUS_FILE, n)
         results = []
         for line in lines:
-            line = line.strip()
-            if not line:
-                continue
             try:
-                results.append(json.loads(line))
-            except json.JSONDecodeError:
+                text = line.decode("utf-8") if isinstance(line, bytes) else line
+                results.append(json.loads(text))
+            except (json.JSONDecodeError, UnicodeDecodeError):
                 continue
         return results
 
