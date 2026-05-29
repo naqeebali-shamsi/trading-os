@@ -1,0 +1,127 @@
+version: 1
+
+defaults:
+  enabled: true
+  timeout_ms: 250
+  fail_closed: true
+  audit: true
+
+hooks:
+  pre_context_build:
+    enabled: true
+    fail_closed: false
+    policies: []
+
+  post_context_build:
+    enabled: true
+    fail_closed: false
+    policies: []
+
+  pre_llm_call:
+    enabled: true
+    fail_closed: true
+    policies:
+      - require_advisory_mode_for_live
+      - block_if_stop_trading
+
+  post_llm_call:
+    enabled: true
+    fail_closed: true
+    policies:
+      - reject_non_json_object
+
+  pre_tool_call:
+    enabled: true
+    fail_closed: true
+    policies:
+      - tool_permission_gate
+      - block_forbidden_tools
+
+  post_tool_call:
+    enabled: true
+    fail_closed: false
+    policies: []
+
+  pre_decision:
+    enabled: true
+    fail_closed: true
+    policies:
+      - block_if_stop_trading
+
+  post_decision:
+    enabled: true
+    fail_closed: false
+    policies: []
+
+  pre_order_intent:
+    enabled: true
+    fail_closed: true
+    policies:
+      - block_if_stop_trading
+      - require_order_guard
+      - require_instrument_validation
+
+  post_order_intent:
+    enabled: true
+    fail_closed: false
+    policies: []
+
+  pre_risk_config_change:
+    enabled: true
+    fail_closed: true
+    policies:
+      - require_human_approval
+
+  post_trade_review:
+    enabled: true
+    fail_closed: false
+    policies: []
+
+  on_error:
+    enabled: true
+    fail_closed: false
+    policies: []
+
+  on_timeout:
+    enabled: true
+    fail_closed: false
+    policies: []
+
+  on_guard_block:
+    enabled: true
+    fail_closed: false
+    policies: []
+
+  on_emergency_halt_request:
+    enabled: true
+    fail_closed: true
+    policies:
+      - alert_only_without_human
+
+tool_permissions:
+  read_bus: read_only
+  read_bus_tail: read_only
+  read_health: read_only
+  read_preflight: read_only
+  read_runtime_controls: read_only
+  read_brain_latest: read_only
+  read_agent_context: read_only
+  read_instruments: read_only
+  summarize_news: read_only
+  ping: read_only
+  get_balance: read_only
+  get_positions: read_only
+  get_symbols: read_only
+  get_rates: read_only
+  propose_order: proposal_only
+  request_backtest: proposal_only
+  place_order: dangerous
+  close_position: dangerous
+  close_all: dangerous
+  modify: dangerous
+  write_working_memory: state_write
+  adjust_risk_config: dangerous
+  emergency_stop: dangerous
+  write_cmd_in: forbidden
+  shell: forbidden
+  send_email: forbidden

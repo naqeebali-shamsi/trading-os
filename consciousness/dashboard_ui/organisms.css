@@ -1,0 +1,298 @@
+.organism-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--desk-gap);
+}
+
+.organism-grid--trader {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.organism-grid--single {
+  grid-template-columns: 1fr;
+}
+
+.desk-section {
+  margin-bottom: 1.35rem;
+}
+
+.organism-live-events-header {
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.15rem;
+}
+
+.organism-live-events-header .atom-card-lead {
+  margin-bottom: 0;
+}
+
+.organism-ops-console {
+  margin-bottom: 1rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--retro-border);
+}
+
+.organism-ops-body {
+  display: grid;
+  gap: var(--desk-gap);
+  margin-top: 0.65rem;
+}
+
+.organism-table-wrap {
+  overflow-x: auto;
+  margin-top: 0.35rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.organism-table-wrap--scroll {
+  max-height: 280px;
+  overflow: auto;
+}
+
+.organism-table {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.organism-table th,
+.organism-table td {
+  border-bottom: 1px dashed #2a3141;
+  padding: 0.35rem 0.45rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.organism-table th {
+  color: var(--retro-muted);
+  font-weight: normal;
+  white-space: nowrap;
+}
+
+.organism-table td.positive,
+.organism-table .positive {
+  color: var(--retro-ok);
+}
+
+.organism-table td.negative,
+.organism-table .negative {
+  color: var(--retro-warn);
+}
+
+.organism-table-cell-clamp {
+  max-width: 280px;
+  overflow-wrap: anywhere;
+}
+
+.organism-table tr.is-ready td:first-child {
+  color: var(--retro-ok);
+}
+
+.organism-table tr.is-blocked td:first-child {
+  color: var(--retro-warn);
+}
+
+.organism-headline-list {
+  margin: 0.5rem 0 0 1rem;
+  padding: 0;
+}
+
+.organism-headline-list li {
+  margin-bottom: 0.35rem;
+}
+
+.organism-feed {
+  max-height: 360px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 1px solid var(--retro-border);
+  background: #0b0e13;
+  padding: 0.55rem 0.65rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.organism-feed--compact {
+  max-height: 220px;
+}
+
+.organism-feed-item {
+  padding: 0.45rem 0;
+  border-bottom: 1px dashed #2a3141;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.organism-feed-item:last-child {
+  border-bottom: 0;
+}
+
+.organism-feed-item .atom-row {
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.organism-feed-item .atom-muted {
+  font-size: 0.84rem;
+  line-height: 1.5;
+  margin-top: 0.2rem;
+}
+
+.organism-feed-item.warn {
+  color: var(--retro-warn);
+}
+
+.organism-event-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.2rem 0.75rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px dashed #2a3141;
+  align-items: start;
+}
+
+.organism-event-row:last-child {
+  border-bottom: 0;
+}
+
+.organism-event-row__line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.5rem;
+  min-width: 0;
+}
+
+.organism-event-row__tag {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--retro-muted);
+  border: 1px solid #2a3141;
+  padding: 0.05rem 0.35rem;
+}
+
+.organism-event-row--markets .organism-event-row__tag {
+  color: #7eb8da;
+  border-color: #3a5068;
+}
+
+.organism-event-row--safe .organism-event-row__tag {
+  color: var(--retro-safe);
+  border-color: #2f6b52;
+}
+
+.organism-event-row--warn .organism-event-row__tag {
+  color: var(--retro-warn);
+  border-color: #6b5a2f;
+}
+
+.organism-event-row__headline {
+  font-size: 0.92rem;
+  color: var(--retro-text);
+  overflow-wrap: anywhere;
+}
+
+.organism-event-row__detail {
+  grid-column: 1 / -1;
+  font-size: 0.82rem;
+  color: var(--retro-muted);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.organism-event-row__time {
+  font-size: 0.78rem;
+  color: var(--retro-muted);
+  white-space: nowrap;
+  padding-top: 0.1rem;
+}
+
+.organism-feed-item.ok {
+  color: var(--retro-ok);
+}
+
+.organism-feed-item.warn {
+  color: var(--retro-warn);
+}
+
+.organism-feed-topic {
+  color: var(--retro-warn);
+  font-size: 0.86rem;
+}
+
+.organism-feed-ts {
+  color: var(--retro-muted);
+  font-size: 0.82rem;
+  flex-shrink: 0;
+}
+
+.organism-empty-state {
+  padding: 0.65rem 0.75rem;
+  border: 1px dashed #2a3141;
+  color: var(--retro-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.organism-promotion-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.organism-promotion-item {
+  border: 1px dashed var(--retro-border);
+  padding: 0.55rem 0.65rem;
+  background: #0b0e13;
+}
+
+.organism-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+  margin-bottom: 0.55rem;
+}
+
+.organism-filter-row label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  font-size: 0.86rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .organism-grid,
+  .organism-grid--trader {
+    grid-template-columns: 1fr;
+  }
+
+  .molecule-card--wide {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 760px) {
+  .organism-filter-row {
+    gap: 0.45rem 0.55rem;
+  }
+
+  .organism-live-events-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .organism-table {
+    font-size: 0.82rem;
+    min-width: 420px;
+  }
+
+  .organism-table th,
+  .organism-table td {
+    padding: 0.25rem 0.35rem;
+  }
+}

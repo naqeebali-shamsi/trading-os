@@ -1,0 +1,31 @@
+# Dream Lab: continuous R&D with human approval before live changes
+
+human_approval_required: true
+
+schedule:
+  hourly_sec: 3600
+  six_hour_sec: 21600
+  daily_utc_hour: 3
+
+auditor:
+  daily_cap: 10
+  enabled: true
+  use_ensemble: true
+
+trainer:
+  min_rows: 50
+  propose_min_confidence_delta: 0.02
+
+historian:
+  dataset_health_only_hourly: true
+
+news_lab:
+  batch_size: 25
+  reporting_lag_hours: 24
+
+backtester:
+  default_bars: 500
+  min_trades: 5
+
+promoter:
+  dedupe_window_sec: 86400

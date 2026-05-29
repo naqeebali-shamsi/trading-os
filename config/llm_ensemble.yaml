@@ -1,0 +1,34 @@
+version: 1
+purpose: >
+  Advisory ensemble reviewers for decision calibration and strategist training.
+  These reviewers must never publish orders or mutate risk. They consume
+  memory/training/decision_training.jsonl and produce critique/eval labels.
+
+review_tasks:
+  - calibrate_confidence
+  - identify_missing_evidence
+  - challenge_trade_or_hold_decision
+  - propose_better_features_not_orders
+  - summarize_lessons_for_strategy_research
+
+reviewers:
+  - name: local_ollama_primary
+    provider: local_ollama
+    model: llama3.1:8b
+    role: skeptic_risk_reviewer
+    enabled: true
+  - name: local_ollama_quant
+    provider: local_ollama
+    model: qwen2.5:7b
+    role: pattern_and_regime_reviewer
+    enabled: false
+  - name: openrouter_free_crosscheck
+    provider: openrouter
+    model: deepseek/deepseek-chat
+    role: external_crosscheck
+    enabled: false
+
+consensus:
+  minimum_reviews: 1
+  require_disagreement_flag: true
+  output_file: memory/training/ensemble_reviews.jsonl

@@ -1,0 +1,3657 @@
+version: 1
+defaults:
+  max_total_risk_pct: 1.0
+  max_symbol_risk_pct: 0.5
+  max_asset_class_risk_pct: 1.0
+  require_fresh_heartbeat_sec: 15
+  require_fresh_tick_sec: 30
+  allow_trading_without_broker_metadata: false
+  readiness:
+    instrument_gate: per_asset_class
+    chart_gate: enabled_symbols
+    default_boot_required: false
+  mt5_bridge:
+    template_extension: tpl
+    template_preferred: trading_os_bridge
+    template_candidates:
+    - trading_os_bridge
+    - trading_os
+sessions:
+  london:
+    timezone: UTC
+    days:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    windows:
+    - - 07:00
+      - '16:00'
+  new_york:
+    timezone: UTC
+    days:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    windows:
+    - - '12:00'
+      - '21:00'
+  forex_24_5:
+    timezone: UTC
+    days:
+    - mon
+    - tue
+    - wed
+    - thu
+    windows:
+    - - '00:00'
+      - '23:59'
+  forex_24_5_friday:
+    timezone: UTC
+    days:
+    - fri
+    windows:
+    - - '00:00'
+      - '21:59'
+  forex_24_5_sunday:
+    timezone: UTC
+    days:
+    - sun
+    windows:
+    - - '22:00'
+      - '23:59'
+  crypto_24_7:
+    timezone: UTC
+    days:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+    - sun
+    windows:
+    - - 00:00
+      - '23:59'
+asset_classes:
+  forex:
+    max_class_risk_pct: 1.0
+    default_max_spread_pips: 2.0
+    allow_weekend_trading: false
+    boot_required: true
+    default_sessions:
+    - forex_24_5
+    - forex_24_5_friday
+    - forex_24_5_sunday
+  forex_exotic:
+    max_class_risk_pct: 0.25
+    default_max_spread_pips: 30.0
+    allow_weekend_trading: false
+    boot_required: true
+    default_sessions:
+    - forex_24_5
+    - forex_24_5_friday
+    - forex_24_5_sunday
+  metal:
+    max_class_risk_pct: 0.5
+    default_max_spread_points: 50.0
+    allow_weekend_trading: false
+    boot_required: true
+    default_sessions:
+    - forex_24_5
+    - forex_24_5_friday
+    - forex_24_5_sunday
+  index_cfd:
+    max_class_risk_pct: 0.35
+    default_max_spread_points: 30.0
+    allow_weekend_trading: false
+  crypto_cfd:
+    max_class_risk_pct: 0.25
+    default_max_spread_points: 200.0
+    allow_weekend_trading: true
+  energy_cfd:
+    max_class_risk_pct: 0.25
+    default_max_spread_points: 80.0
+    allow_weekend_trading: false
+  stock_cfd:
+    max_class_risk_pct: 0.25
+    default_max_spread_points: 100.0
+    allow_weekend_trading: false
+    boot_required: false
+    # MT5 stock CFD quotes are often ~15m delayed; allow quote age up to 20m.
+    require_fresh_tick_sec: 1200
+    default_strategies:
+    - MA_CROSS_SMA9_21
+symbols:
+  EURUSD:
+    enabled: true
+    broker_symbol: EURUSD
+    aliases:
+    - EURUSDm
+    - EURUSD.
+    - EURUSD#
+    - EURUSD.micro
+    - EURUSD.pro
+    asset_class: forex
+    base_currency: EUR
+    quote_currency: USD
+    profit_currency: USD
+    pip_size: 0.0001
+    point_size: auto
+    digits: auto
+    tick_size: auto
+    tick_value: auto
+    contract_size: auto
+    min_lot: 0.01
+    max_lot: 0.01
+    lot_step: 0.01
+    max_spread_pips: 2.0
+    max_slippage_pips: 1.0
+    min_stop_distance_pips: auto
+    max_risk_pct: 0.5
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    news_sensitivity: high
+    strategies:
+    - MA_CROSS_SMA9_21
+    - RSI_MEAN_REVERSION
+  GBPUSD:
+    enabled: true
+    broker_symbol: GBPUSD
+    aliases:
+    - GBPUSDm
+    - GBPUSD.
+    - GBPUSD#
+    - GBPUSD.micro
+    - GBPUSD.pro
+    asset_class: forex
+    base_currency: GBP
+    quote_currency: USD
+    profit_currency: USD
+    pip_size: 0.0001
+    min_lot: 0.01
+    max_lot: 0.01
+    lot_step: 0.01
+    max_spread_pips: 2.5
+    max_slippage_pips: 1.2
+    max_risk_pct: 0.5
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    news_sensitivity: high
+    strategies:
+    - MA_CROSS_SMA9_21
+    - RSI_MEAN_REVERSION
+  XAUUSD:
+    enabled: true
+    broker_symbol: XAUUSD
+    aliases:
+    - GOLD
+    - XAUUSD.
+    - XAUUSD.cash
+    - XAUUSDm
+    asset_class: metal
+    quote_currency: USD
+    tick_size: auto
+    tick_value: auto
+    point_size: 0.01
+    digits: auto
+    min_lot: 0.01
+    max_lot: 0.01
+    lot_step: 0.01
+    max_spread_points: 50.0
+    max_slippage_points: 20.0
+    min_stop_distance_points: auto
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    news_sensitivity: very_high
+    strategies:
+    - MA_CROSS_SMA9_21
+  USDZAR:
+    enabled: false
+    broker_symbol: USDZAR
+    aliases:
+    - USDZARm
+    - USDZAR.
+    - USDZAR#
+    asset_class: forex_exotic
+    base_currency: USD
+    quote_currency: ZAR
+    profit_currency: ZAR
+    pip_size: 0.0001
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_pips: 30.0
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    news_sensitivity: very_high
+    strategies: []
+  USDJPY:
+    enabled: true
+    broker_symbol: USDJPY
+    aliases:
+    - USDJPYm
+    - USDJPY.
+    - USDJPY#
+    asset_class: forex
+    base_currency: USD
+    quote_currency: JPY
+    profit_currency: JPY
+    pip_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.01
+    lot_step: 0.01
+    max_spread_pips: 2.0
+    max_risk_pct: 0.4
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    news_sensitivity: high
+    strategies:
+    - MA_CROSS_SMA9_21
+  XAGUSD:
+    enabled: false
+    broker_symbol: XAGUSD
+    aliases:
+    - SILVER
+    - XAGUSD.
+    - XAGUSDm
+    asset_class: metal
+    quote_currency: USD
+    point_size: 0.001
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 80.0
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  USOIL:
+    enabled: false
+    broker_symbol: USOIL
+    aliases:
+    - WTI
+    - XTIUSD
+    - WTIUSD
+    - USOIL.cash
+    asset_class: energy_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 80.0
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  NAS100:
+    enabled: false
+    broker_symbol: NAS100
+    aliases:
+    - US100
+    - NASDAQ
+    - NAS100.cash
+    asset_class: index_cfd
+    quote_currency: USD
+    point_size: 0.1
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 30.0
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  NVDA:
+    enabled: true
+    broker_symbol: NVDA
+    aliases:
+    - NVIDIA
+    - NVIDIA.US
+    - NVDA.US
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 1.0
+    max_lot: 1.0
+    lot_step: 1.0
+    max_spread_points: 100.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  MSFT:
+    enabled: true
+    broker_symbol: MSFT
+    aliases:
+    - MICROSOFT
+    - MSFT.US
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 1.0
+    max_lot: 1.0
+    lot_step: 1.0
+    max_spread_points: 100.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  AUDUSD:
+    enabled: false
+    broker_symbol: AUDUSD
+    aliases:
+    - AUDUSDm
+    - AUDUSD.
+    - AUDUSD#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 3.0
+  NZDUSD:
+    enabled: false
+    broker_symbol: NZDUSD
+    aliases:
+    - NZDUSDm
+    - NZDUSD.
+    - NZDUSD#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 3.0
+  USDCAD:
+    enabled: false
+    broker_symbol: USDCAD
+    aliases:
+    - USDCADm
+    - USDCAD.
+    - USDCAD#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 3.0
+  USDCHF:
+    enabled: false
+    broker_symbol: USDCHF
+    aliases:
+    - USDCHFm
+    - USDCHF.
+    - USDCHF#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 3.0
+  EURGBP:
+    enabled: false
+    broker_symbol: EURGBP
+    aliases:
+    - EURGBPm
+    - EURGBP.
+    - EURGBP#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 3.0
+  EURJPY:
+    enabled: false
+    broker_symbol: EURJPY
+    aliases:
+    - EURJPYm
+    - EURJPY.
+    - EURJPY#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.01
+    max_spread_pips: 3.0
+  GBPJPY:
+    enabled: false
+    broker_symbol: GBPJPY
+    aliases:
+    - GBPJPYm
+    - GBPJPY.
+    - GBPJPY#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.01
+    max_spread_pips: 3.0
+  AUDJPY:
+    enabled: false
+    broker_symbol: AUDJPY
+    aliases:
+    - AUDJPYm
+    - AUDJPY.
+    - AUDJPY#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.01
+    max_spread_pips: 3.0
+  CADJPY:
+    enabled: false
+    broker_symbol: CADJPY
+    aliases:
+    - CADJPYm
+    - CADJPY.
+    - CADJPY#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.01
+    max_spread_pips: 3.0
+  CHFJPY:
+    enabled: false
+    broker_symbol: CHFJPY
+    aliases:
+    - CHFJPYm
+    - CHFJPY.
+    - CHFJPY#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.01
+    max_spread_pips: 3.0
+  NZDJPY:
+    enabled: false
+    broker_symbol: NZDJPY
+    aliases:
+    - NZDJPYm
+    - NZDJPY.
+    - NZDJPY#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.01
+    max_spread_pips: 3.0
+  EURAUD:
+    enabled: false
+    broker_symbol: EURAUD
+    aliases:
+    - EURAUDm
+    - EURAUD.
+    - EURAUD#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 3.0
+  EURNZD:
+    enabled: false
+    broker_symbol: EURNZD
+    aliases:
+    - EURNZDm
+    - EURNZD.
+    - EURNZD#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 3.0
+  EURCAD:
+    enabled: false
+    broker_symbol: EURCAD
+    aliases:
+    - EURCADm
+    - EURCAD.
+    - EURCAD#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 3.0
+  EURCHF:
+    enabled: false
+    broker_symbol: EURCHF
+    aliases:
+    - EURCHFm
+    - EURCHF.
+    - EURCHF#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 3.0
+  GBPAUD:
+    enabled: false
+    broker_symbol: GBPAUD
+    aliases:
+    - GBPAUDm
+    - GBPAUD.
+    - GBPAUD#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 3.0
+  GBPNZD:
+    enabled: false
+    broker_symbol: GBPNZD
+    aliases:
+    - GBPNZDm
+    - GBPNZD.
+    - GBPNZD#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 3.0
+  GBPCAD:
+    enabled: false
+    broker_symbol: GBPCAD
+    aliases:
+    - GBPCADm
+    - GBPCAD.
+    - GBPCAD#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 3.0
+  GBPCHF:
+    enabled: false
+    broker_symbol: GBPCHF
+    aliases:
+    - GBPCHFm
+    - GBPCHF.
+    - GBPCHF#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 3.0
+  AUDCAD:
+    enabled: false
+    broker_symbol: AUDCAD
+    aliases:
+    - AUDCADm
+    - AUDCAD.
+    - AUDCAD#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 3.0
+  AUDCHF:
+    enabled: false
+    broker_symbol: AUDCHF
+    aliases:
+    - AUDCHFm
+    - AUDCHF.
+    - AUDCHF#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 3.0
+  AUDNZD:
+    enabled: false
+    broker_symbol: AUDNZD
+    aliases:
+    - AUDNZDm
+    - AUDNZD.
+    - AUDNZD#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 3.0
+  CADCHF:
+    enabled: false
+    broker_symbol: CADCHF
+    aliases:
+    - CADCHFm
+    - CADCHF.
+    - CADCHF#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 3.0
+  NZDCAD:
+    enabled: false
+    broker_symbol: NZDCAD
+    aliases:
+    - NZDCADm
+    - NZDCAD.
+    - NZDCAD#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 3.0
+  NZDCHF:
+    enabled: false
+    broker_symbol: NZDCHF
+    aliases:
+    - NZDCHFm
+    - NZDCHF.
+    - NZDCHF#
+    asset_class: forex
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.25
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    - new_york
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 3.0
+  USDMXN:
+    enabled: false
+    broker_symbol: USDMXN
+    aliases:
+    - USDMXNm
+    - USDMXN.
+    - USDMXN#
+    asset_class: forex_exotic
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 40.0
+  USDTRY:
+    enabled: false
+    broker_symbol: USDTRY
+    aliases:
+    - USDTRYm
+    - USDTRY.
+    - USDTRY#
+    asset_class: forex_exotic
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 40.0
+  USDSEK:
+    enabled: false
+    broker_symbol: USDSEK
+    aliases:
+    - USDSEKm
+    - USDSEK.
+    - USDSEK#
+    asset_class: forex_exotic
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 40.0
+  USDNOK:
+    enabled: false
+    broker_symbol: USDNOK
+    aliases:
+    - USDNOKm
+    - USDNOK.
+    - USDNOK#
+    asset_class: forex_exotic
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 40.0
+  USDSGD:
+    enabled: false
+    broker_symbol: USDSGD
+    aliases:
+    - USDSGDm
+    - USDSGD.
+    - USDSGD#
+    asset_class: forex_exotic
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 40.0
+  USDHKD:
+    enabled: false
+    broker_symbol: USDHKD
+    aliases:
+    - USDHKDm
+    - USDHKD.
+    - USDHKD#
+    asset_class: forex_exotic
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 40.0
+  USDPLN:
+    enabled: false
+    broker_symbol: USDPLN
+    aliases:
+    - USDPLNm
+    - USDPLN.
+    - USDPLN#
+    asset_class: forex_exotic
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 40.0
+  EURTRY:
+    enabled: false
+    broker_symbol: EURTRY
+    aliases:
+    - EURTRYm
+    - EURTRY.
+    - EURTRY#
+    asset_class: forex_exotic
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 40.0
+  EURSEK:
+    enabled: false
+    broker_symbol: EURSEK
+    aliases:
+    - EURSEKm
+    - EURSEK.
+    - EURSEK#
+    asset_class: forex_exotic
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 40.0
+  EURNOK:
+    enabled: false
+    broker_symbol: EURNOK
+    aliases:
+    - EURNOKm
+    - EURNOK.
+    - EURNOK#
+    asset_class: forex_exotic
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 40.0
+  EURPLN:
+    enabled: false
+    broker_symbol: EURPLN
+    aliases:
+    - EURPLNm
+    - EURPLN.
+    - EURPLN#
+    asset_class: forex_exotic
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 40.0
+  GBPZAR:
+    enabled: false
+    broker_symbol: GBPZAR
+    aliases:
+    - GBPZARm
+    - GBPZAR.
+    - GBPZAR#
+    asset_class: forex_exotic
+    quote_currency: USD
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - london
+    news_sensitivity: high
+    strategies: []
+    pip_size: 0.0001
+    max_spread_pips: 40.0
+  XPTUSD:
+    enabled: false
+    broker_symbol: XPTUSD
+    aliases:
+    - PLATINUM
+    - XPTUSDm
+    asset_class: metal
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  XPDUSD:
+    enabled: false
+    broker_symbol: XPDUSD
+    aliases:
+    - PALLADIUM
+    - XPDUSDm
+    asset_class: metal
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 150
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  COPPER:
+    enabled: false
+    broker_symbol: COPPER
+    aliases:
+    - HG
+    - XCUUSD
+    - COPPER.cash
+    asset_class: metal
+    quote_currency: USD
+    point_size: 0.001
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 80
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  UKOIL:
+    enabled: false
+    broker_symbol: UKOIL
+    aliases:
+    - BRENT
+    - BRENT.cash
+    - XBRUSD
+    asset_class: energy_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 80
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  NATGAS:
+    enabled: false
+    broker_symbol: NATGAS
+    aliases:
+    - NGAS
+    - XNGUSD
+    asset_class: energy_cfd
+    quote_currency: USD
+    point_size: 0.001
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  GASOLINE:
+    enabled: false
+    broker_symbol: GASOLINE
+    aliases:
+    - RB
+    - RBOB
+    asset_class: energy_cfd
+    quote_currency: USD
+    point_size: 0.001
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  COCOA:
+    enabled: false
+    broker_symbol: COCOA
+    aliases:
+    - Cocoa
+    asset_class: energy_cfd
+    quote_currency: USD
+    point_size: 1.0
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 200
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  COFFEE:
+    enabled: false
+    broker_symbol: COFFEE
+    aliases:
+    - Coffee
+    asset_class: energy_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 100
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  CORN:
+    enabled: false
+    broker_symbol: CORN
+    aliases:
+    - Corn
+    asset_class: energy_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 100
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  WHEAT:
+    enabled: false
+    broker_symbol: WHEAT
+    aliases:
+    - Wheat
+    asset_class: energy_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 100
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  SOYBEAN:
+    enabled: false
+    broker_symbol: SOYBEAN
+    aliases:
+    - Soybeans
+    asset_class: energy_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 100
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  SUGAR:
+    enabled: false
+    broker_symbol: SUGAR
+    aliases:
+    - Sugar
+    asset_class: energy_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 100
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  COTTON:
+    enabled: false
+    broker_symbol: COTTON
+    aliases:
+    - Cotton
+    asset_class: energy_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 100
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  US30:
+    enabled: false
+    broker_symbol: US30
+    aliases:
+    - US30.cash
+    - US30m
+    asset_class: index_cfd
+    quote_currency: USD
+    point_size: 0.1
+    min_lot: 0.01
+    max_lot: 0.01
+    lot_step: 0.01
+    max_spread_points: 50.0
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  SPX500:
+    enabled: false
+    broker_symbol: SPX500
+    aliases:
+    - SPX500.cash
+    - SPX500m
+    asset_class: index_cfd
+    quote_currency: USD
+    point_size: 0.1
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 50.0
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  US500:
+    enabled: false
+    broker_symbol: US500
+    aliases:
+    - US500.cash
+    - US500m
+    asset_class: index_cfd
+    quote_currency: USD
+    point_size: 0.1
+    min_lot: 0.01
+    max_lot: 0.01
+    lot_step: 0.01
+    max_spread_points: 50.0
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  US2000:
+    enabled: false
+    broker_symbol: US2000
+    aliases:
+    - US2000.cash
+    - US2000m
+    asset_class: index_cfd
+    quote_currency: USD
+    point_size: 0.1
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 50.0
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  GER40:
+    enabled: false
+    broker_symbol: GER40
+    aliases:
+    - GER40.cash
+    - GER40m
+    asset_class: index_cfd
+    quote_currency: USD
+    point_size: 0.1
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 50.0
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  UK100:
+    enabled: false
+    broker_symbol: UK100
+    aliases:
+    - UK100.cash
+    - UK100m
+    asset_class: index_cfd
+    quote_currency: USD
+    point_size: 0.1
+    min_lot: 0.01
+    max_lot: 0.01
+    lot_step: 0.01
+    max_spread_points: 50.0
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  FRA40:
+    enabled: false
+    broker_symbol: FRA40
+    aliases:
+    - FRA40.cash
+    - FRA40m
+    asset_class: index_cfd
+    quote_currency: USD
+    point_size: 0.1
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 50.0
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  EU50:
+    enabled: false
+    broker_symbol: EU50
+    aliases:
+    - EU50.cash
+    - EU50m
+    asset_class: index_cfd
+    quote_currency: USD
+    point_size: 0.1
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 50.0
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  ESP35:
+    enabled: false
+    broker_symbol: ESP35
+    aliases:
+    - ESP35.cash
+    - ESP35m
+    asset_class: index_cfd
+    quote_currency: USD
+    point_size: 0.1
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 50.0
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  ITA40:
+    enabled: false
+    broker_symbol: ITA40
+    aliases:
+    - ITA40.cash
+    - ITA40m
+    asset_class: index_cfd
+    quote_currency: USD
+    point_size: 0.1
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 50.0
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  JPN225:
+    enabled: false
+    broker_symbol: JPN225
+    aliases:
+    - JPN225.cash
+    - JPN225m
+    asset_class: index_cfd
+    quote_currency: USD
+    point_size: 0.1
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 50.0
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  HK50:
+    enabled: false
+    broker_symbol: HK50
+    aliases:
+    - HK50.cash
+    - HK50m
+    asset_class: index_cfd
+    quote_currency: USD
+    point_size: 0.1
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 50.0
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  CHINA50:
+    enabled: false
+    broker_symbol: CHINA50
+    aliases:
+    - CHINA50.cash
+    - CHINA50m
+    asset_class: index_cfd
+    quote_currency: USD
+    point_size: 0.1
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 50.0
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  AUS200:
+    enabled: false
+    broker_symbol: AUS200
+    aliases:
+    - AUS200.cash
+    - AUS200m
+    asset_class: index_cfd
+    quote_currency: USD
+    point_size: 0.1
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 50.0
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  INDIA50:
+    enabled: false
+    broker_symbol: INDIA50
+    aliases:
+    - INDIA50.cash
+    - INDIA50m
+    asset_class: index_cfd
+    quote_currency: USD
+    point_size: 0.1
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 50.0
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  VIX:
+    enabled: false
+    broker_symbol: VIX
+    aliases:
+    - VIX.cash
+    - VIXm
+    asset_class: index_cfd
+    quote_currency: USD
+    point_size: 0.1
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 50.0
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  DXY:
+    enabled: false
+    broker_symbol: DXY
+    aliases:
+    - DXY.cash
+    - DXYm
+    asset_class: index_cfd
+    quote_currency: USD
+    point_size: 0.1
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 50.0
+    max_risk_pct: 0.1
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: very_high
+    strategies: []
+  AAPL:
+    enabled: true
+    broker_symbol: AAPL
+    aliases:
+    - AAPL.US
+    - APPLE
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 1.0
+    max_lot: 1.0
+    lot_step: 1.0
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  AMZN:
+    enabled: true
+    broker_symbol: AMZN
+    aliases:
+    - AMZN.US
+    - AMAZON
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 1.0
+    max_lot: 1.0
+    lot_step: 1.0
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  GOOGL:
+    enabled: true
+    broker_symbol: GOOGL
+    aliases:
+    - GOOGL.US
+    - GOOGLE
+    - ALPHABET
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 1.0
+    max_lot: 1.0
+    lot_step: 1.0
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  GOOG:
+    enabled: false
+    broker_symbol: GOOG
+    aliases:
+    - GOOG.US
+    - GOOGLE
+    - ALPHABET
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  META:
+    enabled: true
+    broker_symbol: META
+    aliases:
+    - META.US
+    - FACEBOOK
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 1.0
+    max_lot: 1.0
+    lot_step: 1.0
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  TSLA:
+    enabled: true
+    broker_symbol: TSLA
+    aliases:
+    - TSLA.US
+    - TESLA
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 1.0
+    max_lot: 1.0
+    lot_step: 1.0
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  AMD:
+    enabled: false
+    broker_symbol: AMD
+    aliases:
+    - AMD.US
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  INTC:
+    enabled: false
+    broker_symbol: INTC
+    aliases:
+    - INTC.US
+    - INTEL
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  AVGO:
+    enabled: false
+    broker_symbol: AVGO
+    aliases:
+    - AVGO.US
+    - BROADCOM
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  ORCL:
+    enabled: false
+    broker_symbol: ORCL
+    aliases:
+    - ORCL.US
+    - ORACLE
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  CRM:
+    enabled: false
+    broker_symbol: CRM
+    aliases:
+    - CRM.US
+    - SALESFORCE
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  ADBE:
+    enabled: false
+    broker_symbol: ADBE
+    aliases:
+    - ADBE.US
+    - ADOBE
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  NFLX:
+    enabled: false
+    broker_symbol: NFLX
+    aliases:
+    - NFLX.US
+    - NETFLIX
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  UBER:
+    enabled: false
+    broker_symbol: UBER
+    aliases:
+    - UBER.US
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  PLTR:
+    enabled: false
+    broker_symbol: PLTR
+    aliases:
+    - PLTR.US
+    - PALANTIR
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  ARM:
+    enabled: false
+    broker_symbol: ARM
+    aliases:
+    - ARM.US
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  SMCI:
+    enabled: false
+    broker_symbol: SMCI
+    aliases:
+    - SMCI.US
+    - SUPER MICRO
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  MU:
+    enabled: false
+    broker_symbol: MU
+    aliases:
+    - MU.US
+    - MICRON
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  QCOM:
+    enabled: false
+    broker_symbol: QCOM
+    aliases:
+    - QCOM.US
+    - QUALCOMM
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  CSCO:
+    enabled: false
+    broker_symbol: CSCO
+    aliases:
+    - CSCO.US
+    - CISCO
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  IBM:
+    enabled: false
+    broker_symbol: IBM
+    aliases:
+    - IBM.US
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  SHOP:
+    enabled: false
+    broker_symbol: SHOP
+    aliases:
+    - SHOP.US
+    - SHOPIFY
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  BABA:
+    enabled: false
+    broker_symbol: BABA
+    aliases:
+    - BABA.US
+    - ALIBABA
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  TCEHY:
+    enabled: false
+    broker_symbol: TCEHY
+    aliases:
+    - TCEHY.US
+    - TENCENT
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  TSM:
+    enabled: false
+    broker_symbol: TSM
+    aliases:
+    - TSM.US
+    - TSMC
+    - TAIWAN SEMICONDUCTOR
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  ASML:
+    enabled: false
+    broker_symbol: ASML
+    aliases:
+    - ASML.US
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  SAP:
+    enabled: false
+    broker_symbol: SAP
+    aliases:
+    - SAP.US
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  SONY:
+    enabled: false
+    broker_symbol: SONY
+    aliases:
+    - SONY.US
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  TM:
+    enabled: false
+    broker_symbol: TM
+    aliases:
+    - TM.US
+    - TOYOTA
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  JPM:
+    enabled: false
+    broker_symbol: JPM
+    aliases:
+    - JPM.US
+    - JPMORGAN
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  BAC:
+    enabled: false
+    broker_symbol: BAC
+    aliases:
+    - BAC.US
+    - BANK OF AMERICA
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  GS:
+    enabled: false
+    broker_symbol: GS
+    aliases:
+    - GS.US
+    - GOLDMAN SACHS
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  MS:
+    enabled: false
+    broker_symbol: MS
+    aliases:
+    - MS.US
+    - MORGAN STANLEY
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  WFC:
+    enabled: false
+    broker_symbol: WFC
+    aliases:
+    - WFC.US
+    - WELLS FARGO
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  C:
+    enabled: false
+    broker_symbol: C
+    aliases:
+    - C.US
+    - CITIGROUP
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  V:
+    enabled: false
+    broker_symbol: V
+    aliases:
+    - V.US
+    - VISA
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  MA:
+    enabled: false
+    broker_symbol: MA
+    aliases:
+    - MA.US
+    - MASTERCARD
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  PYPL:
+    enabled: false
+    broker_symbol: PYPL
+    aliases:
+    - PYPL.US
+    - PAYPAL
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  AXP:
+    enabled: false
+    broker_symbol: AXP
+    aliases:
+    - AXP.US
+    - AMERICAN EXPRESS
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  COIN:
+    enabled: false
+    broker_symbol: COIN
+    aliases:
+    - COIN.US
+    - COINBASE
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  BRK.B:
+    enabled: false
+    broker_symbol: BRK.B
+    aliases:
+    - BRK.B.US
+    - BRK-B.US
+    - BERKSHIRE
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  UNH:
+    enabled: false
+    broker_symbol: UNH
+    aliases:
+    - UNH.US
+    - UNITEDHEALTH
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  JNJ:
+    enabled: false
+    broker_symbol: JNJ
+    aliases:
+    - JNJ.US
+    - JOHNSON & JOHNSON
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  LLY:
+    enabled: false
+    broker_symbol: LLY
+    aliases:
+    - LLY.US
+    - ELI LILLY
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  PFE:
+    enabled: false
+    broker_symbol: PFE
+    aliases:
+    - PFE.US
+    - PFIZER
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  MRNA:
+    enabled: false
+    broker_symbol: MRNA
+    aliases:
+    - MRNA.US
+    - MODERNA
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  NVO:
+    enabled: false
+    broker_symbol: NVO
+    aliases:
+    - NVO.US
+    - NOVO NORDISK
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  ABBV:
+    enabled: false
+    broker_symbol: ABBV
+    aliases:
+    - ABBV.US
+    - ABBVIE
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  TMO:
+    enabled: false
+    broker_symbol: TMO
+    aliases:
+    - TMO.US
+    - THERMO FISHER
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  XOM:
+    enabled: false
+    broker_symbol: XOM
+    aliases:
+    - XOM.US
+    - EXXON
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  CVX:
+    enabled: false
+    broker_symbol: CVX
+    aliases:
+    - CVX.US
+    - CHEVRON
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  COP:
+    enabled: false
+    broker_symbol: COP
+    aliases:
+    - COP.US
+    - CONOCOPHILLIPS
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  SLB:
+    enabled: false
+    broker_symbol: SLB
+    aliases:
+    - SLB.US
+    - SCHLUMBERGER
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  OXY:
+    enabled: false
+    broker_symbol: OXY
+    aliases:
+    - OXY.US
+    - OCCIDENTAL
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  BP:
+    enabled: false
+    broker_symbol: BP
+    aliases:
+    - BP.US
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  SHEL:
+    enabled: false
+    broker_symbol: SHEL
+    aliases:
+    - SHEL.US
+    - SHELL
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  TTE:
+    enabled: false
+    broker_symbol: TTE
+    aliases:
+    - TTE.US
+    - TOTALENERGIES
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  BA:
+    enabled: false
+    broker_symbol: BA
+    aliases:
+    - BA.US
+    - BOEING
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  CAT:
+    enabled: false
+    broker_symbol: CAT
+    aliases:
+    - CAT.US
+    - CATERPILLAR
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  GE:
+    enabled: false
+    broker_symbol: GE
+    aliases:
+    - GE.US
+    - GENERAL ELECTRIC
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  LMT:
+    enabled: false
+    broker_symbol: LMT
+    aliases:
+    - LMT.US
+    - LOCKHEED MARTIN
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  NOC:
+    enabled: false
+    broker_symbol: NOC
+    aliases:
+    - NOC.US
+    - NORTHROP GRUMMAN
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  RTX:
+    enabled: false
+    broker_symbol: RTX
+    aliases:
+    - RTX.US
+    - RAYTHEON
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  WMT:
+    enabled: false
+    broker_symbol: WMT
+    aliases:
+    - WMT.US
+    - WALMART
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  COST:
+    enabled: false
+    broker_symbol: COST
+    aliases:
+    - COST.US
+    - COSTCO
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  HD:
+    enabled: false
+    broker_symbol: HD
+    aliases:
+    - HD.US
+    - HOME DEPOT
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  MCD:
+    enabled: false
+    broker_symbol: MCD
+    aliases:
+    - MCD.US
+    - MCDONALDS
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  NKE:
+    enabled: false
+    broker_symbol: NKE
+    aliases:
+    - NKE.US
+    - NIKE
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  DIS:
+    enabled: false
+    broker_symbol: DIS
+    aliases:
+    - DIS.US
+    - DISNEY
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  KO:
+    enabled: false
+    broker_symbol: KO
+    aliases:
+    - KO.US
+    - COCA-COLA
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  PEP:
+    enabled: false
+    broker_symbol: PEP
+    aliases:
+    - PEP.US
+    - PEPSI
+    - PEPSICO
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  PG:
+    enabled: false
+    broker_symbol: PG
+    aliases:
+    - PG.US
+    - PROCTER & GAMBLE
+    asset_class: stock_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 120.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - new_york
+    news_sensitivity: high
+    strategies: []
+  BTCUSD:
+    enabled: false
+    broker_symbol: BTCUSD
+    aliases:
+    - BTCUSDm
+    - BTC/USD
+    asset_class: crypto_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 300.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - crypto_24_7
+    news_sensitivity: very_high
+    strategies: []
+  ETHUSD:
+    enabled: false
+    broker_symbol: ETHUSD
+    aliases:
+    - ETHUSDm
+    - ETH/USD
+    asset_class: crypto_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 300.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - crypto_24_7
+    news_sensitivity: very_high
+    strategies: []
+  SOLUSD:
+    enabled: false
+    broker_symbol: SOLUSD
+    aliases:
+    - SOLUSDm
+    - SOL/USD
+    asset_class: crypto_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 300.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - crypto_24_7
+    news_sensitivity: very_high
+    strategies: []
+  XRPUSD:
+    enabled: false
+    broker_symbol: XRPUSD
+    aliases:
+    - XRPUSDm
+    - XRP/USD
+    asset_class: crypto_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 300.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - crypto_24_7
+    news_sensitivity: very_high
+    strategies: []
+  BNBUSD:
+    enabled: false
+    broker_symbol: BNBUSD
+    aliases:
+    - BNBUSDm
+    - BNB/USD
+    asset_class: crypto_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 300.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - crypto_24_7
+    news_sensitivity: very_high
+    strategies: []
+  ADAUSD:
+    enabled: false
+    broker_symbol: ADAUSD
+    aliases:
+    - ADAUSDm
+    - ADA/USD
+    asset_class: crypto_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 300.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - crypto_24_7
+    news_sensitivity: very_high
+    strategies: []
+  DOGEUSD:
+    enabled: false
+    broker_symbol: DOGEUSD
+    aliases:
+    - DOGEUSDm
+    - DOGE/USD
+    asset_class: crypto_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 300.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - crypto_24_7
+    news_sensitivity: very_high
+    strategies: []
+  AVAXUSD:
+    enabled: false
+    broker_symbol: AVAXUSD
+    aliases:
+    - AVAXUSDm
+    - AVAX/USD
+    asset_class: crypto_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 300.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - crypto_24_7
+    news_sensitivity: very_high
+    strategies: []
+  LINKUSD:
+    enabled: false
+    broker_symbol: LINKUSD
+    aliases:
+    - LINKUSDm
+    - LINK/USD
+    asset_class: crypto_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 300.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - crypto_24_7
+    news_sensitivity: very_high
+    strategies: []
+  DOTUSD:
+    enabled: false
+    broker_symbol: DOTUSD
+    aliases:
+    - DOTUSDm
+    - DOT/USD
+    asset_class: crypto_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 300.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - crypto_24_7
+    news_sensitivity: very_high
+    strategies: []
+  LTCUSD:
+    enabled: false
+    broker_symbol: LTCUSD
+    aliases:
+    - LTCUSDm
+    - LTC/USD
+    asset_class: crypto_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 300.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - crypto_24_7
+    news_sensitivity: very_high
+    strategies: []
+  BCHUSD:
+    enabled: false
+    broker_symbol: BCHUSD
+    aliases:
+    - BCHUSDm
+    - BCH/USD
+    asset_class: crypto_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 300.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - crypto_24_7
+    news_sensitivity: very_high
+    strategies: []
+  UNIUSD:
+    enabled: false
+    broker_symbol: UNIUSD
+    aliases:
+    - UNIUSDm
+    - UNI/USD
+    asset_class: crypto_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 300.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - crypto_24_7
+    news_sensitivity: very_high
+    strategies: []
+  MATICUSD:
+    enabled: false
+    broker_symbol: MATICUSD
+    aliases:
+    - MATICUSDm
+    - MATIC/USD
+    asset_class: crypto_cfd
+    quote_currency: USD
+    point_size: 0.01
+    min_lot: 0.01
+    max_lot: 0.1
+    lot_step: 0.01
+    max_spread_points: 300.0
+    max_risk_pct: 0.05
+    max_open_positions: 1
+    allow_long: true
+    allow_short: true
+    sessions:
+    - crypto_24_7
+    news_sensitivity: very_high
+    strategies: []
+correlation_groups:
+  usd_short:
+    max_positions: 2
+    max_group_risk_pct: 0.75
+    members:
+    - symbol: EURUSD
+      side: BUY
+    - symbol: GBPUSD
+      side: BUY
+    - symbol: XAUUSD
+      side: BUY
+    - symbol: USDJPY
+      side: SELL
+  risk_on:
+    max_positions: 2
+    max_group_risk_pct: 0.5
+    members: []

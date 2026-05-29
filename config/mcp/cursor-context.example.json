@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "trading-os-context": {
+      "command": "python3",
+      "args": ["bridge/context_mcp_server.py"],
+      "cwd": "/mnt/e/GROWTH/trading-os",
+      "env": {
+        "TRADING_OS_PROFILE": "production"
+      }
+    }
+  }
+}

@@ -1,0 +1,50 @@
+# Stock research arm — fundamental multibagger screening
+# Runs daily by default; publishes advisory-only bus events.
+
+universe:
+  source: instrument_registry
+  asset_class: stock_cfd
+  region: null          # null = all regions; set "US" or "IN" to filter
+  include_disabled: true # screen full watchlist, not only enabled symbols
+  max_symbols: 50
+
+weights:
+  quality: 0.25
+  growth: 0.30
+  value: 0.15
+  momentum: 0.15
+  multibagger: 0.15
+
+thresholds:
+  min_confidence: 0.65
+  multibagger_tier: 0.75
+  strong_buy_composite: 0.72
+  publish_min_confidence: 0.68
+
+run_interval_sec: 86400   # 24h — fundamental research is slow-moving
+output:
+  ledger: intel/stock_research.jsonl
+  snapshot: intel/stock_research_latest.json
+  overlay: config/instruments.d/research_active.yaml
+
+publish:
+  bus_topic_ranked: research.stock.ranked
+  bus_topic_alert: research.stock.alert
+
+# Live signal engine (signal_generator_v2) — stock CFD only; FX/metals unchanged.
+signal_engine:
+  enabled: true
+  min_tier: accumulate          # soft filter when block_below_min_tier=true
+  min_confidence: 0.65
+  block_below_min_tier: false   # advisory boost by default; set true to hard-block
+  require_research_row: false
+  tier_confidence_boost:
+    multibagger_candidate: 0.05
+    high_conviction: 0.03
+    accumulate: 0.01
+    watch: 0.0
+
+# Point-in-time walk-forward validation
+pit_validation:
+  reporting_lag_days: 45
+  max_symbols: 20

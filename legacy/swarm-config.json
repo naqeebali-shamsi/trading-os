@@ -1,0 +1,113 @@
+{
+  "state": "ACTIVE",
+  "mode": "PAPER",
+  "risk": {
+    "max_daily_loss_pct": 2.0,
+    "max_drawdown_pct": 5.0,
+    "max_weekly_loss_pct": 5.0,
+    "max_position_size_lots": 0.05,
+    "max_concurrent_positions": 3,
+    "max_total_exposure_lots": 0.1,
+    "max_risk_per_trade_pct": 0.5,
+    "default_stop_loss_pips": 20.0,
+    "default_take_profit_pips": 40.0,
+    "min_risk_reward_ratio": 1.5,
+    "allowed_symbols": [
+      "EURUSD",
+      "GBPUSD",
+      "USDJPY",
+      "AUDUSD",
+      "USDCAD"
+    ],
+    "blocked_symbols": [],
+    "trading_hours": {
+      "timezone": "UTC",
+      "windows": [
+        {
+          "start": "08:00",
+          "end": "12:00",
+          "label": "london-morning"
+        },
+        {
+          "start": "13:00",
+          "end": "17:00",
+          "label": "ny-afternoon"
+        }
+      ],
+      "weekend_closeout": true
+    }
+  },
+  "executor": {
+    "max_orders_per_hour": 3,
+    "max_orders_per_day": 10,
+    "max_closes_per_hour": 6,
+    "minimum_seconds_between_actions": 30,
+    "slippage_acceptable_pips": 3.0,
+    "retry_failed_orders_once": true
+  },
+  "scanner": {
+    "symbols": [
+      "EURUSD",
+      "GBPUSD",
+      "USDJPY",
+      "AUDUSD",
+      "USDCAD"
+    ],
+    "timeframes": [
+      1,
+      5,
+      15
+    ],
+    "bars_to_fetch": 100,
+    "lookback_periods": {
+      "rsi": 14,
+      "sma": {
+        "fast": 9,
+        "slow": 21
+      },
+      "atr": 14
+    },
+    "snapshot_interval_seconds": 60
+  },
+  "strategies": {
+    "sma_crossover": {
+      "description": "Simple SMA(9) / SMA(21) crossover",
+      "entry_long": "sma_fast > sma_slow AND prev_sma_fast <= prev_sma_slow",
+      "entry_short": "sma_fast < sma_slow AND prev_sma_fast >= prev_sma_slow",
+      "confirmation_indicators": [
+        "rsi"
+      ],
+      "min_rsi_for_long": 40,
+      "max_rsi_for_short": 60,
+      "enabled": true,
+      "weight": 0.4
+    },
+    "rsi_bounce": {
+      "description": "RSI(14) oversold/overbought bounce",
+      "entry_long": "rsi <= 30 AND prev_candle_rsi <= 30 AND close > prev_close",
+      "entry_short": "rsi >= 70 AND prev_candle_rsi >= 70 AND close < prev_close",
+      "enabled": true,
+      "weight": 0.3
+    }
+  },
+  "analyst": {
+    "score_window_days": 7,
+    "min_trades_for_confidence": 5,
+    "win_rate_floor": 0.35,
+    "sharpe_lookback_days": 30
+  },
+  "bridge": {
+    "ipc_dir_relative": "trading-os",
+    "heartbeat_timeout_seconds": 30,
+    "command_timeout_seconds": 30,
+    "poll_interval_seconds": 0.2,
+    "wine_prefix": "~/.mt5",
+    "mt5_display": ":99",
+    "mt5_exe_path": "~/.mt5/drive_c/Program Files/MetaTrader 5/terminal64.exe",
+    "ea_magic_number": 261997
+  },
+  "paths": {
+    "workspace": "/mnt/e/GROWTH/trading-os",
+    "ipc_dir": "~/.mt5/drive_c/Program Files/MetaTrader 5/MQL5/Files/trading-os"
+  }
+}

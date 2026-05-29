@@ -1,0 +1,165 @@
+# Trading OS — Master Configuration
+# All risk limits, thresholds, and agent parameters in one place.
+# The orchestrator reads this file before every pulse.
+# Every agent validates its own actions against this file.
+
+# ═══════════════════════════════════════════════════════════════
+# 1. SYSTEM STATE
+# ═══════════════════════════════════════════════════════════════
+state: ACTIVE   # ACTIVE | PAUSED | EMERGENCY_HALT
+mode: PAPER    # PAPER | LIVE
+# When mode=PAPER, the executor prints trades but never fires orders.
+# When mode=LIVE, orders go to MT5. Switching requires manual file edit.
+
+# ═══════════════════════════════════════════════════════════════
+# 2. MONEY / RISK HARD LIMITS
+# ═══════════════════════════════════════════════════════════════
+risk:
+  # Account-level circuit breakers
+  max_daily_loss_pct: 2.0          # Halt trading if daily P&L ≤ -2% of equity
+  max_drawdown_pct: 5.0             # Halt if peak-to-trough equity drawdown ≥ 5%
+  max_weekly_loss_pct: 5.0          # Halt if weekly drawdown ≥ -5%
+
+  # Position sizing (Kelly-inspired conservative)
+  max_position_size_lots: 0.05       # Never exceed 0.05 lots per position
+  max_concurrent_positions: 3       # Max 3 open positions
+  max_total_exposure_lots: 0.10      # Sum of all position volumes ≤ 0.10 lots
+
+  # Per-trade risk
+  max_risk_per_trade_pct: 0.5         # Risk ≤ 0.5% equity on any single trade
+  default_stop_loss_pips: 20.0        # Default SL if no strategy SL provided
+  default_take_profit_pips: 40.0       # Default TP if no strategy TP provided
+  min_risk_reward_ratio: 1.5          # Risk-gate rejects signals below 1:1.5 R:R
+
+  # Symbol restrictions
+  allowed_symbols:                     # Executor ignores signals for symbols not listed
+    - EURUSD
+    - GBPUSD
+    - USDJPY
+    - AUDUSD
+    - USDCAD
+  blocked_symbols: []                  # Excluded from trading
+
+  # Time-of-day restrictions
+  trading_hours:
+    timezone: UTC
+    windows:
+      - {start: "08:00", end: "12:00", label: "london-morning"}
+      - {start: "13:00", end: "17:00", label: "ny-afternoon"}
+    weekend_closeout: true             # Close all positions before Friday 21:59 UTC
+
+# ═══════════════════════════════════════════════════════════════
+# 3. EXECUTOR THROTTLING
+# ═══════════════════════════════════════════════════════════════
+executor:
+  max_orders_per_hour: 3
+  max_orders_per_day: 10
+  max_closes_per_hour: 6
+  minimum_seconds_between_actions: 30  # Debounce
+  slippage_acceptable_pips: 3.0
+  retry_failed_orders_once: true
+
+# ═══════════════════════════════════════════════════════════════
+# 4. MARKET-SCANNER CONFIG
+# ═══════════════════════════════════════════════════════════════
+scanner:
+  symbols: [EURUSD, GBPUSD, USDJPY, AUDUSD, USDCAD]
+  timeframes: [1, 5, 15]              # M1, M5, M15 in MT5 constants
+  bars_to_fetch: 100
+  lookback_periods: {rsi: 14, sma: {fast: 9, slow: 21}, atr: 14}
+  snapshot_interval_seconds: 60        # How often bridge writes data_out.txt
+
+# ═══════════════════════════════════════════════════════════════
+# 5. SIGNAL-FORGE STRATEGIES
+# ═══════════════════════════════════════════════════════════════
+strategies:
+  sma_crossover:
+    description: "Simple SMA(9) / SMA(21) crossover"
+    entry_long: "sma_fast > sma_slow AND sma_fast_prev ≤ sma_slow_prev"
+    entry_short: "sma_fast ≤ sma_slow AND sma_fast_prev > sma_slow_prev"
+    confirmation_indicators: [rsi]
+    min_rsi_for_long: 40
+    max_rsi_for_short: 60
+    enabled: true
+    weight: 0.4
+
+  rsi_bounce:
+    description: "RSI(14) oversold/overbought bounce"
+    entry_long: "rsi ≤ 30 AND previous(candle).rsi ≤ 30 AND current(close) > previous(close)"
+    entry_short: "rsi ≥ 70 AND previous(candle).rsi ≥ 70 AND current(close) < previous(close)"
+    enabled: true
+    weight: 0.3
+
+  atr_breakout:
+    description: "Price breaks above/below 1.5 ATR band"
+    entry_long: "close > upper(bb) AND volume > avg_volume"
+    entry_short: "close < lower(bb) AND volume > avg_volume"
+    enabled: false                     # Disabled by default — needs tuning
+    weight: 0.3
+
+# ═══════════════════════════════════════════════════════════════
+# 6. ANALYST SCORING
+# ═══════════════════════════════════════════════════════════════
+analyst:
+  score_window_days: 7                  # Rolling window for win/loss stats
+  min_trades_for_confidence: 5         # Don't score strategy with <5 trades
+  win_rate_floor: 0.35                 # Disable strategy if win rate drops below 35%
+  sharpe_lookback_days: 30
+
+# ═══════════════════════════════════════════════════════════════
+# 7. MT5 BRIDGE CONFIG
+# ═══════════════════════════════════════════════════════════════
+bridge:
+  ipc_dir_relative: "trading-os"      # Under MQL5/Files/
+  heartbeat_timeout_seconds: 30
+  command_timeout_seconds: 30
+  poll_interval_seconds: 0.2
+  wine_prefix: "~/.mt5"
+  mt5_display: ":99"
+  mt5_exe_path: "~/.mt5/drive_c/Program Files/MetaTrader 5/terminal64.exe"
+  ea_magic_number: 261997
+
+# ═══════════════════════════════════════════════════════════════
+# 8. PATHS (relative to workspace root)
+# ═══════════════════════════════════════════════════════════════
+paths:
+  workspace: "/mnt/e/GROWTH/trading-os"
+  config: "config"
+  queue: "queue"
+  intel: "intel"
+  calendar: "calendar"
+  logs: "logs"
+  skills: "skills"
+  pending: "pending"
+  done: "done"
+  archive: "logs/archive"
+
+# ═══════════════════════════════════════════════════════════════
+# 9. PLATFORM CREDENTIALS (DO NOT COMMIT)
+# ═══════════════════════════════════════════════════════════════
+# These are loaded by the bridge-engine from a separate secrets file
+# secrets file location: config/secrets.yaml (gitignored)
+# Contains: mt5_account, mt5_password, mt5_server
+
+# ═══════════════════════════════════════════════════════════════
+# 10. ORCHESTRATOR SCHEDULE
+# ═══════════════════════════════════════════════════════════════
+schedule:
+  market_scanner: "0,30 * * * *"       # Every 30 minutes
+  signal_forge:     "*/15 8-17 * * 1-5"   # Every 15 min during trading hours
+  risk_guardian:    "*/5 8-17 * * 1-5"    # Every 5 min during trading hours
+  trade_executor:   "*/5 8-18 * * 1-5"    # Every 5 min during trading hours
+  position_monitor: "*/5 * * * *"        # Every 5 minutes (24/5)
+  analyst_auditor:  "0 18 * * 1-5"         # Daily after close
+  learner_improver: "0 20 * * 5"          # Weekly Friday evenings
+
+# ═══════════════════════════════════════════════════════════════
+# 11. HUMAN OVERRIDE
+# ═══════════════════════════════════════════════════════════════
+# Write commands to queue/orchestrator-trader/INBOX.md:
+#   EMERGENCY_HALT — set state to EMERGENCY_HALT
+#   PAUSE — set state to PAUSED
+#   RESUME — set state to ACTIVE
+#   SWITCH_MODE:live — set mode to LIVE (requires confirmation)
+#   CLOSE_ALL — immediately close all positions
+#   FORCE_ORDER:symbol=EURUSD,volume=0.01,side=buy — bypass signal pipeline

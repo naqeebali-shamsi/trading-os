@@ -1,0 +1,4 @@
+-r requirements.txt
+
+# Real TimesFM adapter (optional — heavy; set TRADING_OS_TIMESFM_PROVIDER=timesfm)
+# timesfm>=1.0.0

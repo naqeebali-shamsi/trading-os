@@ -1,0 +1,244 @@
+# NSE Indian equities — disabled until broker-verified on your MT5 account.
+# Enable per symbol after: python scripts/verify_instruments.py --asset-class stock_cfd --region IN --live-query
+#
+# Broker symbols vary by dealer (RELIANCE vs RELIANCE.IN). Aliases cover common variants.
+
+sessions:
+  india_nse:
+    timezone: UTC
+    days: [mon, tue, wed, thu, fri]
+    windows:
+      - ["03:45", "10:00"]  # NSE cash ~09:15–15:30 IST
+
+symbols:
+  RELIANCE:
+    enabled: false
+    broker_symbol: RELIANCE
+    aliases: [RELIANCE.IN, RELIANCE.NS, RIL]
+    asset_class: stock_cfd
+    region: IN
+    exchange: NSE
+    quote_currency: INR
+    point_size: 0.05
+    min_lot: 1.0
+    max_lot: 10.0
+    lot_step: 1.0
+    max_spread_points: 150.0
+    max_risk_pct: 0.03
+    max_open_positions: 1
+    allow_long: true
+    allow_short: false
+    sessions: [india_nse]
+    news_sensitivity: high
+    strategies: []
+    selection_note: "Long-term fundamental core; avoid crowded AI momentum-only entries."
+
+  TCS:
+    enabled: false
+    broker_symbol: TCS
+    aliases: [TCS.IN, TCS.NS, TATA CONSULTANCY]
+    asset_class: stock_cfd
+    region: IN
+    exchange: NSE
+    quote_currency: INR
+    point_size: 0.05
+    min_lot: 1.0
+    max_lot: 10.0
+    lot_step: 1.0
+    max_spread_points: 150.0
+    max_risk_pct: 0.03
+    max_open_positions: 1
+    allow_long: true
+    allow_short: false
+    sessions: [india_nse]
+    news_sensitivity: medium
+    strategies: []
+
+  INFY:
+    enabled: false
+    broker_symbol: INFY
+    aliases: [INFY.IN, INFY.NS, INFOSYS]
+    asset_class: stock_cfd
+    region: IN
+    exchange: NSE
+    quote_currency: INR
+    point_size: 0.05
+    min_lot: 1.0
+    max_lot: 10.0
+    lot_step: 1.0
+    max_spread_points: 150.0
+    max_risk_pct: 0.03
+    max_open_positions: 1
+    allow_long: true
+    allow_short: false
+    sessions: [india_nse]
+    news_sensitivity: medium
+    strategies: []
+
+  HDFCBANK:
+    enabled: false
+    broker_symbol: HDFCBANK
+    aliases: [HDFCBANK.IN, HDFCBANK.NS, HDFC BANK]
+    asset_class: stock_cfd
+    region: IN
+    exchange: NSE
+    quote_currency: INR
+    point_size: 0.05
+    min_lot: 1.0
+    max_lot: 10.0
+    lot_step: 1.0
+    max_spread_points: 150.0
+    max_risk_pct: 0.03
+    max_open_positions: 1
+    allow_long: true
+    allow_short: false
+    sessions: [india_nse]
+    news_sensitivity: high
+    strategies: []
+
+  ICICIBANK:
+    enabled: false
+    broker_symbol: ICICIBANK
+    aliases: [ICICIBANK.IN, ICICIBANK.NS, ICICI BANK]
+    asset_class: stock_cfd
+    region: IN
+    exchange: NSE
+    quote_currency: INR
+    point_size: 0.05
+    min_lot: 1.0
+    max_lot: 10.0
+    lot_step: 1.0
+    max_spread_points: 150.0
+    max_risk_pct: 0.03
+    max_open_positions: 1
+    allow_long: true
+    allow_short: false
+    sessions: [india_nse]
+    news_sensitivity: high
+    strategies: []
+
+  BHARTIARTL:
+    enabled: false
+    broker_symbol: BHARTIARTL
+    aliases: [BHARTIARTL.IN, BHARTI.NS, AIRTEL]
+    asset_class: stock_cfd
+    region: IN
+    exchange: NSE
+    quote_currency: INR
+    point_size: 0.05
+    min_lot: 1.0
+    max_lot: 10.0
+    lot_step: 1.0
+    max_spread_points: 150.0
+    max_risk_pct: 0.03
+    max_open_positions: 1
+    allow_long: true
+    allow_short: false
+    sessions: [india_nse]
+    news_sensitivity: medium
+    strategies: []
+
+  ITC:
+    enabled: false
+    broker_symbol: ITC
+    aliases: [ITC.IN, ITC.NS]
+    asset_class: stock_cfd
+    region: IN
+    exchange: NSE
+    quote_currency: INR
+    point_size: 0.05
+    min_lot: 1.0
+    max_lot: 10.0
+    lot_step: 1.0
+    max_spread_points: 150.0
+    max_risk_pct: 0.03
+    max_open_positions: 1
+    allow_long: true
+    allow_short: false
+    sessions: [india_nse]
+    news_sensitivity: low
+    strategies: []
+
+  SBIN:
+    enabled: false
+    broker_symbol: SBIN
+    aliases: [SBIN.IN, SBIN.NS, SBI]
+    asset_class: stock_cfd
+    region: IN
+    exchange: NSE
+    quote_currency: INR
+    point_size: 0.05
+    min_lot: 1.0
+    max_lot: 10.0
+    lot_step: 1.0
+    max_spread_points: 150.0
+    max_risk_pct: 0.03
+    max_open_positions: 1
+    allow_long: true
+    allow_short: false
+    sessions: [india_nse]
+    news_sensitivity: high
+    strategies: []
+
+  KOTAKBANK:
+    enabled: false
+    broker_symbol: KOTAKBANK
+    aliases: [KOTAKBANK.IN, KOTAKBANK.NS, KOTAK BANK]
+    asset_class: stock_cfd
+    region: IN
+    exchange: NSE
+    quote_currency: INR
+    point_size: 0.05
+    min_lot: 1.0
+    max_lot: 10.0
+    lot_step: 1.0
+    max_spread_points: 150.0
+    max_risk_pct: 0.03
+    max_open_positions: 1
+    allow_long: true
+    allow_short: false
+    sessions: [india_nse]
+    news_sensitivity: high
+    strategies: []
+
+  LT:
+    enabled: false
+    broker_symbol: LT
+    aliases: [LT.IN, LT.NS, LARSEN]
+    asset_class: stock_cfd
+    region: IN
+    exchange: NSE
+    quote_currency: INR
+    point_size: 0.05
+    min_lot: 1.0
+    max_lot: 10.0
+    lot_step: 1.0
+    max_spread_points: 150.0
+    max_risk_pct: 0.03
+    max_open_positions: 1
+    allow_long: true
+    allow_short: false
+    sessions: [india_nse]
+    news_sensitivity: medium
+    strategies: []
+
+  HINDUNILVR:
+    enabled: false
+    broker_symbol: HINDUNILVR
+    aliases: [HINDUNILVR.IN, HINDUNILVR.NS, HUL]
+    asset_class: stock_cfd
+    region: IN
+    exchange: NSE
+    quote_currency: INR
+    point_size: 0.05
+    min_lot: 1.0
+    max_lot: 10.0
+    lot_step: 1.0
+    max_spread_points: 150.0
+    max_risk_pct: 0.03
+    max_open_positions: 1
+    allow_long: true
+    allow_short: false
+    sessions: [india_nse]
+    news_sensitivity: low
+    strategies: []

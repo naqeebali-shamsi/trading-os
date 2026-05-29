@@ -1,0 +1,75 @@
+{
+  "MA_CROSS_SMA9_21": {
+    "active": true,
+    "description": "Golden cross / death cross on SMA 9 vs 21",
+    "entry_logic": "SMA9 crosses above SMA21 (long) or below (short)",
+    "exit_logic": "Opposing cross or trailing ATR stop",
+    "indicators": [
+      "SMA9",
+      "SMA21",
+      "ATR14"
+    ],
+    "max_drawdown_pct": 8,
+    "params": {
+      "fast_period": 9,
+      "slow_period": 21,
+      "atr_multiplier_sl": 1.5,
+      "risk_per_trade_pct": 1.5
+    },
+    "position_type": "single_direction",
+    "timeframe": "H1",
+    "weight": 1.0,
+    "wins": 0,
+    "losses": 0,
+    "sharpe": 0
+  },
+  "RSI_MEAN_REVERSION": {
+    "active": true,
+    "description": "Buy RSI < 30 at support, sell RSI > 70 at resistance",
+    "entry_logic": "RSI14 < 30 and price touches lower Bollinger Band",
+    "exit_logic": "RSI returns to 50 or opposite band",
+    "indicators": [
+      "RSI14",
+      "BB20",
+      "Volume"
+    ],
+    "max_drawdown_pct": 5,
+    "params": {
+      "rsi_period": 14,
+      "oversold": 30,
+      "overbought": 70,
+      "bb_period": 20,
+      "risk_per_trade_pct": 1.0
+    },
+    "position_type": "bi_directional",
+    "timeframe": "H1",
+    "weight": 1.0,
+    "wins": 0,
+    "losses": 0,
+    "sharpe": 0
+  },
+  "ADAPTIVE_DUAL": {
+    "active": false,
+    "description": "Switch trend/mean-reversion based on ADX regime",
+    "entry_logic": "ADX > 25: trend-following. ADX < 20: mean-reversion",
+    "exit_logic": "Regime change detected",
+    "indicators": [
+      "ADX14",
+      "EMA20",
+      "RSI14"
+    ],
+    "max_drawdown_pct": 7,
+    "params": {
+      "adx_period": 14,
+      "adx_trend_threshold": 25,
+      "adx_range_threshold": 20,
+      "risk_per_trade_pct": 1.2
+    },
+    "position_type": "adaptive",
+    "timeframe": "H1",
+    "weight": 0.5,
+    "wins": 0,
+    "losses": 0,
+    "sharpe": 0
+  }
+}

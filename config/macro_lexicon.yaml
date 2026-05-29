@@ -1,0 +1,172 @@
+version: 1
+
+# Weighted keywords — compound terms score higher than single words
+impact_keywords:
+  fed: 1.0
+  fomc: 1.5
+  interest rate: 2.0
+  nfp: 1.5
+  non-farm: 1.5
+  cpi: 1.5
+  inflation: 1.5
+  gdp: 1.2
+  recession: 2.0
+  war: 2.5
+  sanctions: 1.5
+  ceasefire: 1.0
+  invasion: 2.0
+  central bank: 1.5
+  ecb: 1.5
+  boe: 1.5
+  boj: 1.5
+  treasury: 1.0
+  yield: 1.0
+  gold: 1.0
+  oil: 1.0
+  crude: 1.0
+  opec: 1.0
+
+# Per-symbol keyword relevance: {symbol: {keyword: weight}}
+symbol_relevance:
+  EURUSD:
+    ecb: 2.0
+    fed: 1.5
+    euro: 1.0
+    usd: 1.0
+  GBPUSD:
+    boe: 2.0
+    fed: 1.5
+    pound: 1.0
+    usd: 1.0
+  USDJPY:
+    boj: 2.0
+    fed: 1.5
+    yen: 1.0
+    usd: 1.0
+  XAUUSD:
+    gold: 3.0
+    fed: 1.0
+    inflation: 1.5
+    rate: 1.0
+    yield: 1.0
+
+bullish_terms:
+  - strong
+  - growth
+  - optimistic
+  - bullish
+  - surge
+  - rally
+  - expansion
+  - rate cut
+  - easing
+  - stimulus
+  - accommodative
+
+bearish_terms:
+  - weak
+  - recession
+  - pessimistic
+  - bearish
+  - crash
+  - sell-off
+  - contraction
+  - rate hike
+  - tightening
+  - hawkish
+  - austerity
+
+category_rules:
+  oil_shock:
+    keywords:
+      oil: 1.0
+      crude: 1.0
+      brent: 1.0
+      wti: 1.0
+      opec: 1.5
+      supply cut: 2.0
+      tanker: 1.5
+      strait of hormuz: 2.5
+      refinery: 1.0
+    bias: inflation_risk
+    candidate_symbols:
+      - XAUUSD
+      - USDCAD
+      - XTIUSD
+      - USOIL
+  geopolitical_escalation:
+    keywords:
+      war: 2.0
+      invasion: 2.0
+      missile: 1.5
+      sanctions: 1.5
+      ceasefire: 1.0
+      iran: 1.2
+      russia: 1.0
+      ukraine: 1.0
+      israel: 1.0
+      red sea: 1.5
+      attack: 1.0
+    bias: risk_off
+    candidate_symbols:
+      - XAUUSD
+      - USDJPY
+      - EURUSD
+  tech_shock:
+    keywords:
+      nasdaq: 1.0
+      semiconductor: 1.5
+      chips: 1.0
+      ai: 1.0
+      nvidia: 2.0
+      nvda: 2.0
+      apple: 1.2
+      microsoft: 1.2
+      tesla: 1.2
+      earnings: 1.0
+      guidance: 1.0
+      tech stocks: 2.0
+    bias: equity_volatility
+    candidate_symbols:
+      - NAS100
+      - US100
+      - NVDA
+      - MSFT
+      - AAPL
+      - TSLA
+  health_scare:
+    keywords:
+      virus: 1.0
+      hantavirus: 2.5
+      pandemic: 2.0
+      outbreak: 1.8
+      who: 1.0
+      quarantine: 1.5
+      vaccine: 1.0
+      health emergency: 2.0
+    bias: risk_off
+    candidate_symbols:
+      - XAUUSD
+      - USDJPY
+      - NAS100
+      - US100
+  central_bank:
+    keywords:
+      fed: 1.5
+      fomc: 2.0
+      interest rate: 2.0
+      rate cut: 1.5
+      rate hike: 1.5
+      inflation: 1.2
+      cpi: 1.5
+      ecb: 1.5
+      boe: 1.5
+      boj: 1.5
+      powell: 1.5
+      yield: 1.0
+    bias: rates_volatility
+    candidate_symbols:
+      - EURUSD
+      - GBPUSD
+      - USDJPY
+      - XAUUSD

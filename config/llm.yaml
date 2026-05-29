@@ -1,0 +1,46 @@
+version: 1
+
+default_provider: openrouter
+request_timeout_sec: 30
+max_response_chars: 12000
+
+providers:
+  mock:
+    type: mock
+    model: mock-safe-json
+
+  openrouter:
+    type: openai_compatible
+    endpoint: https://openrouter.ai/api/v1/chat/completions
+    api_key_env: OPENROUTER_API_KEY
+    api_key_secret_path: openrouter
+    model: google/gemini-2.5-flash-lite
+    fallback_models:
+      - google/gemini-2.5-flash
+      - deepseek/deepseek-chat
+      - openai/gpt-4.1-mini
+      - anthropic/claude-3.5-haiku
+    headers:
+      HTTP-Referer: https://trading-os.local
+      X-Title: Trading OS
+
+  openai:
+    type: openai_compatible
+    endpoint: https://api.openai.com/v1/chat/completions
+    api_key_env: OPENAI_API_KEY
+    api_key_secret_path: openai
+    model: gpt-4o-mini
+
+  local_ollama:
+    type: openai_compatible
+    endpoint: http://127.0.0.1:11434/v1/chat/completions
+    api_key_env: OLLAMA_API_KEY
+    api_key_optional: true
+    model: llama3.1:8b
+
+  local_vllm:
+    type: openai_compatible
+    endpoint: http://127.0.0.1:8000/v1/chat/completions
+    api_key_env: VLLM_API_KEY
+    api_key_optional: true
+    model: local-model

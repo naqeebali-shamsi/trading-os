@@ -1,0 +1,142 @@
+.molecule-card {
+  border: 1px solid var(--retro-border);
+  background: var(--retro-panel);
+  padding: 0.85rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.molecule-card--wide {
+  grid-column: 1 / -1;
+}
+
+.molecule-panel-body {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.molecule-panel-section {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.molecule-panel-section + .molecule-panel-section {
+  padding-top: 0.5rem;
+  border-top: 1px dashed #2a3141;
+}
+
+.molecule-stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.65rem 0.75rem;
+  margin: 0.35rem 0;
+}
+
+.molecule-stat {
+  min-width: 0;
+}
+
+.molecule-stat-label {
+  color: var(--retro-muted);
+  font-size: 0.82rem;
+}
+
+.molecule-stat-value {
+  font-size: 1.1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.molecule-stat-value.positive {
+  color: var(--retro-ok);
+}
+
+.molecule-stat-value.negative {
+  color: var(--retro-warn);
+}
+
+.molecule-button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.molecule-equity-sparkline {
+  margin: 0.35rem 0;
+}
+
+.molecule-equity-sparkline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.molecule-equity-sparkline-meta {
+  color: var(--retro-muted);
+  font-size: 0.82rem;
+  text-align: right;
+}
+
+.molecule-equity-sparkline-canvas {
+  position: relative;
+  width: 100%;
+  height: 88px;
+}
+
+.molecule-equity-sparkline-canvas canvas {
+  display: block;
+  width: 100% !important;
+}
+
+.molecule-kv {
+  display: grid;
+  grid-template-columns: minmax(120px, auto) 1fr;
+  gap: 0.25rem 0.65rem;
+  margin: 0.35rem 0;
+}
+
+.molecule-kv dt {
+  color: var(--retro-muted);
+}
+
+.molecule-kv dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.molecule-skeleton {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.molecule-skeleton-line {
+  height: 0.75rem;
+  background: linear-gradient(90deg, #1a2030 25%, #252d3d 50%, #1a2030 75%);
+  background-size: 200% 100%;
+  animation: desk-shimmer 1.4s ease infinite;
+}
+
+.molecule-skeleton-line--short {
+  width: 55%;
+}
+
+@keyframes desk-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (max-width: 760px) {
+  .molecule-kv {
+    grid-template-columns: 1fr;
+  }
+
+  .molecule-kv dt {
+    margin-top: 0.35rem;
+  }
+
+  .molecule-stat-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

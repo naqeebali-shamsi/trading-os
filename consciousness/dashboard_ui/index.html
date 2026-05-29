@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trading OS | Trader Desk</title>
+  <link rel="stylesheet" href="/static/foundations.css">
+  <link rel="stylesheet" href="/static/atoms.css">
+  <link rel="stylesheet" href="/static/molecules.css">
+  <link rel="stylesheet" href="/static/organisms.css">
+  <link rel="stylesheet" href="/static/events.css">
+  <link rel="stylesheet" href="/static/templates.css">
+</head>
+<body>
+  <main class="page-shell">
+    <header class="page-header">
+      <h1 class="atom-title">Trading OS</h1>
+      <p class="page-tagline">Your live trading desk. Research, positions, readiness, and trade explanations in one place.</p>
+      <div id="dashboard-status" class="atom-status atom-status--loading">Connecting...</div>
+    </header>
+
+    <section class="desk-section">
+      <h2 class="atom-section-title">Overview</h2>
+      <div class="organism-grid organism-grid--trader">
+        <article class="molecule-card molecule-card--wide">
+          <h3 class="atom-subtitle">Portfolio P&amp;L</h3>
+          <p class="atom-card-lead">Equity, invested exposure, floating and realized profit or loss.</p>
+          <div id="portfolio-pnl-panel" class="molecule-panel-body">
+            <div class="molecule-skeleton"><div class="molecule-skeleton-line"></div><div class="molecule-skeleton-line molecule-skeleton-line--short"></div></div>
+          </div>
+        </article>
+
+        <article class="molecule-card molecule-card--wide">
+          <h3 class="atom-subtitle">Research Watchlist</h3>
+          <p class="atom-card-lead">Top stock ideas from the daily fundamental screen.</p>
+          <div id="research-watchlist" class="molecule-panel-body">
+            <div class="molecule-skeleton"><div class="molecule-skeleton-line"></div><div class="molecule-skeleton-line molecule-skeleton-line--short"></div></div>
+          </div>
+        </article>
+
+        <article class="molecule-card">
+          <h3 class="atom-subtitle">Open Positions</h3>
+          <p class="atom-card-lead">Live exposure and floating P&amp;L from the broker.</p>
+          <div id="positions-panel" class="molecule-panel-body">
+            <div class="molecule-skeleton"><div class="molecule-skeleton-line molecule-skeleton-line--short"></div></div>
+          </div>
+        </article>
+
+        <article class="molecule-card">
+          <h3 class="atom-subtitle">News and Macro</h3>
+          <p class="atom-card-lead">Headline risk and whether to size down or pause.</p>
+          <div id="macro-news-panel" class="molecule-panel-body">
+            <div class="molecule-skeleton"><div class="molecule-skeleton-line molecule-skeleton-line--short"></div></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="desk-section">
+      <h2 class="atom-section-title">Live Events</h2>
+      <div class="organism-grid organism-grid--single">
+        <article class="molecule-card">
+          <div class="atom-row atom-row--spread organism-live-events-header">
+            <div>
+              <h3 class="atom-subtitle">Event Stream</h3>
+              <p class="atom-card-lead">Real-time bus feed. Filters apply instantly.</p>
+            </div>
+            <span id="live-events-status" class="atom-pill atom-pill--safe">Connecting</span>
+          </div>
+          <div class="organism-filter-row">
+            <span class="atom-label">Show</span>
+            <label><input type="checkbox" class="feed-topic-filter" value="market.*" checked> Markets</label>
+            <label><input type="checkbox" class="feed-topic-filter" value="muscle.*" checked> Orders</label>
+            <label><input type="checkbox" class="feed-topic-filter" value="portfolio.*" checked> Portfolio</label>
+            <label><input type="checkbox" class="feed-topic-filter" value="memory.*" checked> Learning</label>
+            <label><input type="checkbox" class="feed-topic-filter" value="research.*" checked> Research</label>
+            <label><input type="checkbox" class="feed-topic-filter" value="immune.*" checked> Risk</label>
+            <label><input type="checkbox" class="feed-topic-filter" value="cortex.*" checked> AI</label>
+            <label><input type="checkbox" class="feed-topic-filter" value="rd.*" checked> Dream Lab</label>
+            <label class="atom-label" for="feed-limit">Entries</label>
+            <select id="feed-limit" class="atom-select">
+              <option value="20" selected>20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+          <div id="live-events-feed" class="organism-feed">
+            <div class="organism-empty-state">Waiting for events from the bus…</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="desk-section">
+      <h2 class="atom-section-title">Dream Lab</h2>
+      <div class="organism-grid organism-grid--trader">
+        <article class="molecule-card">
+          <h3 class="atom-subtitle">Pending Improvements</h3>
+          <p class="atom-card-lead">R&amp;D proposals waiting for your approval.</p>
+          <div id="pending-promotions" class="molecule-panel-body">
+            <div class="molecule-skeleton"><div class="molecule-skeleton-line molecule-skeleton-line--short"></div></div>
+          </div>
+        </article>
+
+        <article class="molecule-card">
+          <h3 class="atom-subtitle">Dream Lab Status</h3>
+          <p class="atom-card-lead">Background research cycles and live policy version.</p>
+          <div id="dream-lab-status" class="molecule-panel-body">
+            <div class="molecule-skeleton"><div class="molecule-skeleton-line molecule-skeleton-line--short"></div></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="desk-section">
+      <h2 class="atom-section-title">Trading Activity</h2>
+      <div class="organism-grid organism-grid--trader">
+        <article class="molecule-card molecule-card--wide">
+          <h3 class="atom-subtitle">Signal History</h3>
+          <p class="atom-card-lead">Why each setup passed or was blocked before an order could fire.</p>
+          <div id="signal-drilldown" class="molecule-panel-body">
+            <div class="molecule-skeleton"><div class="molecule-skeleton-line"></div></div>
+          </div>
+        </article>
+
+        <article class="molecule-card molecule-card--wide">
+          <h3 class="atom-subtitle">Symbol Readiness</h3>
+          <p class="atom-card-lead">Which symbols can trade now. Closed sessions are expected off-hours.</p>
+          <div id="readiness-panel" class="molecule-panel-body">
+            <div class="molecule-skeleton"><div class="molecule-skeleton-line"></div></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <details class="organism-ops-console">
+      <summary class="atom-section-title organism-ops-toggle">System Details</summary>
+      <div class="organism-ops-body">
+        <p class="atom-card-lead organism-ops-lead">Connection health, trading mode, AI output, and troubleshooting log.</p>
+
+        <div class="organism-grid organism-grid--trader">
+          <article class="molecule-card">
+            <h3 class="atom-subtitle">Trading Status</h3>
+            <div id="operator-status" class="molecule-panel-body"><div class="molecule-skeleton"><div class="molecule-skeleton-line molecule-skeleton-line--short"></div></div></div>
+          </article>
+
+          <article class="molecule-card">
+            <h3 class="atom-subtitle">Trading Mode</h3>
+            <div id="runtime-controls" class="molecule-panel-body"><div class="molecule-skeleton"><div class="molecule-skeleton-line molecule-skeleton-line--short"></div></div></div>
+          </article>
+
+          <article class="molecule-card">
+            <h3 class="atom-subtitle">Account Safety</h3>
+            <div id="safety-flags" class="molecule-panel-body"><div class="molecule-skeleton"><div class="molecule-skeleton-line molecule-skeleton-line--short"></div></div></div>
+          </article>
+
+          <article class="molecule-card">
+            <h3 class="atom-subtitle">Broker Connection</h3>
+            <div id="bridge-status" class="molecule-panel-body"><div class="molecule-skeleton"><div class="molecule-skeleton-line molecule-skeleton-line--short"></div></div></div>
+          </article>
+
+          <article class="molecule-card">
+            <h3 class="atom-subtitle">Platform Health</h3>
+            <div id="system-health" class="molecule-panel-body"><div class="molecule-skeleton"><div class="molecule-skeleton-line molecule-skeleton-line--short"></div></div></div>
+          </article>
+
+          <article class="molecule-card">
+            <h3 class="atom-subtitle">Metrics</h3>
+            <div id="telemetry-summary" class="molecule-panel-body"><div class="molecule-skeleton"><div class="molecule-skeleton-line molecule-skeleton-line--short"></div></div></div>
+          </article>
+
+          <article class="molecule-card">
+            <h3 class="atom-subtitle">Latest Decision</h3>
+            <div id="why-trade" class="molecule-panel-body"><div class="molecule-skeleton"><div class="molecule-skeleton-line molecule-skeleton-line--short"></div></div></div>
+          </article>
+
+          <article class="molecule-card">
+            <h3 class="atom-subtitle">AI Advisor</h3>
+            <div id="brain-summary" class="molecule-panel-body"><div class="molecule-skeleton"><div class="molecule-skeleton-line molecule-skeleton-line--short"></div></div></div>
+          </article>
+
+          <article class="molecule-card">
+            <h3 class="atom-subtitle">Recent Signals</h3>
+            <div id="signals-summary" class="molecule-panel-body"><div class="molecule-skeleton"><div class="molecule-skeleton-line molecule-skeleton-line--short"></div></div></div>
+          </article>
+
+          <article class="molecule-card">
+            <h3 class="atom-subtitle">Recent Orders</h3>
+            <div id="orders-summary" class="molecule-panel-body"><div class="molecule-skeleton"><div class="molecule-skeleton-line molecule-skeleton-line--short"></div></div></div>
+          </article>
+
+          <article class="molecule-card">
+            <h3 class="atom-subtitle">Order Progress</h3>
+            <div id="trade-lifecycle" class="molecule-panel-body"><div class="molecule-skeleton"><div class="molecule-skeleton-line molecule-skeleton-line--short"></div></div></div>
+          </article>
+        </div>
+
+        <article class="molecule-card molecule-card--wide">
+          <h3 class="atom-subtitle">Event Log (snapshot)</h3>
+          <p class="atom-card-lead">Compact poll snapshot. Live stream is above.</p>
+          <div id="activity-feed" class="organism-feed organism-feed--compact">
+            <div class="organism-empty-state">Snapshot updates on poll.</div>
+          </div>
+        </article>
+      </div>
+    </details>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/mitt@3.0.1/dist/mitt.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+  <script src="/static/event_formatters.js"></script>
+  <script src="/static/event_stream.js"></script>
+  <script src="/static/equity_sparkline.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

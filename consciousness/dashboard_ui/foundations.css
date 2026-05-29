@@ -1,0 +1,28 @@
+:root {
+  --retro-bg: #0d0f12;
+  --retro-panel: #151921;
+  --retro-border: #3d465a;
+  --retro-text: #d6deeb;
+  --retro-muted: #8d99ae;
+  --retro-fg: #d6deeb;
+  --retro-live: #ff6b6b;
+  --retro-safe: #4dd599;
+  --retro-ok: #4dd599;
+  --retro-warn: #ffd166;
+  --retro-font: "Courier New", Courier, monospace;
+  --desk-gap: 0.85rem;
+  --desk-radius: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--retro-bg);
+  color: var(--retro-text);
+  font-family: var(--retro-font);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}

@@ -1,0 +1,107 @@
+{
+  "charts": [
+    {
+      "asset_class": "stock_cfd",
+      "broker_symbol": "AAPL",
+      "chart_label": "chart_AAPL",
+      "enabled": true,
+      "mt5_period": 15,
+      "symbol": "AAPL",
+      "timeframe": "M15"
+    },
+    {
+      "asset_class": "stock_cfd",
+      "broker_symbol": "AMZN",
+      "chart_label": "chart_AMZN",
+      "enabled": true,
+      "mt5_period": 15,
+      "symbol": "AMZN",
+      "timeframe": "M15"
+    },
+    {
+      "asset_class": "forex",
+      "broker_symbol": "EURUSD",
+      "chart_label": "chart_EURUSD",
+      "enabled": true,
+      "mt5_period": 15,
+      "symbol": "EURUSD",
+      "timeframe": "M15"
+    },
+    {
+      "asset_class": "forex",
+      "broker_symbol": "GBPUSD",
+      "chart_label": "chart_GBPUSD",
+      "enabled": true,
+      "mt5_period": 15,
+      "symbol": "GBPUSD",
+      "timeframe": "M15"
+    },
+    {
+      "asset_class": "stock_cfd",
+      "broker_symbol": "GOOGL",
+      "chart_label": "chart_GOOGL",
+      "enabled": true,
+      "mt5_period": 15,
+      "symbol": "GOOGL",
+      "timeframe": "M15"
+    },
+    {
+      "asset_class": "stock_cfd",
+      "broker_symbol": "META",
+      "chart_label": "chart_META",
+      "enabled": true,
+      "mt5_period": 15,
+      "symbol": "META",
+      "timeframe": "M15"
+    },
+    {
+      "asset_class": "stock_cfd",
+      "broker_symbol": "MSFT",
+      "chart_label": "chart_MSFT",
+      "enabled": true,
+      "mt5_period": 15,
+      "symbol": "MSFT",
+      "timeframe": "M15"
+    },
+    {
+      "asset_class": "stock_cfd",
+      "broker_symbol": "NVDA",
+      "chart_label": "chart_NVDA",
+      "enabled": true,
+      "mt5_period": 15,
+      "symbol": "NVDA",
+      "timeframe": "M15"
+    },
+    {
+      "asset_class": "stock_cfd",
+      "broker_symbol": "TSLA",
+      "chart_label": "chart_TSLA",
+      "enabled": true,
+      "mt5_period": 15,
+      "symbol": "TSLA",
+      "timeframe": "M15"
+    },
+    {
+      "asset_class": "forex",
+      "broker_symbol": "USDJPY",
+      "chart_label": "chart_USDJPY",
+      "enabled": true,
+      "mt5_period": 15,
+      "symbol": "USDJPY",
+      "timeframe": "M15"
+    },
+    {
+      "asset_class": "metal",
+      "broker_symbol": "XAUUSD",
+      "chart_label": "chart_XAUUSD",
+      "enabled": true,
+      "mt5_period": 15,
+      "symbol": "XAUUSD",
+      "timeframe": "M15"
+    }
+  ],
+  "ea_name": "FileBridgeEA_MultiSymbol",
+  "template_name": "trading_os_bridge",
+  "updated_ts": 1779286980.1213698,
+  "version": 1
+}

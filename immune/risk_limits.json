@@ -1,0 +1,70 @@
+{
+  "mode": "LIVE",
+  "circuit_breaker": {
+    "max_daily_loss_usd": -1000,
+    "max_trades_per_hour": 20,
+    "max_daily_trades": 50,
+    "emergency_stop_file": "STOP_TRADING"
+  },
+  "max_daily_loss_pct": 3.0,
+  "max_drawdown_pct": 10.0,
+  "max_positions": 5,
+  "max_position_size_lots": 0.01,
+  "max_correlated_positions": 2,
+  "trade_window_start_utc": 0,
+  "trade_window_end_utc": 23,
+  "min_atr_multiplier_for_sl": 1.5,
+  "allowed_symbols": [
+    "EURUSD",
+    "XAUUSD",
+    "NVDA",
+    "MSFT",
+    "AAPL",
+    "TSLA",
+    "AMZN",
+    "GOOGL",
+    "META",
+    "GBPUSD",
+    "USDJPY"
+  ],
+  "blocked_reasons": [],
+  "loss_streak_cooldown": {
+    "enabled": true,
+    "max_consecutive_losses": 3,
+    "cooldown_minutes": 60,
+    "scope": "global"
+  },
+  "min_spread_pips": 0.5,
+  "max_sl_distance_pips": 500,
+  "min_sl_distance_pips": 5,
+  "symbol_max_position_size_lots": {
+    "NVDA": 1.0,
+    "MSFT": 1.0,
+    "AAPL": 1.0,
+    "TSLA": 1.0,
+    "AMZN": 1.0,
+    "GOOGL": 1.0,
+    "META": 1.0,
+    "USDJPY": 0.01
+  },
+  "stock_cfd_unattended_approval": {
+    "approved": true,
+    "demo_only": true,
+    "max_stock_qty_per_trade": 1.0,
+    "allowed_symbols": [
+      "NVDA",
+      "MSFT",
+      "AAPL",
+      "TSLA",
+      "AMZN",
+      "GOOGL",
+      "META"
+    ],
+    "keep_forex_metals_max_lot": 0.01,
+    "max_total_loss_usd": 100,
+    "require_sl_tp": true,
+    "no_averaging_down": true,
+    "no_martingale": true,
+    "stop_after_consecutive_losses": 2
+  }
+}

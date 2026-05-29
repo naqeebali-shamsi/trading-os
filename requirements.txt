@@ -1,0 +1,9 @@
+# Core runtime — required for supervisor boot and bus locking
+portalocker>=2.8.2,<4
+PyYAML>=6.0.1,<7
+
+# Stock research arm (supervisor layer — degrades gracefully if missing)
+yfinance>=0.2.40,<1
+
+# News orchestrator RSS parsing (stdlib XML fallback exists if missing)
+feedparser>=6.0.11,<7

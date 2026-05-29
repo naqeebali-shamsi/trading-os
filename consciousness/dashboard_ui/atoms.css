@@ -1,0 +1,131 @@
+.atom-title {
+  margin: 0;
+  font-size: 1.4rem;
+  letter-spacing: 0.04em;
+}
+
+.atom-subtitle {
+  margin: 0 0 0.45rem 0;
+  font-size: 0.92rem;
+  color: var(--retro-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.atom-label {
+  color: var(--retro-muted);
+  font-size: 0.85rem;
+}
+
+.atom-code {
+  padding: 0.1rem 0.4rem;
+  border: 1px solid var(--retro-border);
+  background: #0b0e13;
+}
+
+.atom-pill {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--retro-border);
+  margin-right: 0.35rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.atom-pill--safe {
+  color: var(--retro-safe);
+  border-color: var(--retro-safe);
+}
+
+.atom-pill--warn {
+  color: var(--retro-warn);
+  border-color: var(--retro-warn);
+}
+
+.atom-pill--live {
+  color: var(--retro-live);
+  border-color: var(--retro-live);
+}
+
+.atom-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.atom-row--spread {
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.atom-muted {
+  color: var(--retro-muted);
+}
+
+.atom-select {
+  border: 1px solid var(--retro-border);
+  background: #0b0e13;
+  color: var(--retro-fg);
+  font-family: inherit;
+  padding: 0.25rem 0.45rem;
+  font-size: inherit;
+}
+
+.atom-button {
+  border: 1px solid var(--retro-border);
+  background: #0b0e13;
+  color: var(--retro-text);
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.65rem;
+  cursor: pointer;
+}
+
+.atom-button:hover {
+  border-color: var(--retro-muted);
+}
+
+.atom-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.atom-button--primary {
+  border-color: var(--retro-safe);
+  color: var(--retro-safe);
+}
+
+.atom-button--primary:hover {
+  background: rgba(77, 213, 153, 0.08);
+}
+
+.atom-status {
+  margin-top: 0.55rem;
+  border: 1px solid var(--retro-border);
+  padding: 0.35rem 0.5rem;
+  font-size: 0.88rem;
+}
+
+.atom-status--loading {
+  color: var(--retro-muted);
+}
+
+.atom-status--ok {
+  color: var(--retro-safe);
+  border-color: var(--retro-safe);
+}
+
+.atom-status--error {
+  color: var(--retro-live);
+  border-color: var(--retro-live);
+}
+
+.positive {
+  color: var(--retro-ok);
+}
+
+.negative {
+  color: var(--retro-warn);
+}

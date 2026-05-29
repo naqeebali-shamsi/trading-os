@@ -1,0 +1,26 @@
+# Strategy Parameters
+# Updated by learner-improver. Base version.
+# Overridden values should be written to config/strategy_params_override.yaml
+---
+
+MA_CROSS_SMA9_21:
+  sma_fast_period: 9
+  sma_slow_period: 21
+  rsi_filter_low: 40
+  rsi_filter_high: 60
+  default_volume_lots: 0.01
+  atr_multiplier_sl: 1.5
+  atr_multiplier_tp: 3.0
+
+RSI_MEAN_REVERSION:
+  rsi_period: 14
+  oversold_threshold: 30
+  overbought_threshold: 70
+  confirmation_bars: 2
+  default_volume_lots: 0.01
+  atr_multiplier_sl: 1.5
+  atr_multiplier_tp: 2.5
+
+global:
+  max_open_positions: 3
+  min_bars_for_signal: 50
