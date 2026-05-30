@@ -10,6 +10,8 @@ sys.path.insert(0, str(ROOT))
 
 from cortex.instrument_registry import InstrumentRegistry, ValidationResult  # noqa: E402
 
+MARKET_OPEN_UTC = datetime(2026, 5, 4, 13, 0)  # Monday — deterministic session for CI
+
 
 def registry():
     return InstrumentRegistry(ROOT / "config" / "instruments.yaml")
@@ -173,7 +175,7 @@ def test_strategy_allowlist_and_order_validation():
         "qty": 0.01,
         "strategy_id": "MA_CROSS_SMA9_21",
     }
-    result = r.validate_order(order, {"bid": 1.1000, "ask": 1.1001})
+    result = r.validate_order(order, {"bid": 1.1000, "ask": 1.1001}, now=MARKET_OPEN_UTC)
     assert result.ok
     assert result.symbol == "EURUSD"
     assert result.details["rounded_qty"] == 0.01
@@ -205,6 +207,7 @@ def test_tick_quote_freshness_stock_vs_forex():
     blocked = r.validate_order(
         {"symbol": "EURUSD", "side": "BUY", "qty": 0.01, "strategy_id": "MA_CROSS_SMA9_21"},
         {"bid": 1.1, "ask": 1.1002, "quote_age_sec": 200.0},
+        now=MARKET_OPEN_UTC,
     )
     assert not blocked.ok and blocked.reason == "quote_stale"
     print("[test] PASS: tick quote freshness stock vs forex")

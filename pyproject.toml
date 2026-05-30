@@ -1,0 +1,60 @@
+[project]
+name = "trading-os"
+version = "0.1.0"
+requires-python = ">=3.12"
+description = "NomadCrew trading operating system"
+dependencies = [
+    "portalocker>=2.8.2,<4",
+    "PyYAML>=6.0.1,<7",
+    "yfinance>=0.2.40,<1",
+    "feedparser>=6.0.11,<7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8,<9",
+    "ruff>=0.8,<1",
+    "mypy>=1.13,<2",
+    "types-PyYAML",
+]
+
+# Dev dependency source of truth: requirements-dev.txt (install via pip -r requirements-dev.txt)
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "unix_only: test relies on POSIX-only APIs (e.g. process groups) and is skipped elsewhere",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+exclude = [
+    ".venv",
+    "venv",
+    "runtime",
+    "installer/runtime",
+    "__pycache__",
+    "legacy",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = [
+    "E501",  # line length — tighten incrementally on legacy codebase
+    "E402",  # imports after sys.path bootstrap (intentional pattern)
+    "E401",  # multiple imports on one line (legacy style)
+    "E701",  # multiple statements on one line
+    "E731",  # lambda assignment
+    "E741",  # ambiguous variable name
+    "F401",  # unused imports — fix incrementally
+    "F841",  # unused variables — often intentional in tests/scripts
+    "I001",  # import sorting — fix incrementally
+    "W291",  # trailing whitespace
+    "W293",  # blank line contains whitespace
+]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+check_untyped_defs = false

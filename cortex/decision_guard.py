@@ -70,7 +70,7 @@ def normalize_decision(raw: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def guard_decision(raw: Dict[str, Any], mode: Optional[str] = None, market_snapshot: Optional[Dict[str, Any]] = None) -> GuardResult:
+def guard_decision(raw: Dict[str, Any], mode: Optional[str] = None, market_snapshot: Optional[Dict[str, Any]] = None, now=None) -> GuardResult:
     mode = (mode or DEFAULT_MODE).upper()
     if mode not in EXECUTION_MODES:
         mode = "ADVISORY"
@@ -108,7 +108,7 @@ def guard_decision(raw: Dict[str, Any], mode: Optional[str] = None, market_snaps
             "side": decision["side"],
             "qty": decision["qty"],
             "strategy_id": decision.get("strategy_id"),
-        }, market_snapshot=market_snapshot, require_enabled=True)
+        }, market_snapshot=market_snapshot, require_enabled=True, now=now)
         if not inst.ok:
             return GuardResult(False, mode, decision, f"instrument_{inst.reason}", inst.as_dict())
         decision["symbol"] = inst.symbol

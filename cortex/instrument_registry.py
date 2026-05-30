@@ -429,7 +429,13 @@ class InstrumentRegistry:
             return ValidationResult(False, "tp_above_entry_for_sell", canonical)
         return ValidationResult(True, symbol=canonical)
 
-    def validate_order(self, intent: Dict[str, Any], market_snapshot: Optional[Dict[str, Any]] = None, require_enabled: bool = True) -> ValidationResult:
+    def validate_order(
+        self,
+        intent: Dict[str, Any],
+        market_snapshot: Optional[Dict[str, Any]] = None,
+        require_enabled: bool = True,
+        now: Optional[datetime] = None,
+    ) -> ValidationResult:
         symbol = intent.get("symbol", "")
         symbol_result = self.validate_symbol(symbol, require_enabled=require_enabled)
         if not symbol_result.ok:
@@ -441,7 +447,7 @@ class InstrumentRegistry:
         strategy_result = self.strategy_allowed(canonical, intent.get("strategy_id"))
         if not strategy_result.ok:
             return strategy_result
-        session_result = self.session_ok(canonical)
+        session_result = self.session_ok(canonical, now=now)
         if not session_result.ok:
             return session_result
         side = str(intent.get("side", "")).upper()
@@ -609,8 +615,13 @@ def enabled_symbols() -> List[str]:
     return load_registry().enabled_symbols()
 
 
-def validate_order(intent: Dict[str, Any], market_snapshot: Optional[Dict[str, Any]] = None, require_enabled: bool = True) -> ValidationResult:
-    return load_registry().validate_order(intent, market_snapshot=market_snapshot, require_enabled=require_enabled)
+def validate_order(
+    intent: Dict[str, Any],
+    market_snapshot: Optional[Dict[str, Any]] = None,
+    require_enabled: bool = True,
+    now: Optional[datetime] = None,
+) -> ValidationResult:
+    return load_registry().validate_order(intent, market_snapshot=market_snapshot, require_enabled=require_enabled, now=now)
 
 
 if __name__ == "__main__":

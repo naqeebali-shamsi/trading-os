@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """QA for cortex runtime integration with the guarded AgentBrain."""
 import sys
+from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -9,6 +10,8 @@ sys.path.insert(0, str(ROOT))
 import cortex.main as main  # noqa: E402
 from cortex.agent import BrainRunResult, fallback_hold  # noqa: E402
 from cortex.decision_guard import guard_decision  # noqa: E402
+
+MARKET_OPEN_UTC = datetime(2026, 5, 4, 13, 0)
 
 
 PUBLISHED = []
@@ -74,7 +77,7 @@ def test_publish_guarded_order_emits_intent_once():
     decision.proposal.tp = 1.09
     decision.proposal.confidence = 0.95
     decision.proposal.strategy_id = "MA_CROSS_SMA9_21"
-    guard = guard_decision(decision.proposal.to_guard_decision(), mode="PAPER")
+    guard = guard_decision(decision.proposal.to_guard_decision(), mode="PAPER", now=MARKET_OPEN_UTC)
     assert guard.ok, guard.as_dict()
     result = BrainRunResult(True, decision=decision, guard=guard, correlation_id="qa")
     intent = main.publish_brain_result(result, trigger="qa_order")

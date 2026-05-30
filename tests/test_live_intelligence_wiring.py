@@ -2,6 +2,7 @@
 """No-trade live intelligence wiring tests."""
 import time
 import sys
+from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -110,6 +111,13 @@ def test_signal_generator_history_and_cooldown_gates(monkeypatch):
     monkeypatch.setattr(gen, "latest_tick", lambda symbol: {"bid": 1.1013, "ask": 1.10135, "symbol": symbol})
     monkeypatch.setattr(gen, "latest_market_regime", lambda: "trending")
     monkeypatch.setattr(gen, "macro_gate", lambda symbol, controls=None: (True, "ok", {}))
+    market_open = datetime(2026, 5, 4, 13, 0)
+    original_session_ok = gen.REGISTRY.session_ok
+    monkeypatch.setattr(
+        gen.REGISTRY,
+        "session_ok",
+        lambda symbol, now=None: original_session_ok(symbol, now=now or market_open),
+    )
 
     seed_history(8)
     try:

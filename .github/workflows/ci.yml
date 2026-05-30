@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  secrets-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fail if secrets or .env files are tracked
+        shell: bash
+        run: |
+          tracked="$(git ls-files)"
+          if echo "$tracked" | grep -qx 'config/secrets.yaml'; then
+            echo "ERROR: config/secrets.yaml is tracked in git"
+            exit 1
+          fi
+          if echo "$tracked" | grep -qE '(^|/)\.env(\..+)?$'; then
+            echo "ERROR: .env file is tracked in git"
+            echo "$tracked" | grep -E '(^|/)\.env(\..+)?$'
+            exit 1
+          fi
+          if echo "$tracked" | grep -qE '\.(pem|key)$'; then
+            echo "ERROR: private key material is tracked in git"
+            echo "$tracked" | grep -E '\.(pem|key)$'
+            exit 1
+          fi
+          echo "No tracked secrets or .env files found."
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Install dev dependencies
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Ruff check
+        run: python -m ruff check .
+
+  compile:
+    needs: [lint, secrets-scan]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Compile Python sources
+        run: python -m compileall kernel cortex nervous muscle consciousness ops research telemetry scripts tests
+
+  test:
+    needs: [lint, secrets-scan]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -r requirements.txt
+          python -m pip install -r requirements-dev.txt
+
+      - name: Run tests
+        run: pytest tests/ -q
