@@ -403,7 +403,7 @@ $btnLaunch.Location = New-Object System.Drawing.Point(24, 250)
 $btnLaunch.Size = New-Object System.Drawing.Size(160, 32)
 $btnLaunch.Add_Click({
     $launcher = Join-Path $resolvedRoot "TradingOS.exe"
-    if (Test-Path -LiteralPath $launcher) { Start-Process -LiteralPath $launcher }
+    if (Test-Path -LiteralPath $launcher) { Start-Process -FilePath $launcher }
 })
 $panelDone.Controls.Add($btnLaunch)
 $form.Controls.Add($panelDone)

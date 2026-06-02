@@ -265,6 +265,29 @@
   white-space: nowrap;
 }
 
+.molecule-controls-form {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.65rem;
+  padding-top: 0.55rem;
+  border-top: 1px dashed var(--retro-border);
+}
+
+.molecule-controls-check,
+.molecule-controls-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.86rem;
+}
+
+.molecule-controls-field .atom-input,
+.molecule-controls-field .atom-select {
+  flex: 1 1 6rem;
+  min-width: 6rem;
+}
+
 @media (max-width: 900px) {
   .organism-grid,
   .organism-grid--trader {

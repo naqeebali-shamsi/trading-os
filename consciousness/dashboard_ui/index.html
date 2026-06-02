@@ -16,10 +16,19 @@
     <header class="page-header">
       <h1 class="atom-title">Trading OS</h1>
       <p class="page-tagline">Your live trading desk. Research, positions, readiness, and trade explanations in one place.</p>
-      <div id="dashboard-status" class="atom-status atom-status--loading">Connecting...</div>
+      <div id="dashboard-status" class="atom-status atom-status--loading" role="status" aria-live="polite">Connecting...</div>
+      <div id="dashboard-stale-banner" class="atom-banner atom-banner--warn" hidden role="alert"></div>
     </header>
 
-    <section class="desk-section">
+    <nav class="desk-nav" aria-label="Desk sections">
+      <a class="desk-nav__link" href="#desk-overview">Overview</a>
+      <a class="desk-nav__link" href="#desk-events">Events</a>
+      <a class="desk-nav__link" href="#desk-dream-lab">Dream Lab</a>
+      <a class="desk-nav__link" href="#desk-activity">Activity</a>
+      <a class="desk-nav__link" href="#desk-system">System</a>
+    </nav>
+
+    <section class="desk-section" id="desk-overview">
       <h2 class="atom-section-title">Overview</h2>
       <div class="organism-grid organism-grid--trader">
         <article class="molecule-card molecule-card--wide">
@@ -72,7 +81,7 @@
       </div>
     </section>
 
-    <section class="desk-section">
+    <section class="desk-section" id="desk-events">
       <h2 class="atom-section-title">Live Events</h2>
       <div class="organism-grid organism-grid--single">
         <article class="molecule-card">
@@ -107,13 +116,21 @@
       </div>
     </section>
 
-    <section class="desk-section">
+    <section class="desk-section" id="desk-dream-lab">
       <h2 class="atom-section-title">Dream Lab</h2>
       <div class="organism-grid organism-grid--trader">
         <article class="molecule-card">
           <h3 class="atom-subtitle">Pending Improvements</h3>
           <p class="atom-card-lead">R&amp;D proposals waiting for your approval.</p>
           <div id="pending-promotions" class="molecule-panel-body">
+            <div class="molecule-skeleton"><div class="molecule-skeleton-line molecule-skeleton-line--short"></div></div>
+          </div>
+        </article>
+
+        <article class="molecule-card molecule-card--wide">
+          <h3 class="atom-subtitle">Frontier Strategy Search</h3>
+          <p class="atom-card-lead">Guarded automated search: validation-ranked, test-confirmed survivors only.</p>
+          <div id="frontier-search-panel" class="molecule-panel-body">
             <div class="molecule-skeleton"><div class="molecule-skeleton-line molecule-skeleton-line--short"></div></div>
           </div>
         </article>
@@ -128,7 +145,7 @@
       </div>
     </section>
 
-    <section class="desk-section">
+    <section class="desk-section" id="desk-activity">
       <h2 class="atom-section-title">Trading Activity</h2>
       <div class="organism-grid organism-grid--trader">
         <article class="molecule-card molecule-card--wide">
@@ -149,7 +166,7 @@
       </div>
     </section>
 
-    <details class="organism-ops-console">
+    <details class="organism-ops-console" id="desk-system">
       <summary class="atom-section-title organism-ops-toggle">System Details</summary>
       <div class="organism-ops-body">
         <p class="atom-card-lead organism-ops-lead">Connection health, trading mode, AI output, and troubleshooting log.</p>
@@ -173,6 +190,14 @@
           <article class="molecule-card">
             <h3 class="atom-subtitle">Broker Connection</h3>
             <div id="bridge-status" class="molecule-panel-body"><div class="molecule-skeleton"><div class="molecule-skeleton-line molecule-skeleton-line--short"></div></div></div>
+          </article>
+
+          <article class="molecule-card molecule-card--wide">
+            <h3 class="atom-subtitle">Supervisor Layers</h3>
+            <p class="atom-card-lead">Which biological layers are alive, and recent auto-restarts.</p>
+            <div id="supervisor-layers-panel" class="molecule-panel-body">
+              <div class="molecule-skeleton"><div class="molecule-skeleton-line"></div><div class="molecule-skeleton-line molecule-skeleton-line--short"></div></div>
+            </div>
           </article>
 
           <article class="molecule-card">
@@ -222,8 +247,8 @@
     </details>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/mitt@3.0.1/dist/mitt.umd.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+  <script src="/static/mitt.umd.js"></script>
+  <script src="/static/chart.umd.min.js"></script>
   <script src="/static/event_formatters.js"></script>
   <script src="/static/event_stream.js"></script>
   <script src="/static/equity_sparkline.js"></script>

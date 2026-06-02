@@ -14,6 +14,41 @@
   gap: 0.45rem;
 }
 
+.desk-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.45rem 0;
+  margin: -0.25rem 0 0.35rem 0;
+  background: linear-gradient(180deg, rgba(13, 15, 18, 0.98) 70%, rgba(13, 15, 18, 0));
+  border-bottom: 1px solid var(--retro-border);
+}
+
+.desk-nav__link {
+  display: inline-block;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid var(--retro-border);
+  color: var(--retro-muted);
+  text-decoration: none;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.desk-nav__link:hover,
+.desk-nav__link:focus-visible {
+  color: var(--retro-safe);
+  border-color: var(--retro-safe);
+  outline: none;
+}
+
+.desk-section {
+  scroll-margin-top: 3.5rem;
+}
+
 .page-tagline {
   margin: 0;
   font-size: 0.92rem;

@@ -31,6 +31,65 @@ def _latest_log_mtime(term_dir: str) -> float:
     return max(os.path.getmtime(f) for f in logs)
 
 
+def _junction_target(junction: str) -> str | None:
+    """Return normalized junction target path, or None if not a mount point."""
+    proc = subprocess.run(
+        ["fsutil", "reparsepoint", "query", junction],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if proc.returncode != 0 or "Mount Point" not in (proc.stdout or ""):
+        return None
+    for line in (proc.stdout or "").splitlines():
+        if line.strip().startswith("Print Name:"):
+            return os.path.normcase(os.path.normpath(line.split(":", 1)[1].strip()))
+    return None
+
+
+def _junction_points_to(junction: str, target: str) -> bool:
+    current = _junction_target(junction)
+    if current is None:
+        return False
+    return current == os.path.normcase(os.path.normpath(target))
+
+
+def _clear_bridge_link(path: str) -> None:
+    """Remove an existing junction or replace a stale real directory."""
+    if not os.path.lexists(path):
+        return
+    try:
+        os.rmdir(path)
+        return
+    except OSError:
+        shutil.rmtree(path, ignore_errors=True)
+
+
+def _create_junction(junction: str, target: str) -> None:
+    """Create a directory junction; argv form avoids cmd quoting bugs with spaces."""
+    ipc_target = os.path.normpath(target)
+    if not os.path.isdir(ipc_target):
+        raise FileNotFoundError(f"IPC target directory missing: {ipc_target}")
+
+    if _junction_points_to(junction, ipc_target):
+        return
+
+    _clear_bridge_link(junction)
+
+    result = subprocess.run(
+        ["cmd", "/c", "mklink", "/J", junction, ipc_target],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout or "").strip()
+        raise PermissionError(
+            f"IPC junction failed ({junction} -> {ipc_target}). "
+            f"Run as Administrator. {detail}"
+        )
+
+
 def setup_bridge(*, root: Path | None = None, require_ex5: bool = True) -> dict:
     """Configure MT5 bridge junction and copy EA. Returns status dict."""
     root = Path(root or repo_root()).resolve()
@@ -66,22 +125,7 @@ def setup_bridge(*, root: Path | None = None, require_ex5: bool = True) -> dict:
         copied_ex5 = True
 
     os.makedirs(GLOBAL_COMMON, exist_ok=True)
-    if os.path.exists(junction):
-        # Junctions report as directories; rmdir removes junction only.
-        os.rmdir(junction)
-
-    result = subprocess.run(
-        ["cmd", "/c", f'mklink /J "{junction}" "{ipc_win}"'],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    if result.returncode != 0:
-        detail = (result.stderr or result.stdout or "").strip()
-        raise PermissionError(
-            f"IPC junction failed ({junction} -> {ipc_win}). "
-            f"Run as Administrator. {detail}"
-        )
+    _create_junction(junction, str(ipc_win))
 
     heartbeat_visible = os.path.exists(os.path.join(junction, "heartbeat.txt"))
     return {
@@ -89,7 +133,7 @@ def setup_bridge(*, root: Path | None = None, require_ex5: bool = True) -> dict:
         "terminal": active,
         "experts_dir": experts,
         "junction": junction,
-        "ipc_dir": str(ipc_win),
+        "ipc_dir": os.path.normpath(str(ipc_win)),
         "copied_ex5": copied_ex5,
         "heartbeat_visible": heartbeat_visible,
         "terminal_last_log": datetime.fromtimestamp(_latest_log_mtime(active)).isoformat(),

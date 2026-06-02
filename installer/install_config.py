@@ -259,6 +259,7 @@ def run_install(
         openrouter_key=openrouter_key,
         observe_only=observe_only,
     )
+    os.environ["TRADING_OS_IPC"] = str(install_root / "ipc")
     secret_store_path = None
     yaml_key = ""
     if openrouter_key.strip() and not observe_only:

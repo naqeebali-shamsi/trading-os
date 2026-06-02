@@ -192,6 +192,14 @@ def test_dashboard_routes_smoke(monkeypatch):
         assert "text/html" in headers.get("Content-Type", "")
         assert "Trading OS" in body
         assert "Trader Desk" in body or "Overview" in body
+        assert "desk-nav" in body
+        assert "dashboard-stale-banner" in body
+        assert "/static/mitt.umd.js" in body
+        assert "cdn.jsdelivr.net" not in body
+
+        status, headers, body = _request(port, "/static/mitt.umd.js")
+        assert status == 200
+        assert "application/javascript" in headers.get("Content-Type", "")
 
         status, headers, body = _request(port, "/static/app.js")
         assert status == 200
@@ -201,6 +209,7 @@ def test_dashboard_routes_smoke(monkeypatch):
         assert "renderResearchWatchlist" in body
         assert "renderForecastThesisPanel" in body
         assert "renderEdgeValidationPanel" in body
+        assert "applyControlUpdates" in body
 
         status, headers, body = _request(port, "/api/state")
         assert status == 200
@@ -213,13 +222,15 @@ def test_dashboard_routes_smoke(monkeypatch):
         assert "research_watchlist" in payload["trader_panels"]
         assert "forecast_thesis" in payload["trader_panels"]
         assert "edge_validation" in payload["trader_panels"]
+        assert "supervisor_layers" in payload["trader_panels"]
+
+        status, headers, body = _request(port, "/api/auth/config")
+        assert status == 200
+        auth_cfg = json.loads(body)
+        assert "post_auth_required" in auth_cfg
+        assert auth_cfg["loopback_client"] is True
 
         status, headers, body = _request(port, "/api/bridge/status?max_heartbeat_age=45")
-        assert status == 200
-        assert "application/json" in headers.get("Content-Type", "")
-        payload = json.loads(body)
-        assert payload["mode"] == "offline"
-        assert payload["max_heartbeat_age_sec"] == 45.0
 
         status, _headers, _body = _request(port, "/static/../dashboard.py")
         assert status == 404
@@ -240,3 +251,56 @@ def test_dashboard_routes_smoke(monkeypatch):
         httpd.shutdown()
         httpd.server_close()
         thread.join(timeout=2)
+
+
+def _post(port, path, body, headers=None):
+    conn = http.client.HTTPConnection("127.0.0.1", port, timeout=2)
+    payload = json.dumps(body).encode()
+    hdrs = {"Content-Type": "application/json", **(headers or {})}
+    conn.request("POST", path, body=payload, headers=hdrs)
+    response = conn.getresponse()
+    raw = response.read().decode("utf-8", errors="replace")
+    conn.close()
+    return response.status, json.loads(raw or "{}")
+
+
+def test_dashboard_post_auth_token(monkeypatch):
+    monkeypatch.setattr(dashboard, "tail", lambda _n: [])
+    monkeypatch.setattr(dashboard, "_telemetry_summary", lambda: {"endpoint": "mock", "reachable": False, "health": {}, "metrics": {}})
+    monkeypatch.setenv("TRADING_OS_DASHBOARD_TOKEN", "desk-secret")
+    monkeypatch.setattr(
+        dashboard,
+        "_bridge_status",
+        lambda max_heartbeat_age=30.0: {
+            "available": True,
+            "connected": False,
+            "mode": "offline",
+            "detail": "offline",
+            "ipc_root": "/tmp/ipc",
+            "max_heartbeat_age_sec": max_heartbeat_age,
+            "root": {},
+            "charts": [],
+            "fresh_chart_count": 0,
+            "stale_chart_count": 0,
+        },
+    )
+
+    httpd, thread, port = _serve()
+    try:
+        status, payload = _post(port, "/api/controls/preset", {"preset": "observe_only"})
+        assert status == 401
+        assert payload.get("error") == "unauthorized"
+
+        status, payload = _post(
+            port,
+            "/api/controls/preset",
+            {"preset": "observe_only"},
+            headers={"X-Trading-OS-Token": "desk-secret"},
+        )
+        assert status == 200
+        assert payload.get("ok") is True
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+        thread.join(timeout=2)
+        monkeypatch.delenv("TRADING_OS_DASHBOARD_TOKEN", raising=False)

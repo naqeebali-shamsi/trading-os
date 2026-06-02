@@ -1,0 +1,61 @@
+# Automated strategy search — anti-overfit defaults.
+# Search ranks on VALIDATION only; TEST is touched once for survivors.
+
+enabled: true
+
+cost_per_trade_bps: 1.0
+
+splits:
+  train_pct: 0.70
+  validation_pct: 0.15
+  embargo_steps: 1
+
+min_bars:
+  train: 80
+  validation: 40
+  test: 40
+
+min_trades:
+  train: 12
+  validation: 8
+  test: 6
+
+# Reject when train Sharpe exceeds validation Sharpe by this much (curve-fit signal).
+max_train_val_sharpe_gap: 1.25
+
+# Validation Sharpe must exceed deflated threshold: base + sqrt(2 ln trials / n_trades).
+min_validation_sharpe_deflated_base: 0.25
+
+# Both halves of the validation window must show non-negative mean return.
+recency:
+  enabled: true
+  min_trades_per_half: 4
+  max_half_sharpe_gap: 2.0
+
+# Cap how many validation survivors get a one-shot test evaluation.
+top_k_validation: 3
+
+# Minimum profit factor on validation (after costs).
+min_validation_profit_factor: 1.05
+
+# Test Sharpe may decay vs validation but not catastrophically.
+max_val_test_sharpe_decay: 2.5
+
+defaults:
+  symbol: EURUSD
+  timeframe: M15
+  min_split_rows: 30
+
+report_path: intel/strategy_search_report.json
+
+patterns:
+  enabled: true
+  hold_bars: [6, 12]
+  families:
+    - engulfing
+    - hammer
+    - shooting_star
+    - harami
+    - three_soldiers_crows
+    - pinbar
+    - marubozu

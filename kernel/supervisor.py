@@ -20,6 +20,7 @@ if sys.path[:1] == [_KERNEL_DIR]:
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "nervous"))
 from bus import publish  # noqa: E402
+from kernel.supervisor_health import build_supervisor_block, merge_supervisor_health  # noqa: E402
 
 LOG_DIR = ROOT / "logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -164,6 +165,11 @@ def shutdown(sig, frame):
     sys.exit(0)
 
 
+def _persist_layer_health():
+    block = build_supervisor_block(_children, supervisor_pid=os.getpid())
+    merge_supervisor_health(HEALTH_FILE, block)
+
+
 def restart_dead():
     for i, (name, proc, script, purpose, log) in enumerate(_children):
         if proc is None:
@@ -227,6 +233,7 @@ def boot():
     print(f"  Bus       : tail -f {nervous_dir() / 'bus.jsonl'}")
     print("  Stop      : Ctrl+C")
     print("=" * 62)
+    _persist_layer_health()
 
 
 def run():
@@ -234,6 +241,7 @@ def run():
     while True:
         time.sleep(5)
         restart_dead()
+        _persist_layer_health()
 
 
 if __name__ == "__main__":

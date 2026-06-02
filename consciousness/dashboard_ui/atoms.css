@@ -122,6 +122,29 @@
   border-color: var(--retro-live);
 }
 
+.atom-banner {
+  padding: 0.45rem 0.55rem;
+  border: 1px dashed var(--retro-border);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.atom-banner--warn {
+  color: var(--retro-warn);
+  border-color: var(--retro-warn);
+  background: rgba(255, 209, 102, 0.08);
+}
+
+.atom-input {
+  border: 1px solid var(--retro-border);
+  background: #0b0e13;
+  color: var(--retro-fg);
+  font-family: inherit;
+  padding: 0.25rem 0.45rem;
+  font-size: inherit;
+  min-width: 5rem;
+}
+
 .positive {
   color: var(--retro-ok);
 }

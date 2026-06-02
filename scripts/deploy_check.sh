@@ -36,7 +36,7 @@ done
 # 2. Python syntax check
 echo ""
 echo "[2/8] Syntax check..."
-if "$PYTHON" -m py_compile kernel/supervisor.py kernel/hooks.py muscle/multisymbol_router.py muscle/muscle_main.py muscle/pnl_sync.py sensory/combined_feed.py sensory/timesfm_forecaster.py cortex/news_orchestrator.py cortex/event_radar.py cortex/instrument_registry.py cortex/decision_guard.py cortex/llm_client.py cortex/agent_schemas.py cortex/agent.py cortex/main.py introspect/score_strategies.py introspect/decision_evaluator.py introspect/ensemble_reviewer.py telemetry/metrics.py scripts/readiness_gate.py scripts/brain_smoke.py scripts/real_mode_audit.py scripts/opportunity_scanner.py scripts/verify_instruments.py; then
+if "$PYTHON" -m py_compile kernel/supervisor.py kernel/hooks.py muscle/multisymbol_router.py muscle/muscle_main.py muscle/pnl_sync.py sensory/combined_feed.py sensory/timesfm_forecaster.py sensory/candle_patterns.py cortex/news_orchestrator.py cortex/event_radar.py cortex/instrument_registry.py cortex/decision_guard.py cortex/llm_client.py cortex/agent_schemas.py cortex/agent.py cortex/main.py rd/dream_scheduler.py rd/agents/explorer.py research/strategy_search/engine.py introspect/score_strategies.py introspect/decision_evaluator.py introspect/ensemble_reviewer.py telemetry/metrics.py scripts/readiness_gate.py scripts/run_strategy_search.py scripts/brain_smoke.py scripts/real_mode_audit.py scripts/opportunity_scanner.py scripts/verify_instruments.py; then
   echo "  OK: all files compile"
 else
   echo "  FAIL: syntax error"

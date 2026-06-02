@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parent.parent
 # background and warms the cache for the next poll.
 PORTFOLIO_PANEL_TIMEOUT_SEC = 1.2
 GATE_REPORT_PATH = ROOT / "intel" / "edge_gate_report.json"
+STRATEGY_SEARCH_REPORT_PATH = ROOT / "intel" / "strategy_search_report.json"
 
 STAGE_LABELS = {
     "pattern_scan": "Pattern scan",
@@ -151,9 +152,29 @@ def research_watchlist(limit: int = 10) -> Dict[str, Any]:
                 "thesis_tags": tags,
             }
         )
+    updated_ts = snapshot.get("ts") or snapshot.get("generated_ts")
+    stale_after_sec = 86400 * 1.25
+    try:
+        from research.config import load_config
+
+        stale_after_sec = float((load_config().get("run_interval_sec") or 86400)) * 1.25
+    except Exception:
+        pass
+    age_sec = None
+    is_stale = False
+    if updated_ts is not None:
+        try:
+            age_sec = max(0.0, time.time() - float(updated_ts))
+            is_stale = age_sec > stale_after_sec
+        except (TypeError, ValueError):
+            age_sec = None
+
     return {
         "available": True,
-        "updated_ts": snapshot.get("ts") or snapshot.get("generated_ts"),
+        "updated_ts": updated_ts,
+        "age_sec": age_sec,
+        "stale": is_stale,
+        "stale_after_sec": stale_after_sec,
         "run_id": snapshot.get("run_id"),
         "picks": picks,
         "message": f"{len(picks)} names on today's watchlist" if picks else "No names cleared the confidence threshold",
@@ -364,12 +385,18 @@ def readiness_table(preflight: Optional[Mapping[str, Any]] = None, *, enabled_on
         if len(rows) >= limit:
             break
 
+    stale = bool(preflight.get("stale"))
+    message = f"{ready_count} of {len(rows)} symbols ready to trade"
+    if stale:
+        message = f"{message} (readiness from cached probe — refresh may be in progress)"
+
     return {
         "available": True,
         "ready_count": ready_count,
         "total_shown": len(rows),
         "rows": rows,
-        "message": f"{ready_count} of {len(rows)} symbols ready to trade",
+        "stale": stale,
+        "message": message,
     }
 
 
@@ -752,6 +779,80 @@ def edge_validation_panel(*, path: Path = GATE_REPORT_PATH) -> Dict[str, Any]:
     }
 
 
+def frontier_search_panel(*, path: Path = STRATEGY_SEARCH_REPORT_PATH) -> Dict[str, Any]:
+    empty = {
+        "available": False,
+        "trials_run": 0,
+        "survivor_count": 0,
+        "validation_passed_count": 0,
+        "symbol": None,
+        "timeframe": None,
+        "best_survivor": None,
+        "survivors": [],
+        "rejection_summary": {},
+        "protocol": {},
+        "message": "No strategy search report yet. Run scripts/run_strategy_search.py or wait for Dream Lab daily cycle.",
+    }
+    if not path.exists():
+        return empty
+    report = _read_json_file(path)
+    if not report or not report.get("ok"):
+        out = dict(empty)
+        out["message"] = report.get("error") if report else "Strategy search report is unreadable."
+        return out
+
+    best = report.get("best_survivor")
+    best_summary = None
+    if best:
+        spec = best.get("spec") or {}
+        val = best.get("validation") or {}
+        test = best.get("test") or {}
+        best_summary = {
+            "strategy_id": spec.get("strategy_id"),
+            "family": spec.get("family"),
+            "params": spec.get("params") or {},
+            "validation_sharpe": val.get("sharpe_proxy"),
+            "test_sharpe": test.get("sharpe_proxy"),
+            "validation_trades": val.get("trades"),
+            "test_trades": test.get("trades"),
+        }
+
+    survivors = []
+    for row in report.get("survivors") or []:
+        spec = row.get("spec") or {}
+        survivors.append(
+            {
+                "strategy_id": spec.get("strategy_id"),
+                "family": spec.get("family"),
+                "validation_sharpe": (row.get("validation") or {}).get("sharpe_proxy"),
+                "test_sharpe": (row.get("test") or {}).get("sharpe_proxy"),
+            }
+        )
+
+    survivor_count = int(report.get("survivor_count") or 0)
+    validation_passed = int(report.get("validation_passed_count") or 0)
+    trials = int(report.get("trials_run") or 0)
+    return {
+        "available": True,
+        "ts": report.get("ts"),
+        "trials_run": trials,
+        "survivor_count": survivor_count,
+        "validation_passed_count": validation_passed,
+        "symbol": report.get("symbol"),
+        "timeframe": report.get("timeframe"),
+        "protocol": report.get("protocol") or {},
+        "rejection_summary": report.get("rejection_summary") or {},
+        "best_survivor": best_summary,
+        "survivors": survivors,
+        "report_path": str(path),
+        "message": (
+            f"{survivor_count} survivor(s) from {trials} trials ({validation_passed} passed validation gates)"
+            if trials
+            else "Strategy search report loaded"
+        ),
+    }
+
+
 class _PanelTimeout(Exception):
     """Raised when a panel builder exceeds its time budget."""
 
@@ -838,10 +939,80 @@ def _safe_panel(
         return out
 
 
+def supervisor_layers_panel(
+    events: Iterable[dict],
+    health: Optional[Mapping[str, Any]] = None,
+    *,
+    stale_after_sec: float = 45.0,
+) -> Dict[str, Any]:
+    health = health or {}
+    sup = health.get("supervisor") if isinstance(health.get("supervisor"), dict) else {}
+    layers = list(sup.get("layers") or [])
+    ts = sup.get("ts")
+    age_sec = None
+    stale = True
+    if ts is not None:
+        try:
+            age_sec = max(0.0, time.time() - float(ts))
+            stale = age_sec > stale_after_sec
+        except (TypeError, ValueError):
+            age_sec = None
+
+    restarts: List[dict] = []
+    for event in events:
+        if event.get("topic") != "ops.layer.restarted":
+            continue
+        payload = event.get("payload") or {}
+        restarts.append(
+            {
+                "ts": event.get("ts"),
+                "layer": payload.get("layer"),
+                "exit_code": payload.get("exit_code"),
+                "pid": payload.get("pid"),
+            }
+        )
+        if len(restarts) >= 8:
+            break
+
+    if not layers:
+        return {
+            "available": False,
+            "layers": [],
+            "restarts": restarts,
+            "stale": True,
+            "message": "Supervisor layer status not available. Start the stack with kernel/supervisor.py.",
+        }
+
+    running = sum(1 for row in layers if row.get("running"))
+    down = [row for row in layers if not row.get("running")]
+    headline = f"{running} of {len(layers)} layers running"
+    if stale:
+        headline = f"{headline} (status stale)"
+    if down:
+        names = ", ".join(str(row.get("layer") or "?") for row in down[:4])
+        if len(down) > 4:
+            names = f"{names}, +{len(down) - 4} more"
+        headline = f"{headline} — down: {names}"
+
+    return {
+        "available": True,
+        "stale": stale,
+        "age_sec": age_sec,
+        "supervisor_pid": sup.get("pid"),
+        "layer_count": len(layers),
+        "running_count": running,
+        "all_running": bool(sup.get("all_running")),
+        "layers": layers,
+        "restarts": restarts,
+        "message": headline,
+    }
+
+
 def build_trader_panels(
     events: Iterable[dict],
     *,
     preflight: Optional[Mapping[str, Any]] = None,
+    health: Optional[Mapping[str, Any]] = None,
     max_heartbeat_age: float = 30.0,
 ) -> Dict[str, Any]:
     event_list = list(events)
@@ -898,6 +1069,16 @@ def build_trader_panels(
             "edge_validation",
             edge_validation_panel,
             {"available": False, "groups": [], "message": "Edge validation unavailable"},
+        ),
+        "frontier_search": _safe_panel(
+            "frontier_search",
+            frontier_search_panel,
+            {"available": False, "survivors": [], "message": "Frontier strategy search unavailable"},
+        ),
+        "supervisor_layers": _safe_panel(
+            "supervisor_layers",
+            lambda: supervisor_layers_panel(event_list, health),
+            {"available": False, "layers": [], "restarts": [], "message": "Supervisor layers unavailable"},
         ),
     }
 

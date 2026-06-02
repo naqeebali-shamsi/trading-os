@@ -3,7 +3,7 @@
 ; Requires: Inno Setup 6+, TradingOS.exe built via installer\build_release.ps1
 
 #define MyAppName "Trading OS"
-#define MyAppVersion "1.4.1"
+#define MyAppVersion "1.4.3"
 #define MyAppPublisher "QTπ"
 #define MyAppCopyright "Copyright (C) QTπ"
 #define MyAppURL "http://127.0.0.1:8765/ui"
@@ -48,6 +48,9 @@ Source: "..\memory\*"; DestDir: "{app}\memory"; Flags: ignoreversion recursesubd
 Source: "..\muscle\*"; DestDir: "{app}\muscle"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".order_lifecycle_state.json,..order_lifecycle_state.json.*.tmp,*.tmp,__pycache__\*,*.pyc"
 Source: "..\nervous\*"; DestDir: "{app}\nervous"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "bus.jsonl,topics\*,__pycache__\*,*.pyc"
 Source: "..\ops\*"; DestDir: "{app}\ops"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "__pycache__\*,*.pyc"
+Source: "..\research\*"; DestDir: "{app}\research"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "__pycache__\*,*.pyc"
+Source: "..\rd\*"; DestDir: "{app}\rd"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "__pycache__\*,*.pyc"
+Source: "..\scripts\*"; DestDir: "{app}\scripts"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "__pycache__\*,*.pyc"
 Source: "..\sensory\*"; DestDir: "{app}\sensory"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "__pycache__\*,*.pyc"
 Source: "..\swarm\*"; DestDir: "{app}\swarm"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "__pycache__\*,*.pyc"
 Source: "..\telemetry\*"; DestDir: "{app}\telemetry"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "__pycache__\*,*.pyc"

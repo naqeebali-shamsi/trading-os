@@ -1,0 +1,72 @@
+# autonome/config/settings.yaml --- runtime configuration  v2.0
+# Do NOT put secrets here.  Put them in secrets.yaml (git-ignored).
+
+system:
+  mode: PAPER   # PAPER or LIVE -- must be deliberate to switch
+  log_level: INFO
+  heartbeat_interval_sec: 30
+  max_concurrent_positions: 5
+  market_hours_only: true   # skip pre/post for now
+
+broker:
+  name: alpaca
+  paper_url: "https://paper-api.alpaca.markets"
+  live_url: "https://api.alpaca.markets"
+  data_url: "https://data.alpaca.markets"
+  paper_ws: "wss://stream.data.alpaca.markets/v2/iex"   # free tier
+  live_ws:  "wss://stream.data.alpaca.markets/v2/sip"   # paid
+
+data:
+  timeframe: "1Hour"
+  warmup_bars: 200
+  symbols:
+    - SPY
+    - QQQ
+    - TSLA
+    - NVDA
+    - AAPL
+    - META
+    - AMD
+    - AMZN
+    - GOOGL
+    - MSFT
+  on_bars_update: strategy/recompute
+
+strategy:
+  name: momentum_breakout
+  params:
+    ema_fast: 9
+    ema_slow: 21
+    volume_surge_z: 1.5
+    atr_period: 14
+    atr_sl_mult: 2.0
+    atr_tp_mult: 3.0
+    min_bars_confirm: 2
+  # No signal more than once per N bars per symbol
+  cooldown_bars: 6
+
+risk:
+  account_risk_per_trade_pct: 1.0    # of equity
+  max_daily_loss_pct: 3.0
+  max_drawdown_pct: 10.0
+  kelly_fraction: 0.25              # quarter-Kelly
+  # If vol estimated above this, halt new signals
+  volatility_pause_annual_pct: 50.0
+
+execution:
+  order_type: market
+  time_in_force: day
+  # Slippage model for paper -- none for live (market orders)
+  # We use market orders at open because we want IN, not还因为
+  retry_attempts: 3
+  retry_delay_sec: 2
+
+journal:
+  db_path: "data/journal.sqlite"
+  log_trades: true
+  log_signals: true
+
+alerts:
+  telegram:
+    enabled: false   # set true + bot_token/chat_id in secrets.yaml
+  log_fatal: true

@@ -31,14 +31,24 @@ $compileDirs = @(
     "consciousness",
     "ops",
     "research",
-    "telemetry",
+    "rd",
+    "sensory",
+    "immune",
+    "swarm",
+    "introspect",
     "memory",
+    "telemetry",
     "scripts",
     "tests"
 )
 foreach ($dir in $compileDirs) {
     if (Test-Path -LiteralPath $dir) {
         python -m compileall -q $dir
+    }
+}
+foreach ($rootPy in @("data_lake.py", "trading_profile.py", "runtime_safety.py", "runtime_controls.py", "paths.py")) {
+    if (Test-Path -LiteralPath $rootPy) {
+        python -m py_compile $rootPy
     }
 }
 

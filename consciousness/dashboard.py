@@ -53,6 +53,53 @@ MAX_EVENT_LIMIT = 200
 DEFAULT_MAX_HEARTBEAT_AGE_SEC = 30.0
 
 
+def _dashboard_token():
+    return os.getenv("TRADING_OS_DASHBOARD_TOKEN", "").strip()
+
+
+def _client_address(handler):
+    try:
+        return (handler.client_address or [""])[0]
+    except Exception:
+        return ""
+
+
+def _client_is_loopback(handler):
+    return _client_address(handler) in {"127.0.0.1", "::1", "localhost"}
+
+
+def _token_matches(handler):
+    token = _dashboard_token()
+    if not token:
+        return False
+    auth = handler.headers.get("Authorization", "")
+    if auth.startswith("Bearer ") and auth[7:].strip() == token:
+        return True
+    return handler.headers.get("X-Trading-OS-Token", "").strip() == token
+
+
+def _post_authorized(handler):
+    if _dashboard_token():
+        return _token_matches(handler)
+    return _client_is_loopback(handler)
+
+
+def _auth_config(handler):
+    token = _dashboard_token()
+    loopback = _client_is_loopback(handler)
+    if token:
+        return {
+            "post_auth_required": True,
+            "auth_method": "token",
+            "loopback_client": loopback,
+        }
+    return {
+        "post_auth_required": not loopback,
+        "auth_method": "loopback" if loopback else "deny_remote",
+        "loopback_client": loopback,
+    }
+
+
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
     daemon_threads = True
 
@@ -529,7 +576,12 @@ def _dashboard_state(limit=DEFAULT_EVENT_LIMIT, topic_filters=None, max_heartbea
             preflight = _preflight_cached(max_heartbeat_age=max_heartbeat_age)
     except Exception:
         preflight = None
-    trader_panels = build_trader_panels(events, preflight=preflight, max_heartbeat_age=max_heartbeat_age)
+    trader_panels = build_trader_panels(
+        events,
+        preflight=preflight,
+        health=health,
+        max_heartbeat_age=max_heartbeat_age,
+    )
     return {
         "ts": time.time(),
         "health": health,
@@ -619,6 +671,9 @@ class Handler(BaseHTTPRequestHandler):
             limit = _parse_event_limit(query.get("limit", [None])[0])
             topic_filters = _parse_topic_filters(query)
             self._send_json(_dashboard_state(limit=limit, topic_filters=topic_filters, max_heartbeat_age=max_heartbeat_age))
+            return
+        if path == "/api/auth/config":
+            self._send_json(_auth_config(self))
             return
         if path == "/api/bridge/status":
             self._send_json(_bridge_status(max_heartbeat_age=max_heartbeat_age))
@@ -718,6 +773,9 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         parsed = urllib.parse.urlsplit(self.path)
         path = parsed.path
+        if not _post_authorized(self):
+            self._send_json({"ok": False, "error": "unauthorized"}, status=401)
+            return
         try:
             body = self._read_json_body()
             old = load_controls()

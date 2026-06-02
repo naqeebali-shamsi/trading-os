@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "installer"))
 
-from bridge.setup_bridge import setup_bridge  # noqa: E402
+from bridge.setup_bridge import _create_junction, setup_bridge  # noqa: E402
 
 
 def test_load_config_env_from_example(tmp_path):
@@ -29,6 +29,48 @@ def test_load_config_env_from_example(tmp_path):
 
 def test_setup_bridge_module_importable():
     assert callable(setup_bridge)
+
+
+def test_create_junction_uses_argv_mklink(tmp_path, monkeypatch):
+    target = tmp_path / "ipc"
+    target.mkdir()
+    junction = tmp_path / "trading-os"
+    calls: list[list[str]] = []
+
+    def fake_run(cmd, **kwargs):
+        calls.append(list(cmd))
+        class Result:
+            returncode = 0
+            stdout = ""
+            stderr = ""
+
+        return Result()
+
+    monkeypatch.setattr("bridge.setup_bridge.subprocess.run", fake_run)
+    monkeypatch.setattr("bridge.setup_bridge._junction_points_to", lambda _j, _t: False)
+    _create_junction(str(junction), str(target))
+    assert calls[0] == ["cmd", "/c", "mklink", "/J", str(junction), os.path.normpath(str(target))]
+
+
+def test_create_junction_skips_when_already_linked(tmp_path, monkeypatch):
+    target = tmp_path / "ipc"
+    target.mkdir()
+    junction = tmp_path / "trading-os"
+    called = {"run": False}
+
+    def fake_run(*args, **kwargs):
+        called["run"] = True
+        class Result:
+            returncode = 0
+            stdout = ""
+            stderr = ""
+
+        return Result()
+
+    monkeypatch.setattr("bridge.setup_bridge.subprocess.run", fake_run)
+    monkeypatch.setattr("bridge.setup_bridge._junction_points_to", lambda _j, _t: True)
+    _create_junction(str(junction), str(target))
+    assert called["run"] is False
 
 
 def test_install_config_dry_run(tmp_path, monkeypatch):

@@ -1,0 +1,8 @@
+# autonome v2 -- do NOT commit secrets
+config/secrets.yaml
+*.key
+*.pem
+data/
+__pycache__/
+*.pyc
+.env

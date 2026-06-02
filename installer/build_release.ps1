@@ -65,9 +65,36 @@ if (-not $SkipPyInstaller) {
     Write-Host "`n[4/6] Skipped PyInstaller ( -SkipPyInstaller )" -ForegroundColor DarkGray
 }
 
-Write-Host "`n[5/6] Verifying launcher modules..." -ForegroundColor Yellow
+Write-Host "`n[5/6] Verifying launcher + R&D modules..." -ForegroundColor Yellow
 & $py -m py_compile "$RepoRoot\installer\launcher.py" "$RepoRoot\installer\install_config.py" "$RepoRoot\installer\stop.py" "$RepoRoot\installer\secrets_store.py" "$RepoRoot\installer\readiness_check.py" "$RepoRoot\bridge\setup_bridge.py"
 if ($LASTEXITCODE -ne 0) { throw "Python compile check failed" }
+
+$compileDirs = @(
+    "kernel", "cortex", "nervous", "muscle", "consciousness", "ops",
+    "research", "rd", "sensory", "immune", "swarm", "introspect",
+    "memory", "telemetry", "scripts"
+)
+foreach ($dir in $compileDirs) {
+    $full = Join-Path $RepoRoot $dir
+    if (Test-Path -LiteralPath $full) {
+        & $py -m compileall -q $full
+        if ($LASTEXITCODE -ne 0) { throw "compileall failed: $dir" }
+    }
+}
+foreach ($rootPy in @("data_lake.py", "trading_profile.py", "runtime_safety.py", "runtime_controls.py", "paths.py")) {
+    $f = Join-Path $RepoRoot $rootPy
+    if (Test-Path -LiteralPath $f) {
+        & $py -m py_compile $f
+        if ($LASTEXITCODE -ne 0) { throw "compile failed: $rootPy" }
+    }
+}
+
+Write-Host "  Running strategy search + Dream Lab smoke tests..."
+Push-Location -LiteralPath $RepoRoot
+& $py -m pytest "tests/test_strategy_search.py" "tests/test_dream_lab_agents.py" -q --rootdir="$RepoRoot"
+$pytestExit = $LASTEXITCODE
+Pop-Location
+if ($pytestExit -ne 0) { throw "R&D module tests failed" }
 
 if (-not $SkipInstaller) {
     $ex5 = Join-Path $RepoRoot "bridge\FileBridgeEA_Windows.ex5"

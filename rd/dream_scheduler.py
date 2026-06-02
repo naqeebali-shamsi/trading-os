@@ -23,6 +23,7 @@ from rd.agents.strategist import StrategistAgent  # noqa: E402
 from rd.agents.backtester import BacktesterAgent  # noqa: E402
 from rd.agents.auditor import AuditorAgent  # noqa: E402
 from rd.agents.promoter import PromoterAgent  # noqa: E402
+from rd.agents.explorer import ExplorerAgent  # noqa: E402
 
 STATE_FILE = ROOT / "intel" / "dream_lab_state.json"
 
@@ -96,6 +97,13 @@ def run_cycle(cycle: str, *, state: Optional[dict] = None) -> Dict[str, Any]:
         results["agents"]["trainer"] = _run_agent(TrainerAgent())
         if (cfg.get("auditor") or {}).get("enabled", True):
             results["agents"]["auditor"] = _run_agent(AuditorAgent())
+        try:
+            from research.strategy_search.config import load_config as load_search_config
+
+            if load_search_config().get("enabled", True):
+                results["agents"]["explorer"] = _run_agent(ExplorerAgent())
+        except Exception as exc:
+            results["strategy_search"] = {"ok": False, "error": str(exc)}
         try:
             from research.validate_walk_forward import run_validation
 

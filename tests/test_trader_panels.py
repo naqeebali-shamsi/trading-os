@@ -89,6 +89,57 @@ def test_readiness_table_from_preflight():
     print("[test] PASS: readiness table maps instrument status")
 
 
+def test_readiness_table_marks_stale_preflight():
+    preflight = {
+        "stale": True,
+        "instruments": {
+            "EURUSD": {
+                "enabled": True,
+                "asset_class": "fx",
+                "ready": True,
+                "result": "READY",
+                "session_ok": True,
+                "spread_ok": True,
+                "quote_skipped": False,
+                "quote_age_sec": 2,
+                "chart_present": True,
+            },
+        },
+    }
+    panel = tp.readiness_table(preflight)
+    assert panel["stale"] is True
+    assert "cached" in panel["message"].lower()
+    print("[test] PASS: readiness table marks stale preflight")
+
+
+def test_supervisor_layers_panel_from_health():
+    health = {
+        "supervisor": {
+            "ts": __import__("time").time(),
+            "pid": 4242,
+            "layer_count": 2,
+            "running_count": 1,
+            "all_running": False,
+            "layers": [
+                {"layer": "cortex.brain", "running": True, "pid": 11, "exit_code": None, "script": "main.py"},
+                {"layer": "muscle.main", "running": False, "pid": None, "exit_code": 1, "script": "muscle_main.py"},
+            ],
+        }
+    }
+    events = [
+        {
+            "topic": "ops.layer.restarted",
+            "ts": 100.0,
+            "payload": {"layer": "muscle.main", "exit_code": 1, "pid": 22},
+        }
+    ]
+    panel = tp.supervisor_layers_panel(events, health)
+    assert panel["available"] is True
+    assert panel["running_count"] == 1
+    assert panel["restarts"][0]["layer"] == "muscle.main"
+    print("[test] PASS: supervisor layers panel")
+
+
 def test_research_watchlist_handles_missing_snapshot(monkeypatch):
     import research.snapshot as snap
 
@@ -331,6 +382,44 @@ def test_edge_validation_panel_reads_gate_report(tmp_path):
     assert panel["available"] is True
     assert panel["promotable_count"] == 1
     assert len(panel["groups"]) == 2
+
+
+def test_frontier_search_panel_reads_report(tmp_path):
+    import json
+
+    report_path = tmp_path / "strategy_search_report.json"
+    report_path.write_text(
+        json.dumps(
+            {
+                "ok": True,
+                "ts": 1000.0,
+                "symbol": "EURUSD",
+                "timeframe": "M15",
+                "trials_run": 32,
+                "validation_passed_count": 2,
+                "survivor_count": 1,
+                "protocol": {"rank_split": "validation", "pattern_search": True},
+                "rejection_summary": {"val_sharpe": 20, "train_val_sharpe_gap": 8},
+                "best_survivor": {
+                    "spec": {"strategy_id": "PATTERN_ENGULFING_6", "family": "candle_pattern", "params": {}},
+                    "validation": {"sharpe_proxy": 1.1, "trades": 12},
+                    "test": {"sharpe_proxy": 0.6, "trades": 8},
+                },
+                "survivors": [
+                    {
+                        "spec": {"strategy_id": "PATTERN_ENGULFING_6", "family": "candle_pattern"},
+                        "validation": {"sharpe_proxy": 1.1},
+                        "test": {"sharpe_proxy": 0.6},
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    panel = tp.frontier_search_panel(path=report_path)
+    assert panel["available"] is True
+    assert panel["survivor_count"] == 1
+    assert panel["best_survivor"]["strategy_id"] == "PATTERN_ENGULFING_6"
 
 
 def test_portfolio_summary_shape(monkeypatch):

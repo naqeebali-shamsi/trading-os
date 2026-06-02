@@ -4,6 +4,54 @@ function asText(value) {
   return String(value);
 }
 
+const DESK_TOKEN_KEY = "trading_os_desk_token";
+let deskAuthConfig = { post_auth_required: false, auth_method: "loopback" };
+
+function loadDeskTokenFromQuery() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("desk_token");
+  if (token) sessionStorage.setItem(DESK_TOKEN_KEY, token);
+}
+
+function deskAuthHeaders(base = {}) {
+  const headers = { ...base };
+  const token = sessionStorage.getItem(DESK_TOKEN_KEY);
+  if (token) headers["X-Trading-OS-Token"] = token;
+  return headers;
+}
+
+async function ensureDeskAuth() {
+  const entered = window.prompt("Dashboard token required. Enter TRADING_OS_DASHBOARD_TOKEN:");
+  if (!entered) throw new Error("Dashboard action requires authentication.");
+  sessionStorage.setItem(DESK_TOKEN_KEY, entered.trim());
+}
+
+async function fetchDeskAuthConfig() {
+  try {
+    const response = await fetch("/api/auth/config", { cache: "no-store" });
+    if (!response.ok) return;
+    deskAuthConfig = await response.json();
+  } catch (_err) {
+    /* best-effort */
+  }
+}
+
+async function deskPost(url, payload) {
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: deskAuthHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify(payload),
+    });
+    if (response.status === 401 && attempt === 0) {
+      await ensureDeskAuth();
+      continue;
+    }
+    return response;
+  }
+  throw new Error("Dashboard authentication failed");
+}
+
 function emptyState(message) {
   return `<div class="organism-empty-state">${asText(message)}</div>`;
 }
@@ -72,7 +120,28 @@ function readinessCount(trader, statusSummary) {
   return null;
 }
 
-function formatStatusLine(updatedAt, trader, statusSummary, eventCount) {
+function formatAgeDuration(sec) {
+  if (sec == null || Number.isNaN(Number(sec))) return "unknown age";
+  const s = Math.max(0, Math.round(Number(sec)));
+  if (s < 60) return `${s}s ago`;
+  if (s < 3600) return `${Math.round(s / 60)}m ago`;
+  if (s < 86400) return `${Math.round(s / 3600)}h ago`;
+  return `${Math.round(s / 86400)}d ago`;
+}
+
+function setStaleBanner(message, visible) {
+  const node = document.getElementById("dashboard-stale-banner");
+  if (!node) return;
+  if (!visible || !message) {
+    node.hidden = true;
+    node.textContent = "";
+    return;
+  }
+  node.hidden = false;
+  node.textContent = message;
+}
+
+function formatStatusLine(updatedAt, trader, statusSummary, eventCount, meta = {}) {
   const ready = readinessCount(trader, statusSummary);
   const readyText = ready === null
     ? "Readiness check pending"
@@ -81,7 +150,11 @@ function formatStatusLine(updatedAt, trader, statusSummary, eventCount) {
       : `${ready} symbols ready to trade`;
   const equity = trader?.portfolio_pnl?.account?.equity;
   const equityText = equity != null ? `Equity ${formatMoney(equity)}.` : "";
-  return `Last updated ${updatedAt}. ${equityText} ${readyText}. ${eventCount} recent events.`.replace(/\s+/g, " ").trim();
+  const staleBits = [];
+  if (meta.preflightStale) staleBits.push("readiness cached");
+  if (meta.researchStale) staleBits.push("research stale");
+  const staleText = staleBits.length ? ` ${staleBits.join(", ")}.` : "";
+  return `Last updated ${updatedAt}. ${equityText} ${readyText}.${staleText} ${eventCount} recent events.`.replace(/\s+/g, " ").trim();
 }
 
 function renderResearchWatchlist(panel) {
@@ -89,8 +162,17 @@ function renderResearchWatchlist(panel) {
     return emptyState(panel?.message || "Research will appear after the next daily scan.");
   }
   const picks = Array.isArray(panel.picks) ? panel.picks : [];
+  const updatedLine = panel.updated_ts
+    ? `Last scan ${new Date(Number(panel.updated_ts) * 1000).toLocaleString()} (${formatAgeDuration(panel.age_sec)})`
+    : "Scan time unknown";
+  const metaPills = [
+    panel.stale ? pill("Scan stale — next daily run pending", "warn") : pill("Daily scan", "safe"),
+  ];
   if (picks.length === 0) {
-    return emptyState(panel.message || "No names cleared the confidence threshold today.");
+    return `
+      ${pillRow(...metaPills)}
+      <p class="atom-muted">${updatedLine}</p>
+      ${emptyState(panel.message || "No names cleared the confidence threshold today.")}`;
   }
   const rows = picks.map((pick) => {
     const conf = pick.confidence != null ? formatPct(pick.confidence) : "Not available";
@@ -104,7 +186,8 @@ function renderResearchWatchlist(panel) {
       </tr>`;
   }).join("");
   return `
-    <p class="atom-muted">${asText(panel.message)}</p>
+    ${pillRow(...metaPills)}
+    <p class="atom-muted">${updatedLine} · ${asText(panel.message)}</p>
     ${tableWrap(`<thead><tr><th>Symbol</th><th>Rating</th><th>Confidence</th><th>Why it ranked</th></tr></thead><tbody>${rows}</tbody>`, { scroll: true })}`;
 }
 
@@ -351,6 +434,54 @@ function renderEdgeValidationPanel(panel) {
     ${tableWrap(`<thead><tr><th>Symbol</th><th>Gate</th><th>Samples</th><th>Win rate</th><th>Edge</th><th>PF</th><th>Reasons</th></tr></thead><tbody>${rows}</tbody>`, { scroll: true })}`;
 }
 
+function renderFrontierSearchPanel(panel) {
+  if (!panel?.available) {
+    return emptyState(panel?.message || "Strategy search has not run yet.");
+  }
+  const meta = [
+    pill(`${panel.survivor_count || 0} survivors`, panel.survivor_count ? "safe" : "warn"),
+    pill(`${panel.trials_run || 0} trials`, "neutral"),
+    pill(`${panel.validation_passed_count || 0} val pass`, "neutral"),
+  ];
+  const best = panel.best_survivor;
+  const bestBlock = best
+    ? kvHtml([
+        ["Best survivor", best.strategy_id || "—"],
+        ["Family", best.family || "—"],
+        ["Val Sharpe", best.validation_sharpe != null ? Number(best.validation_sharpe).toFixed(2) : "—"],
+        ["Test Sharpe", best.test_sharpe != null ? Number(best.test_sharpe).toFixed(2) : "—"],
+        ["Symbol", `${asText(panel.symbol)} ${asText(panel.timeframe)}`],
+      ])
+    : `<p class="atom-muted">No strategy cleared all gates in the latest search.</p>`;
+
+  const rejections = panel.rejection_summary || {};
+  const rejectRows = Object.entries(rejections)
+    .slice(0, 8)
+    .map(([reason, count]) => `<tr><td>${asText(reason)}</td><td>${asText(count)}</td></tr>`)
+    .join("");
+  const rejectTable = rejectRows
+    ? tableWrap(`<thead><tr><th>Rejection</th><th>Count</th></tr></thead><tbody>${rejectRows}</tbody>`)
+    : "";
+
+  const survivorRows = (panel.survivors || []).slice(0, 5).map((row) => `
+    <tr>
+      <td><strong>${asText(row.strategy_id)}</strong><br><span class="atom-muted">${asText(row.family)}</span></td>
+      <td>${row.validation_sharpe != null ? Number(row.validation_sharpe).toFixed(2) : "—"}</td>
+      <td>${row.test_sharpe != null ? Number(row.test_sharpe).toFixed(2) : "—"}</td>
+    </tr>`).join("");
+  const survivorTable = survivorRows
+    ? tableWrap(`<thead><tr><th>Strategy</th><th>Val Sharpe</th><th>Test Sharpe</th></tr></thead><tbody>${survivorRows}</tbody>`, { scroll: true })
+    : "";
+
+  return `
+    ${pillRow(...meta)}
+    <p class="atom-muted">${asText(panel.message)}</p>
+    ${bestBlock}
+    ${survivorTable}
+    ${rejectTable ? `<p class="atom-label">Top rejection reasons</p>${rejectTable}` : ""}
+  `;
+}
+
 function renderMacroNewsPanel(panel) {
   if (!panel) return emptyState("No news or macro context in the current window.");
   const riskVariant = panel.risk_level === "elevated" ? "live" : panel.risk_level === "caution" ? "warn" : "safe";
@@ -420,17 +551,15 @@ function renderReadinessPanel(panel) {
       <td>${asText(row.quote)}</td>
       <td>${asText(row.chart)}</td>
     </tr>`).join("");
+  const staleRow = panel.stale ? pillRow(pill("Cached readiness probe", "warn")) : "";
   return `
+    ${staleRow}
     <p class="atom-muted">${asText(panel.message)}</p>
     ${tableWrap(`<thead><tr><th>Symbol</th><th>Market</th><th>Status</th><th>Session</th><th>Spread</th><th>Quote</th><th>Chart</th></tr></thead><tbody>${body}</tbody>`, { scroll: true })}`;
 }
 
 async function promotionAction(action, promoId) {
-  const response = await fetch(`/api/promotions/${action}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id: promoId, actor: "dashboard" }),
-  });
+  const response = await deskPost(`/api/promotions/${action}`, { id: promoId, actor: "dashboard" });
   const payload = await response.json();
   if (!response.ok || !payload.ok) {
     throw new Error(payload.error || `Promotion ${action} failed`);
@@ -457,6 +586,33 @@ function renderPendingPromotions(panel) {
       </div>
     </div>
   `).join("")}</div>`;
+}
+
+function renderSupervisorLayersPanel(panel) {
+  if (!panel?.available) {
+    return emptyState(panel?.message || "Supervisor layer status unavailable.");
+  }
+  const meta = [
+    pill(`${panel.running_count || 0}/${panel.layer_count || 0} running`, panel.all_running ? "safe" : "warn"),
+  ];
+  if (panel.stale) meta.push(pill("Status stale", "warn"));
+  if (panel.supervisor_pid) meta.push(pill(`Supervisor PID ${panel.supervisor_pid}`, "neutral"));
+  const rows = (panel.layers || []).map((row) => `
+    <tr class="${row.running ? "is-ready" : "is-blocked"}">
+      <td><strong>${asText(row.layer)}</strong></td>
+      <td>${row.running ? pill("Running", "safe") : pill("Down", "live")}</td>
+      <td>${asText(row.pid ?? "—")}</td>
+      <td>${row.exit_code != null ? asText(row.exit_code) : "—"}</td>
+      <td>${asText(row.script)}</td>
+    </tr>`).join("");
+  const restarts = (panel.restarts || []).map((row) =>
+    `<li><span class="organism-feed-ts">${formatTs(row.ts)}</span> ${asText(row.layer)} restarted (exit ${asText(row.exit_code)}, pid ${asText(row.pid)})</li>`
+  ).join("");
+  return `
+    ${pillRow(...meta)}
+    <p class="atom-muted">${asText(panel.message)}</p>
+    ${rows ? tableWrap(`<thead><tr><th>Layer</th><th>State</th><th>PID</th><th>Last exit</th><th>Script</th></tr></thead><tbody>${rows}</tbody>`, { scroll: true }) : emptyState("No layer rows reported.")}
+    ${restarts ? `<p class="atom-label">Recent restarts</p><ul class="organism-headline-list">${restarts}</ul>` : ""}`;
 }
 
 function renderDreamLabStatus(panel) {
@@ -641,6 +797,12 @@ function renderOperatorStatus(summary) {
 
 function renderRuntimeControls(controls) {
   const preset = String(controls.preset || "custom").replace(/_/g, " ");
+  const directIntents = Boolean(controls.signal_direct_intents);
+  const stockIntents = Boolean(controls.stock_direct_intents);
+  const macroGate = Boolean(controls.signal_macro_gate);
+  const minConfidence = controls.signal_min_confidence ?? 0.75;
+  const macroAge = controls.signal_macro_gate_max_age_sec ?? 900;
+  const llmMode = String(controls.llm_decision_mode || "ADVISORY");
   return `
     ${pillRow(
       controls.signal_direct_intents ? pill("Auto signals on", "live") : pill("Auto signals off", "safe"),
@@ -655,11 +817,30 @@ function renderRuntimeControls(controls) {
     ])}
     <div class="atom-label">Quick presets</div>
     <div class="organism-filter-row" id="preset-buttons">
-      <button class="atom-button" data-preset="observe_only">Observe only</button>
-      <button class="atom-button" data-preset="demo_cautious">Demo cautious</button>
-      <button class="atom-button" data-preset="demo_aggressive">Demo aggressive</button>
-      <button class="atom-button" data-preset="halted">Stop trading</button>
+      <button type="button" class="atom-button" data-preset="observe_only">Observe only</button>
+      <button type="button" class="atom-button" data-preset="demo_cautious">Demo cautious</button>
+      <button type="button" class="atom-button" data-preset="demo_aggressive">Demo aggressive</button>
+      <button type="button" class="atom-button" data-preset="halted">Stop trading</button>
     </div>
+    <div class="atom-label">Fine-tune controls</div>
+    <form id="runtime-controls-form" class="molecule-controls-form">
+      <label class="molecule-controls-check"><input type="checkbox" name="signal_direct_intents" ${directIntents ? "checked" : ""}> Auto signals</label>
+      <label class="molecule-controls-check"><input type="checkbox" name="stock_direct_intents" ${stockIntents ? "checked" : ""}> Stock orders</label>
+      <label class="molecule-controls-check"><input type="checkbox" name="signal_macro_gate" ${macroGate ? "checked" : ""}> News filter</label>
+      <label class="molecule-controls-field">Min confidence
+        <input class="atom-input" type="number" name="signal_min_confidence" min="0" max="1" step="0.01" value="${minConfidence}">
+      </label>
+      <label class="molecule-controls-field">News window (sec)
+        <input class="atom-input" type="number" name="signal_macro_gate_max_age_sec" min="60" step="60" value="${macroAge}">
+      </label>
+      <label class="molecule-controls-field">AI mode
+        <select class="atom-select" name="llm_decision_mode">
+          <option value="ADVISORY" ${llmMode === "ADVISORY" ? "selected" : ""}>Advisory</option>
+          <option value="LIVE" ${llmMode === "LIVE" ? "selected" : ""}>Live</option>
+        </select>
+      </label>
+      <button type="submit" class="atom-button atom-button--primary">Apply controls</button>
+    </form>
   `;
 }
 
@@ -836,12 +1017,26 @@ function renderTradeLifecycle(lifecycle) {
 async function applyPreset(preset) {
   const label = String(preset || "").replace(/_/g, " ");
   if (!window.confirm(`Switch trading mode to "${label}"?`)) return;
-  const response = await fetch("/api/controls/preset", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({preset}),
-  });
+  const response = await deskPost("/api/controls/preset", { preset });
   if (!response.ok) throw new Error(`Could not apply preset (${response.status})`);
+  await refresh({ silent: true });
+}
+
+async function applyControlUpdates(form) {
+  const fd = new FormData(form);
+  const payload = {
+    signal_direct_intents: fd.get("signal_direct_intents") === "on",
+    stock_direct_intents: fd.get("stock_direct_intents") === "on",
+    signal_macro_gate: fd.get("signal_macro_gate") === "on",
+    signal_min_confidence: Number(fd.get("signal_min_confidence")),
+    signal_macro_gate_max_age_sec: Number.parseInt(String(fd.get("signal_macro_gate_max_age_sec")), 10),
+    llm_decision_mode: String(fd.get("llm_decision_mode") || "ADVISORY"),
+  };
+  const response = await deskPost("/api/controls/update", payload);
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok || !body.ok) {
+    throw new Error(body.error || `Could not apply controls (${response.status})`);
+  }
   await refresh({ silent: true });
 }
 
@@ -883,6 +1078,7 @@ let hasLoadedOnce = false;
 let liveEvents = [];
 let silentRefreshTimer = null;
 let lastStatusText = "";
+let refreshFailCount = 0;
 let streamLive = false;
 let streamPollOnly = false;
 let lastPolledSeq = 0;
@@ -1045,12 +1241,14 @@ async function refresh(options = {}) {
     document.getElementById("macro-news-panel").innerHTML = renderMacroNewsPanel(trader.macro_news);
     document.getElementById("forecast-thesis-panel").innerHTML = renderForecastThesisPanel(trader.forecast_thesis);
     document.getElementById("edge-validation-panel").innerHTML = renderEdgeValidationPanel(trader.edge_validation);
+    document.getElementById("frontier-search-panel").innerHTML = renderFrontierSearchPanel(trader.frontier_search);
     document.getElementById("signal-drilldown").innerHTML = renderSignalDrilldown(trader.signal_drilldown);
     document.getElementById("readiness-panel").innerHTML = renderReadinessPanel(trader.readiness);
     document.getElementById("pending-promotions").innerHTML = renderPendingPromotions(trader.pending_promotions);
     document.getElementById("dream-lab-status").innerHTML = renderDreamLabStatus(trader.dream_lab);
     document.getElementById("operator-status").innerHTML = renderOperatorStatus(statusSummary);
     document.getElementById("runtime-controls").innerHTML = renderRuntimeControls(runtimeControls);
+    document.getElementById("supervisor-layers-panel").innerHTML = renderSupervisorLayersPanel(trader.supervisor_layers);
     document.getElementById("system-health").innerHTML = renderSystemHealth(state);
     document.getElementById("telemetry-summary").innerHTML = renderTelemetry(state.telemetry_summary || {});
     document.getElementById("bridge-status").innerHTML = renderBridgeStatus(bridge);
@@ -1071,18 +1269,33 @@ async function refresh(options = {}) {
       pollRecentEvents();
     }
 
-    const nextStatus = formatStatusLine(new Date().toLocaleTimeString(), trader, statusSummary, loadedCount);
+    refreshFailCount = 0;
+    const staleMessages = [];
+    if (state.preflight?.stale) staleMessages.push("Symbol readiness is from a cached probe.");
+    if (trader.research_watchlist?.stale) staleMessages.push("Stock research scan is older than expected.");
+    setStaleBanner(staleMessages.join(" "), staleMessages.length > 0);
+
+    const nextStatus = formatStatusLine(new Date().toLocaleTimeString(), trader, statusSummary, loadedCount, {
+      preflightStale: Boolean(state.preflight?.stale),
+      researchStale: Boolean(trader.research_watchlist?.stale),
+    });
     if (nextStatus !== lastStatusText) {
       setStatus(nextStatus, "ok");
       lastStatusText = nextStatus;
     }
     hasLoadedOnce = true;
   } catch (error) {
+    refreshFailCount += 1;
+    setStaleBanner(
+      `Could not refresh desk data (${asText(error.message)}). Showing last known values.`,
+      hasLoadedOnce,
+    );
     if (!hasLoadedOnce) {
       for (const id of [
         "research-watchlist", "portfolio-pnl-panel", "positions-panel", "macro-news-panel",
-        "forecast-thesis-panel", "edge-validation-panel", "signal-drilldown", "readiness-panel",
+        "forecast-thesis-panel", "edge-validation-panel", "frontier-search-panel", "signal-drilldown", "readiness-panel",
         "pending-promotions", "dream-lab-status", "live-events-feed",
+        "supervisor-layers-panel",
         "system-health", "operator-status", "runtime-controls", "telemetry-summary", "bridge-status",
         "safety-flags", "why-trade", "brain-summary", "signals-summary", "orders-summary", "trade-lifecycle", "activity-feed",
       ]) {
@@ -1090,6 +1303,8 @@ async function refresh(options = {}) {
         if (node) node.innerHTML = emptyState("Could not reach the dashboard service.");
       }
       setStatus(`Could not load dashboard: ${asText(error.message)}`, "error");
+    } else {
+      setStatus(`Refresh failed at ${new Date().toLocaleTimeString()}. Retrying…`, "error");
     }
   }
 }
@@ -1133,6 +1348,21 @@ document.addEventListener("click", (event) => {
     });
 });
 
+document.addEventListener("submit", (event) => {
+  if (event.target.id !== "runtime-controls-form") return;
+  event.preventDefault();
+  const submit = event.target.querySelector('button[type="submit"]');
+  if (submit) submit.disabled = true;
+  applyControlUpdates(event.target)
+    .then(() => setStatus("Runtime controls updated.", "ok"))
+    .catch((error) => setStatus(asText(error.message), "error"))
+    .finally(() => {
+      if (submit) submit.disabled = false;
+    });
+});
+
 initEventBus();
+loadDeskTokenFromQuery();
+fetchDeskAuthConfig();
 refresh();
 setInterval(() => refresh({ silent: true }), 10000);
