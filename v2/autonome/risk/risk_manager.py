@@ -57,7 +57,7 @@ class RiskManager:
     def evaluate(self, account: Account, positions: list[Position],
                  signal_confidence: float, entry_price: float,
                  stop_loss: float, target_price: float,
-                 symbol: str) -> RiskDecision:
+                 symbol: str, direction: str) -> RiskDecision:
 
         equity = account.equity
         self.update_peak(equity)
@@ -89,8 +89,21 @@ class RiskManager:
         if signal_confidence <= 0.0:
             return RiskDecision(False, 0.0, "zero_confidence")
 
+        # 6b. directional sanity
+        if direction == "LONG":
+            if target_price <= entry_price:
+                return RiskDecision(False, 0.0, "long_target_not_above_entry")
+            if stop_loss >= entry_price:
+                return RiskDecision(False, 0.0, "long_stop_not_below_entry")
+        elif direction == "SHORT":
+            if target_price >= entry_price:
+                return RiskDecision(False, 0.0, "short_target_not_below_entry")
+            if stop_loss <= entry_price:
+                return RiskDecision(False, 0.0, "short_stop_not_above_entry")
+        else:
+            return RiskDecision(False, 0.0, f"unknown_direction_{direction}")
+
         # 7. Kelly sizing
-        # win rate estimated from confidence; payoff = R:R
         win_rate = signal_confidence
         risk = abs(entry_price - stop_loss)
         reward = abs(target_price - entry_price)

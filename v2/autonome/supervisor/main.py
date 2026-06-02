@@ -165,7 +165,8 @@ def loop(st: State):
                                 entry_price=sig.entry_price,
                                 stop_loss=sig.stop_loss,
                                 target_price=sig.take_profit,
-                                symbol=sig.symbol
+                                symbol=sig.symbol,
+                                direction=sig.direction,
                             )
                             if not rd.approved:
                                 log.warning("RISK REJECTED %s: %s", sig.symbol, rd.reason)
