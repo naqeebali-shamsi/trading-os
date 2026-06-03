@@ -1,4 +1,4 @@
-# Autonome Trading OS v2.4
+# Autonome Trading OS v2.5
 
 AI-augmented autonomous trading system. Deterministic execution + LLM intelligence.
 
@@ -171,7 +171,7 @@ python3 tests/test_backtest.py      # backtest engine
 - v2.1: Intelligence layer (LLM Gate, DreamPod, Discovery Engine)
 - v2.2: Safety layer (OCO brackets, API hard stop, vol halt, fractional shares, PDT guard)
 - v2.3: Operational maturity (short guards, throttling, VIX feed, Telegram alerts, earnings guard, reconciliation, journal rotation, portfolio heat, LIVE mode gate)
-- v2.4: Backtesting system (event-driven engine, performance metrics, synthetic + Alpaca data, CLI tool)
+- v2.5: Backtesting system (event-driven engine, performance metrics, synthetic + Alpaca data, CLI tool)
 
 ## License
 

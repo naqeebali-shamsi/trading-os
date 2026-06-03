@@ -1,17 +1,19 @@
 """
-autonome/backtest/engine.py  v1.0
-Event-driven backtest engine for momentum breakout strategy.
-Simulates fill at next-bar open with slippage + commission.
+autonome/backtest/engine.py  v2.0
+Event-driven backtest engine with regime filter support.
+Uses Yahoo Finance data for unlimited history.
 """
 from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Dict, Optional, Callable
+from typing import List, Dict, Optional
+from types import SimpleNamespace
 
 from autonome.data.bars import Bar
 from autonome.strategy.momentum_breakout import MomentumBreakout, Signal
+from autonome.strategy.regime import RegimeFilter
 from autonome.risk.risk_manager import RiskManager, RiskDecision
 
 log = logging.getLogger("backtest")
@@ -27,10 +29,10 @@ class TradeResult:
     entry_price: float
     exit_price: Optional[float]
     qty: float
-    pnl: float          # realized P&L
-    pnl_pct: float      # P&L as % of entry notional
-    exit_reason: str    # "stop", "target", "end_of_data", "strategy_exit"
-    max_drawdown: float # max adverse excursion as %
+    pnl: float
+    pnl_pct: float
+    exit_reason: str
+    max_drawdown: float
     bars_held: int
 
 
@@ -40,48 +42,20 @@ class BacktestResult:
     trades: List[TradeResult] = field(default_factory=list)
     equity_curve: List[tuple[datetime, float]] = field(default_factory=list)
     signals_generated: int = 0
-    signals_rejected: int = 0
+    signals_regime_rejected: int = 0
     signals_risk_rejected: int = 0
+    regime_stats: List[dict] = field(default_factory=list)
     initial_equity: float = 100000.0
     commission_rate: float = 0.0
     slippage: float = 0.0
 
 
-def _ema(values: List[float], period: int) -> List[float]:
-    """Simple EMA series."""
-    if len(values) < period:
-        return []
-    k = 2.0 / (period + 1)
-    ema = [sum(values[:period]) / period]
-    for v in values[period:]:
-        ema.append(v * k + ema[-1] * (1 - k))
-    return ema
-
-
 class BacktestEngine:
-    """
-    Walk-forward backtest engine.
-
-    Parameters
-    ----------
-    strategy : MomentumBreakout
-        Strategy instance to backtest.
-    risk_manager : RiskManager
-        Risk manager for sizing decisions.
-    initial_equity : float
-        Starting capital.
-    commission_rate : float
-        Commission as fraction of notional (e.g. 0.0005 for 0.05%).
-    slippage : float
-        Slippage per side as fraction of price (e.g. 0.0005 for 5bps).
-    entry_at : str
-        "next_open" or "limit".  How entry fills are modelled.
-    """
-
     def __init__(
         self,
         strategy: MomentumBreakout,
         risk_manager: RiskManager,
+        regime_filter: Optional[RegimeFilter] = None,
         initial_equity: float = 100000.0,
         commission_rate: float = 0.0005,
         slippage: float = 0.0005,
@@ -89,23 +63,20 @@ class BacktestEngine:
     ):
         self.strategy = strategy
         self.risk = risk_manager
+        self.regime = regime_filter
         self.initial_equity = initial_equity
         self.commission_rate = commission_rate
         self.slippage = slippage
         self.entry_at = entry_at
 
     def _slipped_price(self, price: float, direction: str, is_entry: bool) -> float:
-        """Apply slippage against the trader."""
         slip = price * self.slippage
         if direction == "LONG":
             return price + slip if is_entry else price - slip
-        else:  # SHORT
+        else:
             return price - slip if is_entry else price + slip
 
     def run(self, bars: List[Bar]) -> BacktestResult:
-        """
-        Run backtest on a chronological list of bars for a single symbol.
-        """
         if not bars:
             return BacktestResult(initial_equity=self.initial_equity)
 
@@ -117,12 +88,28 @@ class BacktestEngine:
 
         equity = self.initial_equity
         result.equity_curve.append((bars[0].t, equity))
+        open_trade: Optional[dict] = None
 
-        # Track open position
-        open_trade: Optional[dict] = None  # {signal, entry_price, qty, entry_time, bars_held, max_price, min_price}
+        # Build a no-DB bar store once to avoid SQLite lock issues
+        from autonome.data.bars import BarStore
+        store = BarStore([bars[0].symbol], maxlen=200, db_path=None)
+        for b in bars[:30]:
+            store.buffers[b.symbol].append(b)
 
-        for i in range(len(bars)):
+        for i in range(30, len(bars)):
             bar = bars[i]
+
+            # Update store
+            store.buffers[bar.symbol].append(bar)
+
+            # Regime check
+            if self.regime is not None:
+                allowed, reason = self.regime.check(bar.t)
+                if not allowed:
+                    result.signals_regime_rejected += 1
+                    if i % 50 == 0 and result.regime_stats:
+                        result.regime_stats.append({"time": bar.t.isoformat(), "reason": reason})
+                    continue
 
             # Check exit for open position
             if open_trade is not None:
@@ -140,10 +127,9 @@ class BacktestEngine:
                 exit_reason = None
 
                 if direction == "LONG":
-                    # Stop hit first (intrabar: assume worst case = low)
                     if bar.low <= sl:
                         exited = True
-                        exit_price = min(bar.open, sl)  # worst of open or stop
+                        exit_price = min(bar.open, sl)
                         exit_reason = "stop"
                     elif bar.high >= tp:
                         exited = True
@@ -169,11 +155,10 @@ class BacktestEngine:
                         raw_pnl = (entry_slip - exit_price) * ot["qty"]
 
                     notional = entry_slip * ot["qty"]
-                    commission = notional * self.commission_rate * 2  # in + out
+                    commission = notional * self.commission_rate * 2
                     pnl = raw_pnl - commission
                     pnl_pct = pnl / notional if notional > 0 else 0.0
 
-                    # Max drawdown
                     if direction == "LONG":
                         mae = (entry_slip - ot["min_price"]) / entry_slip
                     else:
@@ -197,23 +182,11 @@ class BacktestEngine:
                     equity += pnl
                     result.equity_curve.append((bar.t, equity))
                     open_trade = None
-                    continue  # skip signal generation on exit bar
+                    continue
 
             # No open position — generate signals
             if open_trade is not None:
                 continue
-
-            # Need enough bars for strategy
-            if i < 30:
-                continue
-
-            # Build BarStore from history up to this bar
-            hist = bars[:i+1]
-            # Use a temporary store without DB (we pass db_path to avoid locks)
-            from autonome.data.bars import BarStore
-            store = BarStore([bar.symbol], maxlen=200, db_path=None)
-            for b in hist:
-                store.buffers[bar.symbol].append(b)
 
             sig = self.strategy.scan(bar.symbol, store, global_bar_idx=i)
             result.signals_generated += 1
@@ -221,8 +194,7 @@ class BacktestEngine:
             if sig is None:
                 continue
 
-            # Risk evaluation (mock account)
-            from types import SimpleNamespace
+            # Risk evaluation
             mock_acc = SimpleNamespace(
                 equity=equity,
                 buying_power=equity,
@@ -230,15 +202,6 @@ class BacktestEngine:
                 daytrade_count=0,
                 status="ACTIVE",
             )
-
-            class MockPosition:
-                def __init__(self, s, q, e):
-                    self.symbol = s
-                    self.qty = q
-                    self.avg_entry_price = e
-                    self.current_price = e
-                    self.unrealized_pl = 0.0
-                    self.unrealized_plpc = 0.0
 
             positions = []
             rd = self.risk.evaluate(
@@ -254,7 +217,6 @@ class BacktestEngine:
             # Entry fill
             if self.entry_at == "next_open":
                 if i + 1 >= len(bars):
-                    # No next bar — skip
                     continue
                 fill_price = self._slipped_price(bars[i+1].open, sig.direction, is_entry=True)
                 fill_time = bars[i+1].t

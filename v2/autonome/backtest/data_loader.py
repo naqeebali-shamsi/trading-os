@@ -1,88 +1,36 @@
 """
-autonome/backtest/data_loader.py  v1.0
+autonome/backtest/data_loader.py  v1.1
 Load historical bars for backtesting.
-Alpaca REST first, synthetic fallback for tests.
+Yahoo Finance primary, Alpaca fallback, synthetic last resort.
 """
 from __future__ import annotations
 
 import os, logging
 from datetime import datetime, timedelta, timezone
-from typing import List, Optional
-
-import requests
-import yaml
+from typing import List, Optional, Tuple
 
 from autonome.data.bars import Bar
+from autonome.data.yahoo_feed import fetch_history as fetch_yahoo
 
 log = logging.getLogger("backtest.data")
 
 
-def _load_cfg() -> dict:
-    p = os.path.join(os.path.dirname(__file__), "../../config/settings.yaml")
-    with open(p) as f:
-        return yaml.safe_load(f)
-
-
-def _load_secrets() -> dict:
-    p = os.path.join(os.path.dirname(__file__), "../../config/secrets.yaml")
-    with open(p) as f:
-        return yaml.safe_load(f)
-
-
-def load_from_alpaca(
+def load_from_yahoo(
     symbol: str,
     start: datetime,
     end: datetime,
-    timeframe: str = "1Hour",
-    adjustment: str = "raw",
+    timeframe: str = "1d",
 ) -> List[Bar]:
-    """Fetch historical bars from Alpaca."""
-    cfg = _load_cfg()
-    sec = _load_secrets()
-
-    url = f"{cfg['broker']['data_url']}/v2/stocks/{symbol}/bars"
-    params = {
-        "timeframe": timeframe,
-        "start": start.strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "end": end.strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "limit": 10000,
-        "feed": "iex",
-        "sort": "asc",
-    }
-    if adjustment in ("split", "all"):
-        params["adjustment"] = adjustment
-
-    session = requests.Session()
-    session.headers.update({
-        "APCA-API-KEY-ID": sec["alpaca"]["api_key"],
-        "APCA-API-SECRET-KEY": sec["alpaca"]["api_secret"],
-    })
-
-    r = session.get(url, params=params, timeout=60)
-    r.raise_for_status()
-    data = r.json()
-
-    bars = []
-    for b in data.get("bars", []):
-        bars.append(Bar(
-            symbol=symbol,
-            t=datetime.fromisoformat(b["t"].replace("Z", "+00:00")),
-            open=float(b["o"]),
-            high=float(b["h"]),
-            low=float(b["l"]),
-            close=float(b["c"]),
-            volume=int(b["v"]),
-        ))
-    log.info("Loaded %d bars for %s from Alpaca", len(bars), symbol)
-    return bars
+    """Fetch from Yahoo Finance (no API keys needed)."""
+    return fetch_yahoo(symbol, start, end, timeframe)
 
 
 def generate_synthetic(
     symbol: str = "SPY",
     n: int = 500,
     base_price: float = 400.0,
-    trend: float = 0.0001,       # per-bar drift
-    volatility: float = 0.008,   # per-bar std
+    trend: float = 0.0001,
+    volatility: float = 0.008,
     seed: int = 42,
 ) -> List[Bar]:
     """Generate synthetic OHLCV for unit testing."""
@@ -115,3 +63,29 @@ def generate_synthetic(
         t += timedelta(hours=1)
 
     return bars
+
+
+def load_bars_with_regime(
+    symbol: str,
+    start: datetime,
+    end: datetime,
+    timeframe: str = "1d",
+) -> Tuple[List[Bar], List[Bar]]:
+    """
+    Load intraday bars AND daily bars for regime filtering.
+    Returns (intraday_bars, daily_bars).
+    """
+    intraday = fetch_yahoo(symbol, start, end, timeframe)
+    if not intraday:
+        log.warning("No intraday bars from Yahoo for %s, trying synthetic", symbol)
+        # Generate synthetic matching the date range
+        days = (end - start).days
+        n = max(days * 6, 200)  # rough estimate of 1H bars
+        intraday = generate_synthetic(symbol, n=n)
+
+    # Fetch daily for regime (go back further for EMA/ATR calc)
+    daily_start = start - timedelta(days=100)
+    daily = fetch_yahoo(symbol, daily_start, end, "1d")
+
+    log.info("Loaded %d %s bars + %d daily bars for %s", len(intraday), timeframe, len(daily), symbol)
+    return intraday, daily

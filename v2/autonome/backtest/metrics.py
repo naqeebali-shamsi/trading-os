@@ -1,21 +1,18 @@
 """
-autonome/backtest/metrics.py  v1.0
+autonome/backtest/metrics.py  v1.1
 Performance metrics for backtest results.
 """
 from __future__ import annotations
 
 import math, statistics
 from datetime import datetime
-from typing import List, Tuple, Dict
+from typing import List, Dict
 
 from autonome.backtest.engine import BacktestResult, TradeResult
 
 
 def compute_metrics(result: BacktestResult) -> Dict:
-    """
-    Compute full performance metrics from a BacktestResult.
-    Returns dict with human-readable values.
-    """
+    """Compute full performance metrics from a BacktestResult."""
     trades = result.trades
     if not trades:
         return {"error": "no trades"}
@@ -24,7 +21,6 @@ def compute_metrics(result: BacktestResult) -> Dict:
     initial = result.initial_equity
     final = equity_curve[-1][1] if equity_curve else initial
 
-    # --- trade stats ---
     pnls = [t.pnl for t in trades]
     wins = [p for p in pnls if p > 0]
     losses = [p for p in pnls if p <= 0]
@@ -42,15 +38,12 @@ def compute_metrics(result: BacktestResult) -> Dict:
     avg_loss = statistics.mean(losses) if losses else 0.0
     avg_trade = statistics.mean(pnls) if pnls else 0.0
 
-    # expectancy = (win_rate * avg_win) - (loss_rate * abs(avg_loss))
     loss_rate = 1.0 - win_rate
     expectancy = (win_rate * avg_win) - (loss_rate * abs(avg_loss))
 
-    # --- equity curve stats ---
     equity_values = [e for _, e in equity_curve]
     total_return = (final - initial) / initial if initial > 0 else 0.0
 
-    # max drawdown
     peak = initial
     max_dd = 0.0
     max_dd_pct = 0.0
@@ -63,7 +56,6 @@ def compute_metrics(result: BacktestResult) -> Dict:
             max_dd = dd
             max_dd_pct = dd_pct
 
-    # Sharpe (daily)
     if len(equity_values) >= 2:
         daily_returns = []
         for i in range(1, len(equity_values)):
@@ -80,13 +72,9 @@ def compute_metrics(result: BacktestResult) -> Dict:
     else:
         sharpe = 0.0
 
-    # Calmar = annual return / max drawdown
     calmar = (total_return / max_dd_pct) if max_dd_pct > 0 else float("inf")
-
-    # avg bars held
     avg_bars = statistics.mean(t.bars_held for t in trades) if trades else 0
 
-    # max consecutive losses
     max_consec_losses = 0
     current_consec = 0
     for p in pnls:
@@ -119,6 +107,7 @@ def compute_metrics(result: BacktestResult) -> Dict:
         "net_pnl": final - initial,
         "final_equity": final,
         "signals_generated": result.signals_generated,
+        "signals_regime_rejected": result.signals_regime_rejected,
         "signals_risk_rejected": result.signals_risk_rejected,
     }
 
@@ -150,6 +139,5 @@ def print_report(result: BacktestResult, symbol: str = "") -> None:
     print(f"  Avg Trade:          ${m['avg_trade']:+.2f}")
     print(f"  Avg Bars Held:      {m['avg_bars_held']:.1f}")
     print(f"  Max Consec Losses:  {m['max_consecutive_losses']}")
-    print(f"  Signals Generated:  {m['signals_generated']}")
-    print(f"  Risk Rejected:      {m['signals_risk_rejected']}")
+    print(f"  Signals: {m['signals_generated']}  RegimeRejected: {m['signals_regime_rejected']}  RiskRejected: {m['signals_risk_rejected']}")
     print(f"{'=' * 60}\n")
