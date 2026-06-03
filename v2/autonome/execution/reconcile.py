@@ -29,7 +29,7 @@ class Reconciler:
 
         # Get journal orders with OPEN status
         try:
-            with journal._conn() as db:
+            with sqlite3.connect(journal.db_path) as db:
                 rows = db.execute(
                     "SELECT symbol, side, qty, entry_order_id, status FROM orders WHERE status = 'OPEN'"
                 ).fetchall()
