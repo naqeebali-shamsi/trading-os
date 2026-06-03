@@ -1,0 +1,177 @@
+{
+  "metadata": {
+    "version": "2.1",
+    "description": "Supply chain maps for thematic discovery. Maps catalyst themes to stocks via industry chain.",
+    "last_updated": "2026-06-03"
+  },
+  "themes": {
+    "india_data_center_fdi": {
+      "description": "Govt of India approves FDI for data centers. Supply chain: land -> power -> construction -> cooling -> fiber -> operations.",
+      "corruption_nexus": ["adani", "ambani", "gadkari"],
+      "supply_chain": {
+        "land_power": {
+          "description": "Land acquisition, power generation, transmission, green energy for DCs",
+          "symbols": {
+            "ADANIGREEN.NS": {"link": "Adani Green Energy", "thesis": "Primary beneficiary of Adani nexus + RE for DCs", "confidence": 0.85},
+            "NTPC.NS": {"link": "NTPC", "thesis": "Govt power utility, likely designated DC power partner", "confidence": 0.75},
+            "POWERGRID.NS": {"link": "Power Grid Corp", "thesis": "Transmission backbone for data center clusters", "confidence": 0.70},
+            "TATAPOWER.NS": {"link": "Tata Power", "thesis": "Private power + green push, strong execution", "confidence": 0.72}
+          }
+        },
+        "construction_civil": {
+          "description": "Data center shell construction, MEP, cooling towers",
+          "symbols": {
+            "LT.NS": {"link": "Larsen & Toubro", "thesis": "Largest EPC contractor, gets marquee infra", "confidence": 0.80},
+            "ACE.NS": {"link": "Action Construction Equipment", "thesis": "Crane & material handling at DC sites", "confidence": 0.55},
+            "KALPATPOWR.NS": {"link": "Kalpataru Power", "thesis": "Power transmission EPC, DC cluster wiring", "confidence": 0.60}
+          }
+        },
+        "cooling_hvac": {
+          "description": "Precision cooling, HVAC, thermal management for DCs",
+          "symbols": {
+            "BLUESTARCO.NS": {"link": "Blue Star", "thesis": "Commercial HVAC leader, DC cooling contracts", "confidence": 0.75},
+            "HAVELLS.NS": {"link": "Havells", "thesis": "Electrical + switchgear for DC power dist", "confidence": 0.65},
+            "VOLTAS.NS": {"link": "Voltas", "thesis": "AC & cooling JV with global DC players", "confidence": 0.62}
+          }
+        },
+        "fiber_connectivity": {
+          "description": "Subsea cables, fiber, 5G backhaul, IX connectivity",
+          "symbols": {
+            "BHARTIARTL.NS": {"link": "Bharti Airtel", "thesis": "Tower + fiber backbone, cloud adjacency", "confidence": 0.78},
+            "RELIANCE.NS": {"link": "Reliance Industries", "thesis": "Ambani nexus + Jio cloud infra play", "confidence": 0.85},
+            "TATACOMM.NS": {"link": "Tata Communications", "thesis": "Subsea cable + enterprise DC connectivity", "confidence": 0.76}
+          }
+        },
+        "it_services_operations": {
+          "description": "DC operations, managed services, cloud infra deployment",
+          "symbols": {
+            "TCS.NS": {"link": "Tata Consultancy", "thesis": "Managed DC ops, hyperscaler partnerships", "confidence": 0.72},
+            "HCLTECH.NS": {"link": "HCL Tech", "thesis": "IT infra mgmt, DC migration services", "confidence": 0.68},
+            "INFY.NS": {"link": "Infosys", "thesis": "Cloud infra consulting, hyperscaler deals", "confidence": 0.70}
+          }
+        }
+      },
+      "primary_beneficiaries": ["ADANIGREEN.NS", "RELIANCE.NS", "LT.NS", "BHARTIARTL.NS", "TATACOMM.NS"],
+      "secondary_beneficiaries": ["NTPC.NS", "BLUESTARCO.NS", "TATAPOWER.NS", "TCS.NS", "HCLTECH.NS"]
+    },
+
+    "india_semiconductor_fab": {
+      "description": "India semiconductor fab incentives ( ₹76,000cr scheme). Supply chain: raw materials -> fab equipment -> ATMP -> design IP.",
+      "corruption_nexus": ["vedanta", "foxconn"],
+      "supply_chain": {
+        "raw_materials": {
+          "symbols": {
+            "HINDZINC.NS": {"link": "Hindustan Zinc", "thesis": "Zinc, specialty metals for chip packaging", "confidence": 0.60},
+            "NATIONALUM.NS": {"link": "National Aluminium", "thesis": "Aluminum substrate/backplate supply", "confidence": 0.55}
+          }
+        },
+        "fab_equipment": {
+          "symbols": {
+            "VEDL.NS": {"link": "Vedanta", "thesis": "JV with Foxconn for chip fab in Gujarat", "confidence": 0.72},
+            "CGPOWER.NS": {"link": "CG Power", "thesis": "Motors, transformers for fab power infrastructure", "confidence": 0.60}
+          }
+        },
+        "atmp_osat": {
+          "symbols": {
+            "DIXON.NS": {"link": "Dixon Technologies", "thesis": "EMS/plastics, likely ATMP beneficiary", "confidence": 0.65},
+            "CYIENT.NS": {"link": "Cyient", "thesis": "Engineering for semiconductor design", "confidence": 0.55}
+          }
+        },
+        "design_ip": {
+          "symbols": {
+            "NA": {"link": "No direct India-listed pure-play design IP", "thesis": "Consider global ADRs: ARM, NVDA, AMD", "confidence": 0.50}
+          }
+        }
+      },
+      "primary_beneficiaries": ["VEDL.NS", "DIXON.NS"],
+      "secondary_beneficiaries": ["HINDZINC.NS", "CGPOWER.NS"]
+    },
+
+    "us_ai_infrastructure": {
+      "description": "US AI datacenter buildout: power, cooling, GPUs, networking, real estate.",
+      "supply_chain": {
+        "power_generation": {
+          "symbols": {
+            "VST": {"link": "Vistra", "thesis": "Nuclear + gas for AI DC power, largest US beneficiary", "confidence": 0.90},
+            "CEG": {"link": "Constellation Energy", "thesis": "Nuclear restart for Microsoft AI DCs", "confidence": 0.88},
+            "NRG": {"link": "NRG Energy", "thesis": "Gas peaker for DC backup power", "confidence": 0.70}
+          }
+        },
+        "cooling": {
+          "symbols": {
+            "APD": {"link": "Air Products", "thesis": "Liquid hydrogen/cooling for AI clusters", "confidence": 0.60},
+            "ITT": {"link": "ITT Inc", "thesis": "Pumps and flow for liquid cooling", "confidence": 0.55}
+          }
+        },
+        "real_estate_dc": {
+          "symbols": {
+            "EQIX": {"link": "Equinix", "thesis": "Global DC REIT, AI rack expansion", "confidence": 0.80},
+            "DLR": {"link": "Digital Realty", "thesis": "Hyperscale DC, AI workloads", "confidence": 0.78},
+            "AMT": {"link": "American Tower", "thesis": "Edge DC on tower footprint", "confidence": 0.60}
+          }
+        },
+        "networking": {
+          "symbols": {
+            "ANET": {"link": "Arista Networks", "thesis": "Data center networking, hyperscaler backbone", "confidence": 0.85},
+            "MRVL": {"link": "Marvell", "thesis": "Custom silicon, optical interconnects for AI", "confidence": 0.82},
+            "COHR": {"link": "Coherent", "thesis": "Optical transceivers for AI clusters", "confidence": 0.72}
+          }
+        }
+      },
+      "primary_beneficiaries": ["VST", "CEG", "ANET", "DLR", "EQIX"],
+      "secondary_beneficiaries": ["MRVL", "NRG", "COHR", "AMT"]
+    },
+
+    "us_defense_ai": {
+      "description": "Pentagon AI + autonomous weapons spending surge. JADC2, drone swarms, AI targeting.",
+      "primary_beneficiaries": ["PLTR", "ANDUR"],
+      "secondary_beneficiaries": ["LMT", "RTX", "NOC", "KTOS", "AVAV"],
+      "thesis": "AI-driven warfare is bipartisan priority. Anduril (private) and Palantir are purest plays. Traditional defense primes (Lockheed, RTX) lag but have scale."
+    },
+
+    "global_battery_supply_chain": {
+      "description": "EV + grid battery demand. Lithium, graphite, cathode materials, cell makers, recycling.",
+      "supply_chain": {
+        "lithium": {
+          "symbols": {
+            "ALB": {"link": "Albemarle", "thesis": "World's largest lithium producer", "confidence": 0.85},
+            "SQM": {"link": "SQM (Chile)", "thesis": "Lithium + specialty chems", "confidence": 0.80},
+            "LTHM": {"link": "Livent/Allkem mergeco", "thesis": "Lithium hydroxide for NMC cells", "confidence": 0.75}
+          }
+        },
+        "cathode_materials": {
+          "symbols": {
+            "MP": {"link": "MP Materials", "thesis": "Rare earths + magnet materials for EV motors", "confidence": 0.72}
+          }
+        },
+        "cell_makers": {
+          "symbols": {
+            "TSLA": {"link": "Tesla", "thesis": "Vertically integrated battery (4680)", "confidence": 0.80},
+            "CATL-F": {"link": "CATL (not US-listed)", "thesis": "World's largest cell maker", "confidence": 0.90}
+          }
+        }
+      },
+      "primary_beneficiaries": ["ALB", "TSLA"],
+      "secondary_beneficiaries": ["MP", "SQM", "LTHM"]
+    }
+  },
+
+  "corruption_indicators": {
+    "description": "For markets where corruption and crony capitalism drive contract allocation, these patterns predict winners.",
+    "india": {
+      "movers": ["adani", "ambani", "gadkari", "bjp", "rss"],
+      "pattern": "Infrastructure/govt contracts flow to politically connected conglomerates. Adani = energy/infra. Ambani = telecom/retail/energy. Gadkari proximity = road/transport infra.",
+      "trade_logic": "Buy on contract announcement, don't hold through delivery (overruns common). Exit on pledge news, regulatory probe, or Hindenburg-style reports."
+    },
+    "china": {
+      "movers": ["state_grid", "china_mobile", "sasac"],
+      "pattern": "State-directed: SOEs win stated industries. Private tech wins only with Party blessing.",
+      "trade_logic": "Follow Five-Year Plan sectors. Avoid if CAC crackdown narrative active."
+    },
+    "saudi": {
+      "movers": ["pif", "aramco", "neom"],
+      "pattern": "PIF-linked entities get all mega-projects. Western firms enter via joint-venture.",
+      "trade_logic": "Buy PIF-driven sectors at announcement. Be wary of Vision 2030 execution delays."
+    }
+  }
+}

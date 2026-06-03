@@ -82,13 +82,14 @@ class TradeJournal:
                 )
             """)
 
-    def log_signal(self, signal, t: Optional[datetime] = None):
+    def log_signal(self, signal, t: Optional[datetime] = None, meta: Optional[dict] = None):
         t = t or datetime.utcnow()
+        meta_json = json.dumps(meta) if meta else (signal.meta if hasattr(signal, 'meta') and signal.meta else "")
         with sqlite3.connect(self.db_path) as db:
             db.execute(
                 "INSERT INTO signals (t,symbol,direction,entry_price,stop_loss,take_profit,confidence,meta) VALUES (?,?,?,?,?,?,?,?)",
                 (t.isoformat(), signal.symbol, signal.direction, signal.entry_price,
-                 signal.stop_loss, signal.take_profit, signal.confidence, signal.meta)
+                 signal.stop_loss, signal.take_profit, signal.confidence, meta_json)
             )
 
     def log_order(self, trade_record, t: Optional[datetime] = None):

@@ -1,0 +1,12 @@
+[Unit]
+Description=Autonome DreamPod — Overnight Market Intelligence
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c 'cd /mnt/e/NomadCrew[GROWTH]/trading-os/v2 && source .venv/bin/activate 2>/dev/null || true && python3 -m autonome.intelligence.dreampod'
+WorkingDirectory=/mnt/e/NomadCrew[GROWTH]/trading-os/v2
+LimitNOFILE=65536
+
+[Install]
+WantedBy=default.target

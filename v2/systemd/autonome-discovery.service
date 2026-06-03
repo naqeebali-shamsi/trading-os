@@ -1,0 +1,12 @@
+[Unit]
+Description=Autonome Discovery Engine — Thematic Stock Discovery
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c 'cd /mnt/e/NomadCrew[GROWTH]/trading-os/v2 && source .venv/bin/activate 2>/dev/null || true && python3 -m autonome.intelligence.discovery'
+WorkingDirectory=/mnt/e/NomadCrew[GROWTH]/trading-os/v2
+LimitNOFILE=65536
+
+[Install]
+WantedBy=default.target

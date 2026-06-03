@@ -70,3 +70,33 @@ alerts:
   telegram:
     enabled: false   # set true + bot_token/chat_id in secrets.yaml
   log_fatal: true
+
+# ── INTELLIGENCE LAYER (v2.1) ──────────────────────────────────────────────
+intelligence:
+  # LLM Gate: qualitative review before execution
+  llm_gate_enabled: true
+  llm_gate_model: "openai/gpt-4o-mini"
+  llm_gate_context_bars: 50
+  auto_approve_below_confidence: 0.0   # signals below this skip LLM (auto-approve)
+
+  # DreamPod: overnight/pre-market analysis
+  dreampod_enabled: true
+  dreampod_macro_llm: true
+  dreampod_schedule_utc: "04:00"       # when to run pre-market analysis
+
+  # Discovery Engine: news + supply-chain + corruption-aware stock discovery
+  discovery_enabled: true
+  discovery_llm: true
+  discovery_max_candidates: 20
+
+  # Global news queries (expanded by DiscoveryEngine per theme)
+  discovery_queries:
+    - "FDI data center India government approve"
+    - "India semiconductor fab PLI scheme"
+    - "AI datacenter power nuclear US"
+    - "Pentagon AI autonomous weapons budget"
+    - "EV battery lithium supply chain"
+    - "tariff trade war semiconductor"
+    - "infrastructure tender India Adani Ambani"
+    - "government contract corruption supply chain"
+    - "Bloomberg NEF renewable energy tender"

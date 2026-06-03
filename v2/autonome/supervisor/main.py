@@ -20,6 +20,7 @@ from autonome.strategy.momentum_breakout import MomentumBreakout, Signal
 from autonome.risk.risk_manager import RiskManager
 from autonome.execution.engine import ExecutionEngine, TradeRecord
 from autonome.journal.trade_journal import TradeJournal
+from autonome.intelligence.llm_gate import LLMGate, SignalContext
 
 logging.basicConfig(
     level=logging.INFO,
@@ -54,6 +55,7 @@ class State:
         self.risk = RiskManager()
         self.execution = ExecutionEngine(self.client)
         self.journal = TradeJournal()
+        self.llm_gate = LLMGate()
 
         self.global_bar_idx = 0
         self.last_equity_log = datetime.min.replace(tzinfo=timezone.utc)
@@ -155,7 +157,33 @@ def loop(st: State):
                                      sig.symbol, sig.direction, sig.entry_price, sig.confidence)
                             st.journal.log_signal(sig)
 
-                            # ── risk ───────────────────────────────
+                            # ── LLM GATE ─────────────────────────────────
+                            gctx = SignalContext(
+                                symbol=sig.symbol,
+                                direction=sig.direction,
+                                entry_price=sig.entry_price,
+                                stop_loss=sig.stop_loss,
+                                take_profit=sig.take_profit,
+                                confidence=sig.confidence,
+                                strategy="momentum_breakout",
+                                regime=st.cfg.get("playbook", {}).get("regime", "unknown"),
+                                sector=None,
+                            )
+                            gate = st.llm_gate.review(gctx)
+                            log.info("LLM GATE %s: %s (conf=%.2f) reasoning=%s",
+                                     sig.symbol, gate.decision, gate.confidence, gate.reasoning[:80])
+
+                            if gate.decision == "REJECT":
+                                log.warning("LLM REJECTED %s: %s", sig.symbol, gate.reasoning)
+                                st.journal.log_signal(sig, meta={"gate": "REJECTED", "reason": gate.reasoning})
+                                continue
+
+                            if gate.decision == "MODIFY":
+                                sig = st.llm_gate.apply_modifications(sig, gate)
+                                log.info("LLM MODIFIED %s entry=%.2f stop=%.2f target=%.2f",
+                                         sig.symbol, sig.entry_price, sig.stop_loss, sig.take_profit)
+
+                            # ── risk ─────────────────────────────────────
                             acc = st.client.get_account()
                             positions = st.client.list_positions()
                             rd = st.risk.evaluate(
