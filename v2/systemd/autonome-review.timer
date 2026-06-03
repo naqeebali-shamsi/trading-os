@@ -1,0 +1,10 @@
+[Unit]
+Description=Autonome v2 LLM Review Timer (8am + 8pm UTC)
+
+[Timer]
+OnCalendar=*-*-* 08:00:00
+OnCalendar=*-*-* 20:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

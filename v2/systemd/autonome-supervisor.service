@@ -1,0 +1,17 @@
+[Unit]
+Description=Autonome v2 Supervisor (Paper Trading)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/mnt/e/NomadCrew[GROWTH]/trading-os/v2
+Environment=PYTHONUNBUFFERED=1
+Environment=AUTONOME_MODE=PAPER
+ExecStart=/bin/bash -lc 'cd /mnt/e/NomadCrew[GROWTH]/trading-os/v2 && source .venv/bin/activate && exec python3 -m autonome.supervisor.main'
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target
