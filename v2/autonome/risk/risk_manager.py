@@ -111,7 +111,8 @@ class RiskManager:
                  stop_loss: float, target_price: float,
                  symbol: str, direction: str,
                  closes: Optional[List[float]] = None,
-                 sector: Optional[str] = None) -> RiskDecision:
+                 sector: Optional[str] = None,
+                 vix: Optional[float] = None) -> RiskDecision:
 
         equity = account.equity
         self.update_peak(equity)
@@ -138,6 +139,11 @@ class RiskManager:
             vol = self.realized_vol_annual(closes)
             if vol >= self.vol_pause_annual:
                 return RiskDecision(False, 0.0, f"volatility_halt_{vol:.1%}")
+
+        # 4b. VIX-based volatility rules
+        if vix is not None:
+            if vix >= 40.0:
+                return RiskDecision(False, 0.0, f"vix_extreme_{vix:.1f}")
 
         # 5. max positions
         if len(positions) >= self.max_positions:
@@ -198,12 +204,25 @@ class RiskManager:
         if shares * entry_price < 1.0:
             return RiskDecision(False, 0.0, "min_notional_1usd")
 
-        # 11. buying power guard
         notional = shares * entry_price
+
+        # 10.5 short margin requirement (1.5x buying power for shorts)
+        if direction == "SHORT":
+            if account.buying_power < notional * 1.5:
+                return RiskDecision(False, 0.0, "short_margin_requirement_not_met")
+
+        # 11. buying power guard
         if notional > account.buying_power * 0.95:
             shares = (account.buying_power * 0.95) / entry_price
             if shares * entry_price < 1.0:
                 return RiskDecision(False, 0.0, "insufficient_buying_power")
+
+        # VIX high: reduce approved size by 50%
+        if vix is not None and vix >= 30.0:
+            shares = shares * 0.5
+            if shares * entry_price < 1.0:
+                return RiskDecision(False, 0.0, "vix_high_reduced_below_min_notional")
+            log.info("VIX high (%.1f) — position size halved to %.4f", vix, shares)
 
         return RiskDecision(True, round(shares, 6), "approved")
 

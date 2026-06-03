@@ -3,6 +3,7 @@ config/secrets.yaml
 *.key
 *.pem
 data/
+!autonome/data/
 __pycache__/
 *.pyc
 .env

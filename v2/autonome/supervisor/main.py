@@ -15,11 +15,13 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../.."))
 
 from autonome.broker.alpaca_client import AlpacaClient
 from autonome.data.bars import BarStore, AlpacaDataFeed
+from autonome.data.vix_feed import fetch_vix
 from autonome.strategy.momentum_breakout import MomentumBreakout
 from autonome.risk.risk_manager import RiskManager
 from autonome.execution.engine import ExecutionEngine
 from autonome.journal.trade_journal import TradeJournal
 from autonome.intelligence.llm_gate import LLMGate, SignalContext
+from autonome.alerts.telegram import TelegramAlertSender
 
 logging.basicConfig(
     level=logging.INFO,
@@ -55,6 +57,7 @@ class State:
         self.execution = ExecutionEngine(self.client)
         self.journal = TradeJournal()
         self.llm_gate = LLMGate()
+        self.alerts = TelegramAlertSender()
 
         self.global_bar_idx = 0
         self.last_equity_log = datetime.min.replace(tzinfo=timezone.utc)
@@ -62,6 +65,10 @@ class State:
         self.last_order_sync = datetime.min.replace(tzinfo=timezone.utc)
         self.consecutive_api_failures = 0
         self._running = True
+        self.prev_positions: dict[str, object] = {}
+        self.last_vix: Optional[float] = None
+        self.last_vix_fetch: Optional[datetime] = None
+        self.consecutive_stale_cycles = 0
 
     def shutdown(self, *_):
         log.warning("Shutdown signal received")
@@ -88,6 +95,8 @@ def write_state_json(st: State):
                 "bar_idx": st.global_bar_idx,
                 "symbols_warm": {s: len(st.store.history(s, 999)) for s in st.symbols},
                 "halted": st.risk.halted,
+                "vix": st.last_vix,
+                "vix_fetch": st.last_vix_fetch.isoformat() if st.last_vix_fetch else None,
             }, f)
     except Exception:
         log.exception("state write failed")
@@ -105,6 +114,7 @@ def _handle_api_failure(st: State, context: str) -> bool:
     if st.consecutive_api_failures >= MAX_CONSECUTIVE_API_FAILURES:
         st.risk.halted = True
         st.risk._save_halt_state()
+        st.alerts.send_api_halt(st.consecutive_api_failures, context)
         log.critical("HALT TRIGGERED: %d consecutive API failures. Manual resume required.",
                      st.consecutive_api_failures)
         return True
@@ -188,21 +198,26 @@ def loop(st: State):
             except Exception:
                 log.warning("Order sync failed (non-fatal)")
 
-        # ── fetch new bars ─────────────────────────────────────────────────
+        # ── systematic data staleness check ────────────────────────────────
         max_staleness_sec = 3600 * 2  # 2 hours
-        any_stale = False
+        any_stale, stale_symbols = st.store.any_stale(max_staleness_sec)
+        if any_stale:
+            st.consecutive_stale_cycles += 1
+            log.warning("STALE DATA %s (consecutive=%d/3)", stale_symbols, st.consecutive_stale_cycles)
+            if st.consecutive_stale_cycles >= 3:
+                log.error("SOFT HALT: data stale for 3+ cycles — pausing until fresh")
+                time.sleep(300)
+                continue
+        else:
+            if st.consecutive_stale_cycles > 0:
+                log.info("Data fresh again — clearing stale counter")
+            st.consecutive_stale_cycles = 0
 
+        # ── fetch new bars ─────────────────────────────────────────────────
         for sym in st.symbols:
             try:
                 bars = st.feed.fetch_history(sym, limit=5)
                 for b in bars:
-                    # staleness check
-                    bar_age_sec = (datetime.now(timezone.utc) - b.t).total_seconds()
-                    if bar_age_sec > max_staleness_sec:
-                        log.warning("STALE BAR %s age=%.0fs — skipping", sym, bar_age_sec)
-                        any_stale = True
-                        continue
-
                     last = st.store.last(sym)
                     if last is None or b.t > last.t:
                         st.store.ingest(b)
@@ -248,6 +263,14 @@ def loop(st: State):
                             hist = st.store.history(sym, 30)
                             closes = [bar.close for bar in hist] if hist else []
 
+                            # fetch VIX (cached 15 min)
+                            vix_data = fetch_vix()
+                            vix_val = None
+                            if vix_data:
+                                vix_val, _ = vix_data
+                                st.last_vix = vix_val
+                                st.last_vix_fetch = datetime.now(timezone.utc)
+
                             rd = st.risk.evaluate(
                                 account=acc,
                                 positions=positions,
@@ -258,9 +281,17 @@ def loop(st: State):
                                 symbol=sig.symbol,
                                 direction=sig.direction,
                                 closes=closes,
+                                vix=vix_val,
                             )
                             if not rd.approved:
                                 log.warning("RISK REJECTED %s: %s", sig.symbol, rd.reason)
+                                if rd.reason.startswith("drawdown_limit"):
+                                    st.alerts.send_drawdown_halt(st.risk.current_drawdown(acc.equity), acc.equity)
+                                elif rd.reason == "daily_loss_limit":
+                                    st.alerts.send_daily_loss_halt(st.risk.daily_loss_accum, acc.equity)
+                                elif rd.reason.startswith("volatility_halt"):
+                                    vol = float(rd.reason.split("_")[-1].rstrip("%")) / 100.0 if "_" in rd.reason else 0.0
+                                    st.alerts.send_volatility_halt(vol)
                                 continue
                             log.info("RISK APPROVED %s qty=%.4f", sig.symbol, rd.qty)
 
@@ -270,13 +301,12 @@ def loop(st: State):
                             if tr.status == "OPEN":
                                 log.info("ENTER %s %s qty=%.4f @ %.2f",
                                          tr.symbol, tr.side, tr.qty, tr.entry_price or 0)
+                                st.alerts.send_position_entered(tr)
                             else:
                                 log.error("ENTER FAILED %s: %s", tr.symbol, tr.error)
+                                st.alerts.send_order_rejected(tr, tr.error)
             except Exception:
                 log.exception("Bar cycle failed for %s", sym)
-
-        if any_stale:
-            log.warning("Some bars were stale this cycle — consider checking data feed")
 
         # ── periodic tasks ─────────────────────────────────────────────────
         now = datetime.now(timezone.utc)
@@ -289,6 +319,21 @@ def loop(st: State):
                 st.journal.log_equity(acc.equity, acc.buying_power, acc.cash, dd, len(positions))
                 log.info("Equity=%.2f DD=%.2f%% Pos=%d", acc.equity, dd * 100, len(positions))
                 st.last_equity_log = now
+
+                # Detect position exits
+                prev_syms = set(st.prev_positions.keys())
+                curr_syms = {p.symbol for p in positions}
+                exited = prev_syms - curr_syms
+                for sym in exited:
+                    pp = st.prev_positions[sym]
+                    side = pp.direction if hasattr(pp, "direction") else ("LONG" if float(pp.qty) > 0 else "SHORT")
+                    entry_price = float(pp.avg_entry_price)
+                    if hasattr(pp, "current_price"):
+                        pnl = (pp.current_price - entry_price) * pp.qty if side == "LONG" else (entry_price - pp.current_price) * abs(pp.qty)
+                    else:
+                        pnl = None
+                    st.alerts.send_position_exited(pp, pnl)
+                st.prev_positions = {p.symbol: p for p in positions}
             except Exception:
                 if _handle_api_failure(st, "equity_snapshot"):
                     continue

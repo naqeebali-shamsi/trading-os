@@ -16,6 +16,7 @@ import yaml
 from autonome.broker.alpaca_client import AlpacaClient, OrderResult
 from autonome.risk.risk_manager import RiskDecision
 from autonome.strategy.momentum_breakout import Signal
+from autonome.execution.rate_limiter import OrderRateLimiter
 
 log = logging.getLogger("execution")
 
@@ -37,6 +38,8 @@ class TradeRecord:
 class ExecutionEngine:
     def __init__(self, client: AlpacaClient):
         self.client = client
+        self.limiter = OrderRateLimiter()
+        self.pending_queued: list = []  # queued signals awaiting rate limit slot
         cfg_path = os.path.join(os.path.dirname(__file__), "../../config/settings.yaml")
         with open(cfg_path) as f:
             cfg = yaml.safe_load(f)
@@ -45,13 +48,62 @@ class ExecutionEngine:
         self.tif = ec.get("time_in_force", "day")
         self.max_retry = ec.get("retry_attempts", 3)
         self.retry_delay = ec.get("retry_delay_sec", 2)
+        self.reject_htb = ec.get("reject_htb", True)
+        self.reject_non_shortable = ec.get("reject_non_shortable", True)
 
         # Track active orders for lifecycle monitoring
         self.active_orders: Dict[str, dict] = {}
 
     def enter_position(self, sig: Signal, rd: RiskDecision) -> TradeRecord:
+        # Rate limit check
+        if not self.limiter.can_submit(sig.symbol):
+            wait = self.limiter.time_to_next(sig.symbol)
+            log.warning("RATE LIMIT %s — queued (%.0fs)", sig.symbol, wait)
+            self.pending_queued.append((sig, rd))
+            return TradeRecord(
+                sig.symbol, "buy" if sig.direction == "LONG" else "sell",
+                rd.qty, "", None, None, None,
+                "QUEUED", filled_qty=0.0,
+                error=f"rate_limited_wait_{wait:.0f}s")
+
         side = "buy" if sig.direction == "LONG" else "sell"
         qty = rd.qty
+
+        # ── SHORT pre-flight guards ────────────────────────────────────────
+        if sig.direction == "SHORT":
+            asset = self.client.get_asset(sig.symbol)
+            if asset is None:
+                return TradeRecord(
+                    sig.symbol, side, qty, "", None, None, None,
+                    "REJECTED", filled_qty=0.0,
+                    error=f"asset_fetch_failed_{sig.symbol}")
+
+            if self.reject_non_shortable and not asset.get("shortable", False):
+                return TradeRecord(
+                    sig.symbol, side, qty, "", None, None, None,
+                    "REJECTED", filled_qty=0.0,
+                    error="symbol_not_shortable")
+
+            if self.reject_htb and not asset.get("easy_to_borrow", False):
+                return TradeRecord(
+                    sig.symbol, side, qty, "", None, None, None,
+                    "REJECTED", filled_qty=0.0,
+                    error="symbol_hard_to_borrow")
+
+            if not self.client.is_margin_enabled():
+                return TradeRecord(
+                    sig.symbol, side, qty, "", None, None, None,
+                    "REJECTED", filled_qty=0.0,
+                    error="margin_not_enabled")
+
+            # Short margin requirement: 1.5x notional buying power
+            account = self.client.get_account()
+            notional = qty * sig.entry_price
+            if notional * 1.5 > account.buying_power:
+                return TradeRecord(
+                    sig.symbol, side, qty, "", None, None, None,
+                    "REJECTED", filled_qty=0.0,
+                    error="insufficient_buying_power_for_short")
 
         # Build bracket order payload (Alpaca native OCO)
         payload = {

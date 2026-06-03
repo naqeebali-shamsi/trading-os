@@ -22,6 +22,7 @@ class Account:
     cash: float
     daytrade_count: int
     status: str  # ACTIVE, etc.
+    margin_enabled: bool = False
 
 
 @dataclass(frozen=True)
@@ -111,6 +112,7 @@ class AlpacaClient:
             cash=float(raw["cash"]),
             daytrade_count=int(raw.get("daytrade_count", 0)),
             status=raw["status"],
+            margin_enabled=bool(raw.get("margin_enabled", False)),
         )
         return self._account
 
@@ -214,6 +216,19 @@ class AlpacaClient:
         try:
             raw = self._get(f"/v2/assets/{symbol}")
             return raw.get("tradable", False) and raw.get("status") == "active"
+        except requests.HTTPError:
+            return False
+
+    def get_asset(self, symbol: str) -> Optional[dict]:
+        try:
+            return self._get(f"/v2/assets/{symbol}")
+        except requests.HTTPError:
+            return None
+
+    def is_margin_enabled(self) -> bool:
+        try:
+            raw = self._get("/v2/account")
+            return bool(raw.get("margin_enabled", False))
         except requests.HTTPError:
             return False
 

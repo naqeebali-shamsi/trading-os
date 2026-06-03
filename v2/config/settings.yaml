@@ -60,6 +60,8 @@ execution:
   # We use market orders at open because we want IN, not还因为
   retry_attempts: 3
   retry_delay_sec: 2
+  reject_htb: true
+  reject_non_shortable: true
 
 journal:
   db_path: "data/journal.sqlite"
