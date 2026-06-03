@@ -1,4 +1,4 @@
-# Autonome Trading OS v2.2
+# Autonome Trading OS v2.3
 
 AI-augmented autonomous trading system. Deterministic execution + LLM intelligence.
 
@@ -24,6 +24,7 @@ nano config/secrets.yaml
 #   alpaca.api_secret: "..."
 #   openrouter.api_key: "sk-or-v1-..."   # optional, for LLM Gate
 #   newsapi.api_key: "..."               # optional, for Discovery
+#   finnhub.api_key: "..."               # optional, for earnings calendar
 
 # 2. Install systemd services
 cp systemd/*.service systemd/*.timer ~/.config/systemd/user/
@@ -46,26 +47,41 @@ systemctl --user enable autonome-discovery.timer
 |--------|------|---------|
 | Broker | `broker/alpaca_client.py` | Alpaca REST API, paper/live gate |
 | Data | `data/bars.py` | BarStore (SQLite + deque), AlpacaDataFeed |
+| Data | `data/vix_feed.py` | VIX fetcher (Yahoo Finance, 15min cache) |
+| Data | `data/earnings.py` | Earnings calendar (Finnhub, 24h cache) |
 | Strategy | `strategy/momentum_breakout.py` | EMA + volume breakout signals |
 | Risk | `risk/risk_manager.py` | Kelly sizing, drawdown halt, vol halt, PDT guard |
+| Risk | `risk/portfolio_heat.py` | Total portfolio heat + sector heat tracking |
 | Execution | `execution/engine.py` | Native OCO bracket orders, lifecycle tracking |
-| Journal | `journal/trade_journal.py` | SQLite append-only audit log |
+| Execution | `execution/rate_limiter.py` | Token-bucket order throttling (6/min global, 2/min/symbol) |
+| Execution | `execution/reconcile.py` | Broker position/order reconciliation |
+| Execution | `execution/limit_entry.py` | Limit orders with market fallback |
+| Journal | `journal/trade_journal.py` | SQLite append-only audit log + auto-rotation |
 | Supervisor | `supervisor/main.py` | 24x7 loop, API failure hard stop, stale data guard |
 | Review | `supervisor/review.py` | LLM cockpit dashboard |
 | LLM Gate | `intelligence/llm_gate.py` | Qualitative signal review (APPROVE/REJECT/MODIFY) |
 | DreamPod | `intelligence/dreampod.py` | Overnight analysis, regime detection |
 | Discovery | `intelligence/discovery.py` | News + supply-chain + corruption-aware discovery |
+| Alerts | `alerts/telegram.py` | Real-time Telegram alerts for critical events |
 
 ## Safety Features
 
-- **Mode gate**: `PAPER` default; `LIVE` requires deliberate config change
+- **LIVE mode safety gate**: Requires `AUTONOME_LIVE_CONFIRM=I_UNDERSTAND` environment variable
 - **Drawdown halt**: Persistent across restarts (saved to `data/halted.json`)
 - **API failure hard stop**: 5 consecutive failures → auto-halt
-- **Data staleness guard**: Skips bars older than 2 hours
-- **Volatility halt**: Rejects signals when realized vol exceeds threshold
+- **Data staleness guard**: 3-cycle soft halt when bars older than 2 hours
+- **Volatility halt**: Rejects signals when realized vol exceeds threshold or VIX >= 40
+- **VIX sizing**: Position size halved when VIX >= 30
 - **PDT guard**: Blocks day trades when count >= 3
 - **Fractional shares**: Alpaca fractional support (no `int()` clamping)
 - **OCO bracket orders**: Native Alpaca bracket API (not independent legs)
+- **Short selling guards**: HTB rejection, margin check, 1.5x BP requirement
+- **Order throttling**: Prevents Alpaca rate-limit hits (6/min global, 2/min/symbol)
+- **Earnings avoidance**: Skips signals within ±2 days of earnings (Finnhub calendar)
+- **Broker reconciliation**: Hourly position/order mismatch detection
+- **Journal rotation**: Auto-archives when DB > 500MB
+- **Portfolio heat guard**: Total heat <= 5% equity, sector heat <= 3%
+- **Conviction weighting**: Position sizes scaled by signal confidence relative to portfolio
 
 ## Intelligence Layer
 
@@ -130,6 +146,7 @@ python3 tests/test_pipeline.py
 - v2.0: Core deterministic system (Alpaca, momentum, Kelly, journal)
 - v2.1: Intelligence layer (LLM Gate, DreamPod, Discovery Engine)
 - v2.2: Safety layer (OCO brackets, API hard stop, vol halt, fractional shares, PDT guard)
+- v2.3: Operational maturity (short guards, throttling, VIX feed, Telegram alerts, earnings guard, reconciliation, journal rotation, portfolio heat, LIVE mode gate)
 
 ## License
 

@@ -12,6 +12,7 @@ from typing import Optional, Dict, List
 import yaml
 
 from autonome.broker.alpaca_client import Account, Position
+from autonome.risk.portfolio_heat import PortfolioHeat
 
 log = logging.getLogger("risk")
 
@@ -35,6 +36,12 @@ class RiskManager:
         self.kelly_frac = rc["kelly_fraction"]
         self.vol_pause_annual = rc["volatility_pause_annual_pct"] / 100.0
         self.max_positions = cfg["system"]["max_concurrent_positions"]
+
+        # portfolio heat tracker
+        self.heat = PortfolioHeat(
+            max_heat_pct=rc.get("max_portfolio_heat_pct", 5.0),
+            max_heat_per_sector_pct=rc.get("max_sector_heat_pct", 3.0),
+        )
 
         # mutable state
         self.daily_loss_accum = 0.0
@@ -223,6 +230,22 @@ class RiskManager:
             if shares * entry_price < 1.0:
                 return RiskDecision(False, 0.0, "vix_high_reduced_below_min_notional")
             log.info("VIX high (%.1f) — position size halved to %.4f", vix, shares)
+
+        # 12. portfolio heat guard
+        proposed_notional = shares * entry_price
+        proposed_risk_pct = abs(entry_price - stop_loss) / entry_price if entry_price > 0 else 0
+        proposed_heat = proposed_notional * proposed_risk_pct
+        allowed, heat_reason = self.heat.can_add_position(proposed_heat, equity, sector)
+        if not allowed:
+            return RiskDecision(False, 0.0, heat_reason)
+
+        # 13. conviction weight scaling
+        shares = self.heat.conviction_weight(symbol, shares)
+        if shares * entry_price < 1.0:
+            return RiskDecision(False, 0.0, "conviction_scaled_below_min_notional")
+
+        # register in heat tracker (will be updated on actual fill)
+        self.heat.register_position(symbol, entry_price, stop_loss, shares, sector, signal_confidence)
 
         return RiskDecision(True, round(shares, 6), "approved")
 

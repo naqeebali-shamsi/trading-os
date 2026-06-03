@@ -55,6 +55,8 @@ risk:
   kelly_fraction: 0.25              # quarter-Kelly
   # If vol estimated above this, halt new signals
   volatility_pause_annual_pct: 50.0
+  max_portfolio_heat_pct: 5.0       # total risk across all positions
+  max_sector_heat_pct: 3.0          # risk per sector
 
 execution:
   order_type: market

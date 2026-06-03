@@ -50,14 +50,14 @@ class BarStore:
     """
     In-memory ring buffer per symbol + SQLite append-only log for warm restarts.
     """
-    def __init__(self, symbols: List[str], maxlen: int = 500):
+    def __init__(self, symbols: List[str], maxlen: int = 500, db_path: Optional[str] = None):
         self.symbols = symbols
         self.maxlen = maxlen
         self.buffers: Dict[str, deque] = {s: deque(maxlen=maxlen) for s in symbols}
         self._callbacks: List[Callable[[Bar], None]] = []
 
         cfg = _load_cfg()
-        self.db_path = cfg.get("journal", {}).get("db_path", "data/journal.sqlite")
+        self.db_path = db_path or cfg.get("journal", {}).get("db_path", "data/journal.sqlite")
         os.makedirs(os.path.dirname(self.db_path) or ".", exist_ok=True)
         self._ensure_table()
         self._warm_from_db()
