@@ -157,8 +157,8 @@ class TradeJournal:
         cutoff = (datetime.utcnow() - timedelta(days=keep_months * 30)).strftime("%Y-%m-%d")
         archive_path = self.db_path.replace(".sqlite", f"_archive_{datetime.utcnow():%Y%m}.sqlite")
 
+        # Step 1: write archive
         with sqlite3.connect(self.db_path) as src:
-            # Copy old records to archive
             with sqlite3.connect(archive_path) as dst:
                 for table in ("signals", "orders", "pnl", "equity"):
                     dst.execute(f"CREATE TABLE IF NOT EXISTS {table} AS SELECT * FROM {table} WHERE 0")
@@ -168,8 +168,19 @@ class TradeJournal:
                         placeholders = ",".join("?" * len(cols))
                         dst.executemany(f"INSERT INTO {table} ({','.join(cols)}) VALUES ({placeholders})", rows)
                         log.info("Archived %d rows from %s", len(rows), table)
-                # Delete from source
-                for table in ("signals", "orders", "pnl", "equity"):
-                    src.execute(f"DELETE FROM {table} WHERE t < ?", (cutoff,))
-                src.execute("VACUUM")
+
+        # Step 2: confirm archive was actually persisted
+        if not os.path.exists(archive_path) or os.path.getsize(archive_path) == 0:
+            log.critical(
+                "Archive write failed or produced empty file (%s). "
+                "Aborting rotation; source data NOT deleted.",
+                archive_path,
+            )
+            return
+
+        # Step 3: only now safe to delete from source and reclaim space
+        with sqlite3.connect(self.db_path) as src:
+            for table in ("signals", "orders", "pnl", "equity"):
+                src.execute(f"DELETE FROM {table} WHERE t < ?", (cutoff,))
+            src.execute("VACUUM")
         log.info("Journal rotated. Archive: %s", archive_path)

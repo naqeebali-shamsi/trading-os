@@ -53,8 +53,20 @@ class ExecutionEngine:
 
         # Track active orders for lifecycle monitoring
         self.active_orders: Dict[str, dict] = {}
+        self._recent_entries: Dict[str, float] = {}  # symbol -> timestamp
+        self.duplicate_cooldown_sec = 60.0
 
     def enter_position(self, sig: Signal, rd: RiskDecision) -> TradeRecord:
+        # Duplicate signal protection
+        now = time.time()
+        last_entry = self._recent_entries.get(sig.symbol, 0)
+        if now - last_entry < self.duplicate_cooldown_sec:
+            return TradeRecord(
+                sig.symbol, "buy" if sig.direction == "LONG" else "sell",
+                rd.qty, "", None, None, None,
+                "REJECTED", filled_qty=0.0,
+                error="duplicate_signal_cooldown")
+
         # Rate limit check
         if not self.limiter.can_submit(sig.symbol):
             wait = self.limiter.time_to_next(sig.symbol)
@@ -166,18 +178,46 @@ class ExecutionEngine:
                                "NO_FILL", filled_qty=0.0, error="entry_not_filled")
 
         # Bracket order creates stop + target children automatically
-        # We don't know child IDs yet; lifecycle monitor will find them
+        # Query children and track them
+        self._recent_entries[sig.symbol] = time.time()
+        stop_id, target_id = self._fetch_bracket_children(entry.id)
+        self.active_orders[entry.id]["children"] = [c for c in [stop_id, target_id] if c]
         return TradeRecord(
             symbol=sig.symbol,
             side=side,
             qty=qty,
             entry_order_id=entry.id,
             entry_price=filled_price,
-            stop_order_id=None,  # populated by lifecycle monitor
-            target_order_id=None,
+            stop_order_id=stop_id,
+            target_order_id=target_id,
             status="OPEN",
             filled_qty=filled_qty,
         )
+
+    def _fetch_bracket_children(self, parent_id: str):
+        """Query Alpaca for stop/target child orders of a bracket parent."""
+        try:
+            orders = self.client._get("/v2/orders?status=open&limit=500")
+            stop_id = None
+            target_id = None
+            for o in orders:
+                if o.get("legs"):
+                    for leg in o["legs"]:
+                        if leg.get("type") == "stop":
+                            stop_id = leg.get("id")
+                        elif leg.get("type") == "limit":
+                            target_id = leg.get("id")
+                # Also check by parent order ID in nested structure
+                if o.get("id") == parent_id and o.get("legs"):
+                    for leg in o.get("legs", []):
+                        if leg.get("type") == "stop":
+                            stop_id = leg.get("id")
+                        elif leg.get("type") == "limit":
+                            target_id = leg.get("id")
+            return stop_id, target_id
+        except Exception as e:
+            log.error("Failed to fetch bracket children for %s: %s", parent_id, e)
+            return None, None
 
     def flatten_symbol(self, symbol: str):
         """Market-order out entire position for symbol."""
@@ -194,11 +234,23 @@ class ExecutionEngine:
 
     def _cancel_bracket_legs(self, symbol: str):
         """Cancel stop/target orders for a symbol when position is flattened."""
-        try:
-            self.client.cancel_order(entry.id)
-            log.info("Cancelled all orders for %s after flatten", symbol)
-        except Exception as e:
-            log.error("Failed to cancel orders for %s: %s", symbol, e)
+        # Find all active orders for this symbol and cancel their children
+        cancelled = 0
+        for entry_id, info in list(self.active_orders.items()):
+            if info.get("symbol") == symbol:
+                for child_id in info.get("children", []):
+                    try:
+                        self.client.cancel_order(child_id)
+                        cancelled += 1
+                    except Exception as e:
+                        log.error("Failed to cancel child %s for %s: %s", child_id, symbol, e)
+                # Also cancel the parent entry if still open
+                try:
+                    self.client.cancel_order(entry_id)
+                    cancelled += 1
+                except Exception:
+                    pass
+        log.info("Cancelled %d orders for %s after flatten", cancelled, symbol)
 
     # ── lifecycle monitoring ─────────────────────────────────────────────────
 

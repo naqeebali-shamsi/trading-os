@@ -23,6 +23,7 @@ from autonome.execution.engine import ExecutionEngine
 from autonome.execution.reconcile import Reconciler
 from autonome.journal.trade_journal import TradeJournal
 from autonome.intelligence.llm_gate import LLMGate, SignalContext
+from autonome.intelligence.timesfm_real import TimesFMAdapter
 from autonome.alerts.telegram import TelegramAlertSender
 
 logging.basicConfig(
@@ -329,6 +330,15 @@ def loop(st: State):
                                 st.last_vix = vix_val
                                 st.last_vix_fetch = datetime.now(timezone.utc)
 
+                            # ── TimesFM forecast filter ───────────────────────
+                            hist = st.store.history(sym, 50)
+                            if hist and len(hist) >= 20:
+                                fc = st.forecaster.forecast(sym, hist, horizon=5)
+                                if not st.forecaster.should_trade(fc, sig.direction):
+                                    log.warning("TIMESFM BLOCKED %s — forecast contradicts %s (regime=%s)",
+                                                sym, sig.direction, fc.get("regime", "unknown"))
+                                    continue
+
                             rd = st.risk.evaluate(
                                 account=acc,
                                 positions=positions,
@@ -357,10 +367,17 @@ def loop(st: State):
                             tr = st.execution.enter_position(sig, rd)
                             st.journal.log_order(tr)
                             if tr.status == "OPEN":
+                                # Register heat ONLY after confirmed fill
+                                st.risk.commit_trade(
+                                    tr.symbol, tr.entry_price or sig.entry_price,
+                                    sig.stop_loss, tr.qty, None, sig.confidence
+                                )
                                 log.info("ENTER %s %s qty=%.4f @ %.2f",
                                          tr.symbol, tr.side, tr.qty, tr.entry_price or 0)
                                 st.alerts.send_position_entered(tr)
                             else:
+                                # Undo any pre-registered heat
+                                st.risk.unregister_trade(tr.symbol)
                                 log.error("ENTER FAILED %s: %s", tr.symbol, tr.error)
                                 st.alerts.send_order_rejected(tr, tr.error)
             except Exception:

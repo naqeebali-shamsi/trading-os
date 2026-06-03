@@ -244,8 +244,7 @@ class RiskManager:
         if shares * entry_price < 1.0:
             return RiskDecision(False, 0.0, "conviction_scaled_below_min_notional")
 
-        # register in heat tracker (will be updated on actual fill)
-        self.heat.register_position(symbol, entry_price, stop_loss, shares, sector, signal_confidence)
+        # Heat will be registered AFTER successful fill, not before
 
         return RiskDecision(True, round(shares, 6), "approved")
 
@@ -255,6 +254,15 @@ class RiskManager:
 
     def record_win(self, win: float):
         pass
+
+    def commit_trade(self, symbol: str, entry_price: float, stop_loss: float,
+                     shares: float, sector: Optional[str], confidence: float):
+        """Register heat ONLY after confirmed fill."""
+        self.heat.register_position(symbol, entry_price, stop_loss, shares, sector, confidence)
+
+    def unregister_trade(self, symbol: str):
+        """Undo heat registration on failed fill."""
+        self.heat.unregister(symbol)
 
     def _persist_daily_loss(self):
         """Persist daily loss to journal for crash recovery."""
