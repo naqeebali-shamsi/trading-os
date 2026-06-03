@@ -158,7 +158,7 @@ class ExecutionEngine:
         if not filled_price:
             # Can't confirm fill — cancel and abort
             try:
-                self.client.cancel_all_orders()
+                self.client.cancel_order(entry.id)
             except Exception:
                 pass
             del self.active_orders[entry.id]
@@ -195,7 +195,7 @@ class ExecutionEngine:
     def _cancel_bracket_legs(self, symbol: str):
         """Cancel stop/target orders for a symbol when position is flattened."""
         try:
-            self.client.cancel_all_orders()
+            self.client.cancel_order(entry.id)
             log.info("Cancelled all orders for %s after flatten", symbol)
         except Exception as e:
             log.error("Failed to cancel orders for %s: %s", symbol, e)

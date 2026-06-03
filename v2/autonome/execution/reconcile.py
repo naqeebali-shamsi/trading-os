@@ -6,6 +6,7 @@ Flags mismatches, orphans, and drift.
 from __future__ import annotations
 
 import logging
+import sqlite3
 from typing import List, Dict, Optional
 
 from autonome.broker.alpaca_client import AlpacaClient

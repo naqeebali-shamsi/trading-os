@@ -221,7 +221,7 @@ Be decisive. Most signals should be APPROVED or REJECTED. Only MODIFY if you see
     def _call_llm(self, prompt: str) -> Optional[Dict[str, Any]]:
         if not self.api_key:
             log.warning("No OpenRouter API key configured; auto-approving")
-            return {"decision": "APPROVE", "confidence": 0.5, "reasoning": "no_llm_key_auto_approve"}
+            return {"decision": "REJECT", "confidence": 0.0, "reasoning": "no_llm_key_auto_reject"}
 
         payload = {
             "model": self.model,
@@ -251,13 +251,13 @@ Be decisive. Most signals should be APPROVED or REJECTED. Only MODIFY if you see
             return parsed
         except requests.exceptions.RequestException as e:
             log.error("LLM API error: %s", e)
-            return {"decision": "APPROVE", "confidence": 0.5, "reasoning": f"llm_api_error:{e}"}
+            return {"decision": "REJECT", "confidence": 0.0, "reasoning": f"llm_api_error:{e}"}
         except json.JSONDecodeError as e:
             log.error("LLM returned invalid JSON: %s | raw: %s", e, content[:500])
             return {"decision": "REJECT", "confidence": 0.5, "reasoning": "llm_invalid_json"}
         except Exception as e:
             log.error("LLM unexpected error: %s", e)
-            return {"decision": "APPROVE", "confidence": 0.5, "reasoning": f"llm_error:{e}"}
+            return {"decision": "REJECT", "confidence": 0.0, "reasoning": f"llm_error:{e}"}
 
     # ── public API ───────────────────────────────────────────────────────────
 

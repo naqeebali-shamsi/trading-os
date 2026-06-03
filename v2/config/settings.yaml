@@ -19,6 +19,7 @@ data:
   earnings_buffer_days: 2
   symbols:
   - TQQQ
+  - SPY
   on_bars_update: strategy/recompute
 strategy:
   name: router

@@ -39,7 +39,8 @@ class StrategyRouter:
             "crossover": EMACrossover(params.get("crossover", {})),
         }
         self.use_llm = use_llm
-        self._last_signal_bar: Optional[int] = None
+        self._last_idx: dict[str, int] = {}
+        
         self.min_gap = params.get("min_gap", 3)  # bars between signals
 
     def _regime_score(self, buf: list) -> str:
@@ -147,7 +148,7 @@ class StrategyRouter:
         if selected is not None:
             selected.meta["regime"] = regime
             selected.meta["selected_strategy"] = selected_name
-            self._last_signal_bar = global_bar_idx
+            self._last_idx[symbol] = global_bar_idx
             log.info("Router: %s selected %s at bar %d (conf=%.2f)",
                      regime, selected_name, global_bar_idx, selected.confidence)
             return selected

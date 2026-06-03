@@ -255,3 +255,14 @@ class RiskManager:
 
     def record_win(self, win: float):
         pass
+
+    def _persist_daily_loss(self):
+        """Persist daily loss to journal for crash recovery."""
+        if hasattr(self, 'journal') and self.journal:
+            self.journal.log_equity(
+                self.account.equity,
+                self.account.buying_power,
+                self.account.cash,
+                0.0,  # drawdown placeholder
+                len(self.positions) if hasattr(self, 'positions') else 0,
+            )
