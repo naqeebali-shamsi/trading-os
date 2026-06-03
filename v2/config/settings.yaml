@@ -19,6 +19,9 @@ broker:
 data:
   timeframe: "1Hour"
   warmup_bars: 200
+  bar_adjustment: split  # raw | split | all
+  earnings_enabled: true
+  earnings_buffer_days: 2
   symbols:
     - SPY
     - QQQ
@@ -56,8 +59,8 @@ risk:
 execution:
   order_type: market
   time_in_force: day
-  # Slippage model for paper -- none for live (market orders)
-  # We use market orders at open because we want IN, not还因为
+  entry_order_type: limit_with_fallback  # market | limit_with_fallback | limit
+  limit_fallback_timeout_sec: 30
   retry_attempts: 3
   retry_delay_sec: 2
   reject_htb: true

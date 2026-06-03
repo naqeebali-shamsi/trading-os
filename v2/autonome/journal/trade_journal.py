@@ -137,3 +137,33 @@ class TradeJournal:
                 "SELECT COUNT(*) FROM signals WHERE t LIKE ?", (today + "%",)
             ).fetchone()
         return row[0] or 0
+
+    # ── rotation ─────────────────────────────────────────────────────────
+    def db_size_mb(self) -> float:
+        try:
+            return os.path.getsize(self.db_path) / (1024 * 1024)
+        except OSError:
+            return 0.0
+
+    def rotate(self, keep_months: int = 3):
+        """Archive records older than keep_months to a separate DB, then VACUUM."""
+        from datetime import datetime, timedelta
+        cutoff = (datetime.utcnow() - timedelta(days=keep_months * 30)).strftime("%Y-%m-%d")
+        archive_path = self.db_path.replace(".sqlite", f"_archive_{datetime.utcnow():%Y%m}.sqlite")
+
+        with sqlite3.connect(self.db_path) as src:
+            # Copy old records to archive
+            with sqlite3.connect(archive_path) as dst:
+                for table in ("signals", "orders", "pnl", "equity"):
+                    dst.execute(f"CREATE TABLE IF NOT EXISTS {table} AS SELECT * FROM {table} WHERE 0")
+                    rows = src.execute(f"SELECT * FROM {table} WHERE t < ?", (cutoff,)).fetchall()
+                    if rows:
+                        cols = [d[0] for d in src.execute(f"PRAGMA table_info({table})").fetchall()]
+                        placeholders = ",".join("?" * len(cols))
+                        dst.executemany(f"INSERT INTO {table} ({','.join(cols)}) VALUES ({placeholders})", rows)
+                        log.info("Archived %d rows from %s", len(rows), table)
+                # Delete from source
+                for table in ("signals", "orders", "pnl", "equity"):
+                    src.execute(f"DELETE FROM {table} WHERE t < ?", (cutoff,))
+                src.execute("VACUUM")
+        log.info("Journal rotated. Archive: %s", archive_path)

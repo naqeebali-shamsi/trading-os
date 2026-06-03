@@ -1,14 +1,13 @@
 """
-autonome/strategy/momentum_breakout.py  v2.0
+autonome/strategy/momentum_breakout.py  v2.1
 Single strategy: post-breakout momentum with volume confirmation.
-No indicators older than 1980.  Purely statistical.
+Includes earnings avoidance.
 """
 from __future__ import annotations
 
 import logging, statistics
 from dataclasses import dataclass
 from typing import List, Optional
-from collections import deque
 
 from autonome.data.bars import Bar, BarStore
 
@@ -45,8 +44,10 @@ class MomentumBreakout:
         self.atr_tp_mult = params.get("atr_tp_mult", 3.0)
         self.min_confirm = params.get("min_bars_confirm", 2)
         self.cooldown = params.get("cooldown_bars", 6)
-        # per-symbol last signal index
         self._last_idx: dict[str, int] = {}
+        self.earnings_calendar = None  # set by supervisor after init
+        self.earnings_enabled = True
+        self.earnings_buffer_days = 2
 
     # ── math ─────────────────────────────────────────────────────────────
     @staticmethod
@@ -75,7 +76,7 @@ class MomentumBreakout:
     def _volume_surge(self, bars: List[Bar]) -> bool:
         if len(bars) < 20:
             return False
-        vols = [b.volume for b in bars[:-1]]  # exclude current
+        vols = [b.volume for b in bars[:-1]]
         mean = statistics.mean(vols)
         try:
             std = statistics.stdev(vols)
@@ -85,6 +86,12 @@ class MomentumBreakout:
 
     # ── scan ─────────────────────────────────────────────────────────────
     def scan(self, symbol: str, store: BarStore, global_bar_idx: int) -> Optional[Signal]:
+        # Earnings avoidance
+        if self.earnings_enabled and self.earnings_calendar:
+            if self.earnings_calendar.is_earnings_week(symbol, self.earnings_buffer_days):
+                log.info("Skipped %s: earnings within %dd", symbol, self.earnings_buffer_days)
+                return None
+
         bars = store.history(symbol, max(self.ema_slow + self.atr_period + 10, 50))
         if len(bars) < self.ema_slow + 5:
             return None
@@ -108,7 +115,6 @@ class MomentumBreakout:
         # --- LONG ---
         if last.close > ema_slow[-1] and last.close > prev.high:
             if self._volume_surge(bars):
-                # trend alignment: fast EMA above slow
                 if ema_fast[-1] > ema_slow[-1]:
                     sl = round(last.close - atr * self.atr_sl_mult, 2)
                     tp = round(last.close + atr * self.atr_tp_mult, 2)

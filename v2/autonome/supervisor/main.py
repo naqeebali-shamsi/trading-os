@@ -1,7 +1,7 @@
 """
-autonome/supervisor/main.py  v2.2
+autonome/supervisor/main.py  v2.3
 24x7 supervisor loop: data -> signal -> LLM gate -> risk -> execute -> journal.
-Includes API failure hard stop, data staleness guard, order lifecycle sync.
+Includes earnings avoidance, broker reconciliation, journal rotation, LIVE guard.
 """
 from __future__ import annotations
 
@@ -16,9 +16,11 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../.."))
 from autonome.broker.alpaca_client import AlpacaClient
 from autonome.data.bars import BarStore, AlpacaDataFeed
 from autonome.data.vix_feed import fetch_vix
+from autonome.data.earnings import EarningsCalendar
 from autonome.strategy.momentum_breakout import MomentumBreakout
 from autonome.risk.risk_manager import RiskManager
 from autonome.execution.engine import ExecutionEngine
+from autonome.execution.reconcile import Reconciler
 from autonome.journal.trade_journal import TradeJournal
 from autonome.intelligence.llm_gate import LLMGate, SignalContext
 from autonome.alerts.telegram import TelegramAlertSender
@@ -32,6 +34,7 @@ log = logging.getLogger("supervisor")
 
 # ── config ─────────────────────────────────────────────────────────────
 CFG_PATH = os.path.join(os.path.dirname(__file__), "../../config/settings.yaml")
+SEC_PATH = os.path.join(os.path.dirname(__file__), "../../config/secrets.yaml")
 
 
 def load_settings() -> dict:
@@ -58,11 +61,28 @@ class State:
         self.journal = TradeJournal()
         self.llm_gate = LLMGate()
         self.alerts = TelegramAlertSender()
+        self.reconciler = Reconciler()
+
+        # earnings calendar
+        self.earnings: Optional[EarningsCalendar] = None
+        if self.cfg.get("data", {}).get("earnings_enabled", False):
+            try:
+                with open(SEC_PATH) as f:
+                    secs = yaml.safe_load(f)
+                finnhub_key = secs.get("finnhub", {}).get("api_key", "")
+                if finnhub_key:
+                    self.earnings = EarningsCalendar(api_key=finnhub_key)
+                    self.strategy.earnings_calendar = self.earnings
+                    self.strategy.earnings_enabled = True
+                    self.strategy.earnings_buffer_days = self.cfg["data"].get("earnings_buffer_days", 2)
+            except Exception:
+                log.warning("Failed to init earnings calendar")
 
         self.global_bar_idx = 0
         self.last_equity_log = datetime.min.replace(tzinfo=timezone.utc)
         self.last_daily_reset = datetime.now(timezone.utc).date()
         self.last_order_sync = datetime.min.replace(tzinfo=timezone.utc)
+        self.last_reconcile = datetime.min.replace(tzinfo=timezone.utc)
         self.consecutive_api_failures = 0
         self._running = True
         self.prev_positions: dict[str, object] = {}
@@ -104,11 +124,10 @@ def write_state_json(st: State):
 
 # ── API health ─────────────────────────────────────────────────────────
 MAX_CONSECUTIVE_API_FAILURES = 5
-API_FAILURE_HALT_TIMEOUT_SEC = 60  # pause after halt trigger
+API_FAILURE_HALT_TIMEOUT_SEC = 60
 
 
 def _handle_api_failure(st: State, context: str) -> bool:
-    """Track consecutive failures. Return True if system should HALT."""
     st.consecutive_api_failures += 1
     log.error("API failure [%s] #%d/%d", context, st.consecutive_api_failures, MAX_CONSECUTIVE_API_FAILURES)
     if st.consecutive_api_failures >= MAX_CONSECUTIVE_API_FAILURES:
@@ -129,7 +148,7 @@ def _reset_api_failures(st: State):
 
 # ── main loop ──────────────────────────────────────────────────────────
 def loop(st: State):
-    log.info("=== AUTONOME v2.2 supervisor === mode=%s", st.mode)
+    log.info("=== AUTONOME v2.3 supervisor === mode=%s", st.mode)
 
     # initial warm
     log.info("Warming bar store...")
@@ -150,7 +169,11 @@ def loop(st: State):
     while st._running:
         write_state_json(st)
 
-        # Halt check at top of loop
+        # LIVE mode periodic warning
+        if st.mode == "LIVE":
+            log.critical("LIVE TRADING MODE — REAL MONEY AT RISK")
+
+        # Halt check
         if st.risk.halted:
             log.warning("System is HALTED — sleeping 60s...")
             time.sleep(API_FAILURE_HALT_TIMEOUT_SEC)
@@ -165,6 +188,13 @@ def loop(st: State):
                 _reset_api_failures(st)
                 st.risk.reset_day(acc.equity)
                 log.info("New day reset. Equity=%.2f", acc.equity)
+                # warm earnings cache for all symbols
+                if st.earnings:
+                    for sym in st.symbols:
+                        try:
+                            st.earnings.fetch_earnings(sym)
+                        except Exception:
+                            pass
             except Exception:
                 if _handle_api_failure(st, "daily_reset"):
                     continue
@@ -198,8 +228,31 @@ def loop(st: State):
             except Exception:
                 log.warning("Order sync failed (non-fatal)")
 
+        # ── broker reconciliation (hourly) ──────────────────────────────────
+        if (now - st.last_reconcile).total_seconds() >= 3600:
+            try:
+                pos_disc = st.reconciler.reconcile_positions(st.client, st.journal)
+                ord_disc = st.reconciler.reconcile_orders(st.client)
+                total = len(pos_disc) + len(ord_disc)
+                if total > 0:
+                    log.warning("RECONCILE FOUND %d discrepancies", total)
+                    st.alerts.send_alert("Reconciliation", f"{total} discrepancies found")
+                else:
+                    log.info("RECONCILE OK")
+                st.last_reconcile = now
+            except Exception:
+                log.warning("Reconciliation failed (non-fatal)")
+
+        # ── journal rotation check ──────────────────────────────────────────
+        try:
+            if st.journal.db_size_mb() > 500:
+                log.warning("Journal DB >500MB — auto-rotating")
+                st.journal.rotate(keep_months=1)
+        except Exception:
+            pass
+
         # ── systematic data staleness check ────────────────────────────────
-        max_staleness_sec = 3600 * 2  # 2 hours
+        max_staleness_sec = 3600 * 2
         any_stale, stale_symbols = st.store.any_stale(max_staleness_sec)
         if any_stale:
             st.consecutive_stale_cycles += 1
@@ -259,11 +312,9 @@ def loop(st: State):
                             positions = st.client.list_positions()
                             _reset_api_failures(st)
 
-                            # get recent closes for vol calc
                             hist = st.store.history(sym, 30)
                             closes = [bar.close for bar in hist] if hist else []
 
-                            # fetch VIX (cached 15 min)
                             vix_data = fetch_vix()
                             vix_val = None
                             if vix_data:
@@ -320,7 +371,6 @@ def loop(st: State):
                 log.info("Equity=%.2f DD=%.2f%% Pos=%d", acc.equity, dd * 100, len(positions))
                 st.last_equity_log = now
 
-                # Detect position exits
                 prev_syms = set(st.prev_positions.keys())
                 curr_syms = {p.symbol for p in positions}
                 exited = prev_syms - curr_syms
@@ -338,7 +388,6 @@ def loop(st: State):
                 if _handle_api_failure(st, "equity_snapshot"):
                     continue
 
-        # heartbeat / sleep
         sleep_sec = st.heartbeat_sec
         if st.timeframe == "1Hour":
             sleep_sec = min(300, next_bar_wait_seconds(st.timeframe))

@@ -154,6 +154,7 @@ class AlpacaDataFeed:
         })
         self.timeframe = cfg["data"]["timeframe"]
         self.symbols = cfg["data"]["symbols"]
+        self.adjustment = cfg["data"].get("bar_adjustment", "raw")
 
     def fetch_history(self, symbol: str, limit: int = 200) -> List[Bar]:
         url = f"{self.data_url}/v2/stocks/{symbol}/bars"
@@ -168,6 +169,8 @@ class AlpacaDataFeed:
             "feed": "iex",
             "sort": "asc",
         }
+        if self.adjustment in ("split", "all"):
+            params["adjustment"] = self.adjustment
         r = self.session.get(url, params=params, timeout=30)
         r.raise_for_status()
         bars = []

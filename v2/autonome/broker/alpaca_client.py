@@ -57,6 +57,15 @@ class AlpacaClient:
         if self.mode not in ("PAPER", "LIVE"):
             raise ValueError(f"Mode must be PAPER or LIVE, got {mode}")
 
+        # LIVE mode safety gate
+        if self.mode == "LIVE":
+            if os.environ.get("AUTONOME_LIVE_CONFIRM") != "I_UNDERSTAND":
+                raise RuntimeError(
+                    "LIVE mode requires env var AUTONOME_LIVE_CONFIRM=I_UNDERSTAND. "
+                    "This is a deliberate safety gate. Set it explicitly to trade live."
+                )
+            log.critical("LIVE TRADING MODE — REAL MONEY AT RISK")
+
         cfg_path = os.path.join(os.path.dirname(__file__), "../../config/settings.yaml")
         sec_path = os.path.join(os.path.dirname(__file__), "../../config/secrets.yaml")
         with open(cfg_path) as f:
@@ -205,6 +214,13 @@ class AlpacaClient:
             return self._get(f"/v2/orders?status={status}&limit={limit}")
         except requests.HTTPError:
             return []
+
+    def cancel_order(self, order_id: str) -> None:
+        """Cancel a specific order by ID."""
+        try:
+            self._delete(f"/v2/orders/{order_id}")
+        except requests.HTTPError as e:
+            log.warning("Cancel order %s failed: %s", order_id, e)
 
     # ── market clock ─────────────────────────────────────────────────────
     def is_market_open(self) -> bool:
