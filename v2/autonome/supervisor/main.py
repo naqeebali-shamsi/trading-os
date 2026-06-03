@@ -6,7 +6,7 @@ Minimal. Deterministic. No LLM.
 from __future__ import annotations
 
 import os, sys, time, json, logging, signal
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import yaml
@@ -56,8 +56,8 @@ class State:
         self.journal = TradeJournal()
 
         self.global_bar_idx = 0
-        self.last_equity_log = datetime.min
-        self.last_daily_reset = datetime.utcnow().date()
+        self.last_equity_log = datetime.min.replace(tzinfo=timezone.utc)
+        self.last_daily_reset = datetime.now(timezone.utc).date()
         self._running = True
 
     def shutdown(self, *_):
@@ -114,7 +114,7 @@ def loop(st: State):
         write_state_json(st)
 
         # daily reset
-        today = datetime.utcnow().date()
+        today = datetime.now(timezone.utc).date()
         if today != st.last_daily_reset:
             st.last_daily_reset = today
             try:
