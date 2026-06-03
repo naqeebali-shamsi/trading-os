@@ -23,7 +23,7 @@ from autonome.execution.engine import ExecutionEngine
 from autonome.execution.reconcile import Reconciler
 from autonome.journal.trade_journal import TradeJournal
 from autonome.intelligence.llm_gate import LLMGate, SignalContext
-from autonome.intelligence.timesfm_real import TimesFMAdapter
+from autonome.intelligence.timesfm_adapter_production import TimesFMAdapter
 from autonome.alerts.telegram import TelegramAlertSender
 
 logging.basicConfig(
