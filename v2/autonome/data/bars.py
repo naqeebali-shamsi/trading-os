@@ -57,10 +57,17 @@ class BarStore:
         self._callbacks: List[Callable[[Bar], None]] = []
 
         cfg = _load_cfg()
-        self.db_path = db_path or cfg.get("journal", {}).get("db_path", "data/journal.sqlite")
-        os.makedirs(os.path.dirname(self.db_path) or ".", exist_ok=True)
-        self._ensure_table()
-        self._warm_from_db()
+        if db_path is None:
+            self.db_path = cfg.get("journal", {}).get("db_path", "data/journal.sqlite")
+            os.makedirs(os.path.dirname(self.db_path) or ".", exist_ok=True)
+            self._ensure_table()
+            self._warm_from_db()
+        else:
+            self.db_path = db_path
+            if db_path:
+                os.makedirs(os.path.dirname(self.db_path) or ".", exist_ok=True)
+                self._ensure_table()
+                self._warm_from_db()
 
     def _ensure_table(self):
         with sqlite3.connect(self.db_path) as db:
@@ -103,6 +110,8 @@ class BarStore:
                 log.exception("callback failed for %s", bar.symbol)
 
     def _persist(self, bar: Bar):
+        if not self.db_path:
+            return
         with sqlite3.connect(self.db_path) as db:
             db.execute(
                 "INSERT OR REPLACE INTO bars VALUES (?,?,?,?,?,?,?)",
