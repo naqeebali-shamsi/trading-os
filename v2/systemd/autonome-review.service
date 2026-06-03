@@ -4,4 +4,4 @@ Description=Autonome v2 LLM Review Report
 [Service]
 Type=oneshot
 WorkingDirectory=/mnt/e/NomadCrew[GROWTH]/trading-os/v2
-ExecStart=/bin/bash -lc 'cd /mnt/e/NomadCrew[GROWTH]/trading-os/v2 && source .venv/bin/activate && python3 -m autonome.supervisor.review > /mnt/e/NomadCrew[GROWTH]/trading-os/v2/data/review_$(date +%%Y%%m%%d_%%H%%M).txt'
+ExecStart=/bin/bash -lc 'cd /mnt/e/NomadCrew[GROWTH]/trading-os/v2 && source .venv/bin/activate && mkdir -p data/reviews && python3 -m autonome.supervisor.review > data/reviews/review_$(date +%%Y%%m%%d_%%H%%M).txt'
