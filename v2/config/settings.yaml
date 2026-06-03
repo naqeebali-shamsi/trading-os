@@ -1,109 +1,89 @@
-# autonome/config/settings.yaml --- runtime configuration  v2.0
-# Do NOT put secrets here.  Put them in secrets.yaml (git-ignored).
-
 system:
-  mode: PAPER   # PAPER or LIVE -- must be deliberate to switch
+  mode: PAPER
   log_level: INFO
   heartbeat_interval_sec: 30
   max_concurrent_positions: 5
-  market_hours_only: true   # skip pre/post for now
-
+  market_hours_only: true
 broker:
   name: alpaca
-  paper_url: "https://paper-api.alpaca.markets"
-  live_url: "https://api.alpaca.markets"
-  data_url: "https://data.alpaca.markets"
-  paper_ws: "wss://stream.data.alpaca.markets/v2/iex"   # free tier
-  live_ws:  "wss://stream.data.alpaca.markets/v2/sip"   # paid
-
+  paper_url: https://paper-api.alpaca.markets
+  live_url: https://api.alpaca.markets
+  data_url: https://data.alpaca.markets
+  paper_ws: wss://stream.data.alpaca.markets/v2/iex
+  live_ws: wss://stream.data.alpaca.markets/v2/sip
 data:
-  timeframe: "1Hour"
+  timeframe: 1Hour
   warmup_bars: 200
-  bar_adjustment: split  # raw | split | all
+  bar_adjustment: split
   earnings_enabled: true
   earnings_buffer_days: 2
   symbols:
-    - SPY
-    - QQQ
-    - TSLA
-    - NVDA
-    - AAPL
-    - META
-    - AMD
-    - AMZN
-    - GOOGL
-    - MSFT
+  - TQQQ
   on_bars_update: strategy/recompute
-
 strategy:
-  name: momentum_breakout
+  name: router
   params:
     ema_fast: 9
     ema_slow: 21
-    volume_surge_z: 1.5
-    atr_period: 14
-    atr_sl_mult: 2.0
-    atr_tp_mult: 3.0
-    min_bars_confirm: 2
-  # No signal more than once per N bars per symbol
+    volume_surge_z: 1.0
+    atr_sl_mult: 1.5
+    atr_tp_mult: 4.0
+    cooldown_bars: 3
   cooldown_bars: 6
-
+  pullback:
+    ema_fast: 21
+    ema_slow: 50
+    pullback_tolerance: 0.5
+    stop_mult: 1.0
+    tp_mult: 3.0
+  crossover:
+    ema_fast: 9
+    ema_slow: 21
+    vol_mult: 1.2
+    stop_mode: trailing_ema
 risk:
-  account_risk_per_trade_pct: 1.0    # of equity
+  account_risk_per_trade_pct: 1.0
   max_daily_loss_pct: 3.0
   max_drawdown_pct: 10.0
-  kelly_fraction: 0.25              # quarter-Kelly
-  # If vol estimated above this, halt new signals
+  kelly_fraction: 0.25
   volatility_pause_annual_pct: 50.0
-  max_portfolio_heat_pct: 5.0       # total risk across all positions
-  max_sector_heat_pct: 3.0          # risk per sector
-
+  max_portfolio_heat_pct: 5.0
+  max_sector_heat_pct: 3.0
 execution:
   order_type: market
   time_in_force: day
-  entry_order_type: limit_with_fallback  # market | limit_with_fallback | limit
+  entry_order_type: limit_with_fallback
   limit_fallback_timeout_sec: 30
   retry_attempts: 3
   retry_delay_sec: 2
   reject_htb: true
   reject_non_shortable: true
-
 journal:
-  db_path: "data/journal.sqlite"
+  db_path: data/journal.sqlite
   log_trades: true
   log_signals: true
-
 alerts:
   telegram:
-    enabled: false   # set true + bot_token/chat_id in secrets.yaml
+    enabled: false
   log_fatal: true
-
-# ── INTELLIGENCE LAYER (v2.1) ──────────────────────────────────────────────
 intelligence:
-  # LLM Gate: qualitative review before execution
   llm_gate_enabled: true
-  llm_gate_model: "openai/gpt-4o-mini"
+  llm_gate_model: openai/gpt-4o-mini
   llm_gate_context_bars: 50
-  auto_approve_below_confidence: 0.0   # signals below this skip LLM (auto-approve)
-
-  # DreamPod: overnight/pre-market analysis
+  auto_approve_below_confidence: 0.0
   dreampod_enabled: true
   dreampod_macro_llm: true
-  dreampod_schedule_utc: "04:00"       # when to run pre-market analysis
-
-  # Discovery Engine: news + supply-chain + corruption-aware stock discovery
+  dreampod_schedule_utc: 04:00
   discovery_enabled: true
   discovery_llm: true
   discovery_max_candidates: 20
-
-  # Global news queries (expanded by DiscoveryEngine per theme)
   discovery_queries:
-    - "FDI data center India government approve"
-    - "India semiconductor fab PLI scheme"
-    - "AI datacenter power nuclear US"
-    - "Pentagon AI autonomous weapons budget"
-    - "EV battery lithium supply chain"
-    - "tariff trade war semiconductor"
-    - "infrastructure tender India Adani Ambani"
-    - "government contract corruption supply chain"
-    - "Bloomberg NEF renewable energy tender"
+  - FDI data center India government approve
+  - India semiconductor fab PLI scheme
+  - AI datacenter power nuclear US
+  - Pentagon AI autonomous weapons budget
+  - EV battery lithium supply chain
+  - tariff trade war semiconductor
+  - infrastructure tender India Adani Ambani
+  - government contract corruption supply chain
+  - Bloomberg NEF renewable energy tender

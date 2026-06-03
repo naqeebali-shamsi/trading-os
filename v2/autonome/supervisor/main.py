@@ -17,7 +17,7 @@ from autonome.broker.alpaca_client import AlpacaClient
 from autonome.data.bars import BarStore, AlpacaDataFeed
 from autonome.data.vix_feed import fetch_vix
 from autonome.data.earnings import EarningsCalendar
-from autonome.strategy.momentum_breakout import MomentumBreakout
+from autonome.strategy.router import StrategyRouter
 from autonome.risk.risk_manager import RiskManager
 from autonome.execution.engine import ExecutionEngine
 from autonome.execution.reconcile import Reconciler
@@ -55,7 +55,14 @@ class State:
         self.client = AlpacaClient(mode=self.mode)
         self.store = BarStore(self.symbols, maxlen=500)
         self.feed = AlpacaDataFeed()
-        self.strategy = MomentumBreakout(self.cfg["strategy"]["params"])
+        self.strategy = StrategyRouter(
+            {
+                "momentum": self.cfg["strategy"]["params"],
+                "pullback": self.cfg.get("strategy", {}).get("pullback", {}),
+                "crossover": self.cfg.get("strategy", {}).get("crossover", {}),
+            },
+            use_llm=False,
+        )
         self.risk = RiskManager()
         self.execution = ExecutionEngine(self.client)
         self.journal = TradeJournal()

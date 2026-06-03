@@ -1,5 +1,5 @@
 """
-autonome/strategy/momentum_breakout.py  v2.1
+autonome/strategy/momentum_breakout.py  v2.2
 Single strategy: post-breakout momentum with volume confirmation.
 Includes earnings avoidance.
 """
@@ -22,7 +22,7 @@ class Signal:
     stop_loss: float
     take_profit: float
     confidence: float   # 0.0-1.0
-    meta: str
+    meta: dict
 
 
 class MomentumBreakout:
@@ -49,7 +49,6 @@ class MomentumBreakout:
         self.earnings_enabled = True
         self.earnings_buffer_days = 2
 
-    # ── math ─────────────────────────────────────────────────────────────
     @staticmethod
     def _ema(values: List[float], period: int) -> List[float]:
         if len(values) < period:
@@ -84,9 +83,7 @@ class MomentumBreakout:
             std = 0.0
         return bars[-1].volume > mean + self.vol_z * std
 
-    # ── scan ─────────────────────────────────────────────────────────────
     def scan(self, symbol: str, store: BarStore, global_bar_idx: int) -> Optional[Signal]:
-        # Earnings avoidance
         if self.earnings_enabled and self.earnings_calendar:
             if self.earnings_calendar.is_earnings_week(symbol, self.earnings_buffer_days):
                 log.info("Skipped %s: earnings within %dd", symbol, self.earnings_buffer_days)
@@ -108,11 +105,9 @@ class MomentumBreakout:
         if atr <= 0:
             return None
 
-        # cooldown
         if global_bar_idx - self._last_idx.get(symbol, -999) < self.cooldown:
             return None
 
-        # --- LONG ---
         if last.close > ema_slow[-1] and last.close > prev.high:
             if self._volume_surge(bars):
                 if ema_fast[-1] > ema_slow[-1]:
@@ -123,9 +118,8 @@ class MomentumBreakout:
                     confidence = min(0.95, reward / (risk + 1e-9) / 3.0)
                     self._last_idx[symbol] = global_bar_idx
                     return Signal(symbol, "LONG", last.close, sl, tp, confidence,
-                                  f"breakout_above_{prev.high:.2f}|atr={atr:.2f}")
+                                  {"type": "breakout_long", "resistance": round(prev.high, 2), "atr": round(atr, 2)})
 
-        # --- SHORT ---
         if last.close < ema_slow[-1] and last.close < prev.low:
             if self._volume_surge(bars):
                 if ema_fast[-1] < ema_slow[-1]:
@@ -136,6 +130,6 @@ class MomentumBreakout:
                     confidence = min(0.95, reward / (risk + 1e-9) / 3.0)
                     self._last_idx[symbol] = global_bar_idx
                     return Signal(symbol, "SHORT", last.close, sl, tp, confidence,
-                                  f"breakout_below_{prev.low:.2f}|atr={atr:.2f}")
+                                  {"type": "breakout_short", "support": round(prev.low, 2), "atr": round(atr, 2)})
 
         return None

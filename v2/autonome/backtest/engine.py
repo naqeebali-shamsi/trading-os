@@ -12,7 +12,8 @@ from typing import List, Dict, Optional
 from types import SimpleNamespace
 
 from autonome.data.bars import Bar
-from autonome.strategy.momentum_breakout import MomentumBreakout, Signal
+from autonome.strategy.router import StrategyRouter
+from autonome.strategy.momentum_breakout import Signal
 from autonome.strategy.regime import RegimeFilter
 from autonome.risk.risk_manager import RiskManager, RiskDecision
 
@@ -53,7 +54,7 @@ class BacktestResult:
 class BacktestEngine:
     def __init__(
         self,
-        strategy: MomentumBreakout,
+        strategy: StrategyRouter,
         risk_manager: RiskManager,
         regime_filter: Optional[RegimeFilter] = None,
         initial_equity: float = 100000.0,
