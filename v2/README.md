@@ -1,4 +1,4 @@
-# Autonome Trading OS v2.3
+# Autonome Trading OS v2.4
 
 AI-augmented autonomous trading system. Deterministic execution + LLM intelligence.
 
@@ -63,6 +63,9 @@ systemctl --user enable autonome-discovery.timer
 | DreamPod | `intelligence/dreampod.py` | Overnight analysis, regime detection |
 | Discovery | `intelligence/discovery.py` | News + supply-chain + corruption-aware discovery |
 | Alerts | `alerts/telegram.py` | Real-time Telegram alerts for critical events |
+| Backtest | `backtest/engine.py` | Event-driven walk-forward backtesting |
+| Backtest | `backtest/metrics.py` | Sharpe, drawdown, profit factor, expectancy |
+| Backtest | `backtest/data_loader.py` | Alpaca history + synthetic data generator |
 
 ## Safety Features
 
@@ -121,6 +124,26 @@ Thematic discovery uses `intelligence/supply_chain_maps.json`:
 - `us_defense_ai` → PLTR, LMT, RTX
 - `global_battery_supply_chain` → ALB, TSLA, MP
 
+## Backtesting
+
+```bash
+# Synthetic data (fast, no API keys needed)
+python3 tools/run_backtest.py --synthetic --n 500 --trend 0.0002
+
+# Live Alpaca historical data
+python3 tools/run_backtest.py --symbol SPY --days 90 --commission 0.0005 --slippage 0.0005
+
+# Custom params
+python3 tools/run_backtest.py --synthetic --n 1000 --trend 0.0001 --slippage 0.001
+```
+
+**Modeling assumptions:**
+- Entry fill: next-bar open with slippage
+- Exit fill: stop/target hit within bar (worst-case intrabar assumed)
+- Commission: configurable fraction of notional (default 0.05%)
+- Slippage: configurable per-side buffer (default 5bps)
+- Risk: same Kelly + heat rules as live system
+
 ## Files
 
 | Path | Purpose |
@@ -138,7 +161,8 @@ Thematic discovery uses `intelligence/supply_chain_maps.json`:
 
 ```bash
 cd /mnt/e/NomadCrew[GROWTH]/trading-os/v2
-python3 tests/test_pipeline.py
+python3 tests/test_pipeline.py      # core pipeline
+python3 tests/test_backtest.py      # backtest engine
 ```
 
 ## Version History
@@ -147,6 +171,7 @@ python3 tests/test_pipeline.py
 - v2.1: Intelligence layer (LLM Gate, DreamPod, Discovery Engine)
 - v2.2: Safety layer (OCO brackets, API hard stop, vol halt, fractional shares, PDT guard)
 - v2.3: Operational maturity (short guards, throttling, VIX feed, Telegram alerts, earnings guard, reconciliation, journal rotation, portfolio heat, LIVE mode gate)
+- v2.4: Backtesting system (event-driven engine, performance metrics, synthetic + Alpaca data, CLI tool)
 
 ## License
 
