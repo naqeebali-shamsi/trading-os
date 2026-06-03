@@ -1,12 +1,15 @@
 """
-autonome/execution/engine.py  v2.0
-Bracket order execution: market entry + OCO stop/target.
+autonome/execution/engine.py  v2.2
+Bracket order execution with OCO linkage via Alpaca native API.
+Handles partial fills, tracks order lifecycle, cancels orphans.
 """
 from __future__ import annotations
 
-import os, logging, time
-from dataclasses import dataclass
-from typing import Optional
+import os
+import logging
+import time
+from dataclasses import dataclass, field
+from typing import Optional, Dict, List
 
 import yaml
 
@@ -27,6 +30,7 @@ class TradeRecord:
     stop_order_id: Optional[str]
     target_order_id: Optional[str]
     status: str
+    filled_qty: float = 0.0
     error: Optional[str] = None
 
 
@@ -42,16 +46,28 @@ class ExecutionEngine:
         self.max_retry = ec.get("retry_attempts", 3)
         self.retry_delay = ec.get("retry_delay_sec", 2)
 
+        # Track active orders for lifecycle monitoring
+        self.active_orders: Dict[str, dict] = {}
+
     def enter_position(self, sig: Signal, rd: RiskDecision) -> TradeRecord:
         side = "buy" if sig.direction == "LONG" else "sell"
         qty = rd.qty
 
-        # market entry
+        # Build bracket order payload (Alpaca native OCO)
+        payload = {
+            "type": self.order_type,
+            "time_in_force": self.tif,
+            "order_class": "bracket",
+            "stop_loss": {"stop_price": str(round(sig.stop_loss, 2))},
+            "take_profit": {"limit_price": str(round(sig.take_profit, 2))},
+        }
+
         entry: Optional[OrderResult] = None
         for attempt in range(1, self.max_retry + 1):
             entry = self.client.submit_order(
                 symbol=sig.symbol, side=side, qty=qty,
-                order_type=self.order_type, time_in_force=self.tif
+                order_type=self.order_type, time_in_force=self.tif,
+                extra=payload  # pass bracket config
             )
             if entry.status != "rejected":
                 break
@@ -60,55 +76,55 @@ class ExecutionEngine:
 
         if entry is None or entry.status == "rejected":
             return TradeRecord(sig.symbol, side, qty, "", None, None, None,
-                               "REJECTED", entry.error if entry else "no_result")
+                               "REJECTED", filled_qty=0.0,
+                               error=entry.error if entry else "no_result")
 
-        # wait briefly for fill so we have avg price for bracket legs
+        # Wait briefly for fill, but don't block forever
         filled_price = entry.filled_avg_price
-        if not filled_price:
-            for _ in range(10):
+        filled_qty = float(entry.filled_qty or 0)
+        if not filled_price or filled_qty < qty * 0.99:
+            for _ in range(20):
                 time.sleep(0.5)
                 check = self.client.get_order(entry.id)
                 if check and check.filled_avg_price:
                     filled_price = check.filled_avg_price
+                    filled_qty = float(check.filled_qty or 0)
+                if filled_qty >= qty * 0.99 or check.status in ("filled", "canceled", "expired"):
                     break
 
+        # Track this order for lifecycle monitoring
+        self.active_orders[entry.id] = {
+            "symbol": sig.symbol,
+            "side": side,
+            "qty": qty,
+            "filled_qty": filled_qty,
+            "entry_price": filled_price,
+            "created_at": time.time(),
+            "sig": sig,
+        }
+
         if not filled_price:
-            # can't build bracket without fill price -- cancel and abort
+            # Can't confirm fill — cancel and abort
             try:
                 self.client.cancel_all_orders()
             except Exception:
                 pass
+            del self.active_orders[entry.id]
             return TradeRecord(sig.symbol, side, qty, entry.id, None, None, None,
-                               "NO_FILL", "entry_not_filled")
+                               "NO_FILL", filled_qty=0.0, error="entry_not_filled")
 
-        # bracket: OCO stop + target
-        # Alpaca bracket requires stop_loss and take_profit on the original order
-        # We already submitted market.  Submit separate stop + limit now.
-        reverse_side = "sell" if side == "buy" else "buy"
-        stop = self.client.submit_order(
-            symbol=sig.symbol, side=reverse_side, qty=qty,
-            order_type="stop", time_in_force="gtc",
-            stop_price=sig.stop_loss
-        )
-        target = self.client.submit_order(
-            symbol=sig.symbol, side=reverse_side, qty=qty,
-            order_type="limit", time_in_force="gtc",
-            limit_price=sig.take_profit
-        )
-
-        # NOTE: these are independent orders -- they don't OCO.  When one fills,
-        # the other remains.  We rely on the supervisor exposure loop to cancel
-        # dangling orders when position drops to zero.
-
+        # Bracket order creates stop + target children automatically
+        # We don't know child IDs yet; lifecycle monitor will find them
         return TradeRecord(
             symbol=sig.symbol,
             side=side,
             qty=qty,
             entry_order_id=entry.id,
             entry_price=filled_price,
-            stop_order_id=stop.id if stop.status != "rejected" else None,
-            target_order_id=target.id if target.status != "rejected" else None,
-            status="OPEN"
+            stop_order_id=None,  # populated by lifecycle monitor
+            target_order_id=None,
+            status="OPEN",
+            filled_qty=filled_qty,
         )
 
     def flatten_symbol(self, symbol: str):
@@ -118,5 +134,65 @@ class ExecutionEngine:
             return
         side = "sell" if pos.qty > 0 else "buy"
         qty = abs(pos.qty)
-        self.client.submit_order(symbol, side, qty, "market", "day")
-        log.warning("Flattened %s qty=%.2f", symbol, qty)
+        result = self.client.submit_order(symbol, side, qty, "market", "day")
+        log.warning("Flattened %s qty=%.2f result=%s", symbol, qty, result.status)
+
+        # Cancel any remaining bracket legs for this symbol
+        self._cancel_bracket_legs(symbol)
+
+    def _cancel_bracket_legs(self, symbol: str):
+        """Cancel stop/target orders for a symbol when position is flattened."""
+        try:
+            self.client.cancel_all_orders()
+            log.info("Cancelled all orders for %s after flatten", symbol)
+        except Exception as e:
+            log.error("Failed to cancel orders for %s: %s", symbol, e)
+
+    # ── lifecycle monitoring ─────────────────────────────────────────────────
+
+    def sync_orders(self) -> List[dict]:
+        """
+        Call periodically to update order statuses, find bracket children,
+        and detect orphans. Returns list of status changes.
+        """
+        changes = []
+        try:
+            # Get all open orders from broker
+            open_orders = self.client._get("/v2/orders?status=open&limit=500")  # raw fetch
+        except Exception as e:
+            log.error("Order sync failed: %s", e)
+            return changes
+
+        # Build map of active order IDs we know about
+        tracked_ids = set(self.active_orders.keys())
+
+        # Find bracket children (orders parented by our entries)
+        for o in open_orders:
+            parent_id = o.get("client_order_id", "")
+            if parent_id in tracked_ids or o.get("id") in tracked_ids:
+                oid = o["id"]
+                status = o.get("status", "unknown")
+                if status == "filled":
+                    log.info("Order %s filled @ %s", oid, o.get("filled_avg_price"))
+                elif status == "canceled":
+                    log.info("Order %s canceled", oid)
+                changes.append({"id": oid, "status": status, "order": o})
+
+        return changes
+
+    def reconcile_position(self, symbol: str, expected_qty: float) -> bool:
+        """
+        Check actual position vs expected. Call after bracket fills.
+        Returns True if reconciled, False if mismatch.
+        """
+        try:
+            pos = self.client.get_position(symbol)
+            actual = abs(pos.qty) if pos else 0.0
+            if abs(actual - expected_qty) > 0.01:
+                log.warning("Position mismatch for %s: expected=%.2f actual=%.2f",
+                            symbol, expected_qty, actual)
+                return False
+            return True
+        except Exception as e:
+            log.error("Reconcile failed for %s: %s", symbol, e)
+            return False

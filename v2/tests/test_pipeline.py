@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import random
 import statistics
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from autonome.data.bars import Bar, BarStore
 from autonome.strategy.momentum_breakout import MomentumBreakout
@@ -41,13 +41,17 @@ class FakeAlpaca:
         r.side = kw.get("side")
         r.qty = kw.get("qty")
         r.filled_avg_price = kw.get("stop_price", 450.0) or 450.0
+        r.filled_qty = r.qty
         r.status = "filled"
         r.error = None
+        r.raw = {}
         return r
     def get_order(self, oid):
         return None
     def cancel_all_orders(self):
         pass
+    def list_orders(self, status="open", limit=500):
+        return []
 
 
 def make_uptrend_then_breakout(symbol="SPY", n=50, base_price=400.0, breakout_volume=99999999):
@@ -55,7 +59,7 @@ def make_uptrend_then_breakout(symbol="SPY", n=50, base_price=400.0, breakout_vo
     store = BarStore([symbol], maxlen=100)
     price = base_price
     for i in range(n):
-        t = datetime.utcnow() - timedelta(hours=n - i)
+        t = datetime.now(timezone.utc) - timedelta(hours=n - i)
         o = price + i * 1.2
         c = o + 0.5
         h = max(o, c) + 0.3
@@ -65,7 +69,7 @@ def make_uptrend_then_breakout(symbol="SPY", n=50, base_price=400.0, breakout_vo
         price = c
 
     prev = store.last(symbol)
-    last_t = datetime.utcnow()
+    last_t = datetime.now(timezone.utc)
     breakout = Bar(
         symbol, last_t,
         open=prev.high - 0.2,

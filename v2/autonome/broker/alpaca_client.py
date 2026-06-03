@@ -42,6 +42,7 @@ class OrderResult:
     qty: float
     filled_avg_price: Optional[float]
     status: str  # new / partially_filled / filled / canceled / expired
+    filled_qty: Optional[float] = None
     error: Optional[str] = None
 
 
@@ -144,7 +145,8 @@ class AlpacaClient:
                      order_type: str = "market",
                      time_in_force: str = "day",
                      stop_price: Optional[float] = None,
-                     limit_price: Optional[float] = None) -> OrderResult:
+                     limit_price: Optional[float] = None,
+                     extra: Optional[dict] = None) -> OrderResult:
         payload = {
             "symbol": symbol,
             "side": side,
@@ -156,13 +158,15 @@ class AlpacaClient:
             payload["stop_price"] = str(round(stop_price, 2))
         if limit_price:
             payload["limit_price"] = str(round(limit_price, 2))
+        if extra:
+            payload.update(extra)
 
         try:
             raw = self._post("/v2/orders", payload)
         except BrokerError as e:
             return OrderResult(
                 id="", symbol=symbol, side=side, qty=qty,
-                filled_avg_price=None, status="rejected", error=str(e.body)
+                filled_avg_price=None, status="rejected", error=str(e.body), filled_qty=0.0
             )
 
         return OrderResult(
@@ -172,6 +176,7 @@ class AlpacaClient:
             qty=float(raw["qty"]),
             filled_avg_price=float(raw["filled_avg_price"]) if raw.get("filled_avg_price") else None,
             status=raw["status"],
+            filled_qty=float(raw["filled_qty"]) if raw.get("filled_qty") else 0.0,
         )
 
     def cancel_all_orders(self) -> None:
@@ -189,7 +194,15 @@ class AlpacaClient:
             qty=float(raw["qty"]),
             filled_avg_price=float(raw["filled_avg_price"]) if raw.get("filled_avg_price") else None,
             status=raw["status"],
+            filled_qty=float(raw["filled_qty"]) if raw.get("filled_qty") else 0.0,
         )
+
+    def list_orders(self, status: str = "open", limit: int = 500) -> List[dict]:
+        """Fetch orders by status. Returns raw dict list."""
+        try:
+            return self._get(f"/v2/orders?status={status}&limit={limit}")
+        except requests.HTTPError:
+            return []
 
     # ── market clock ─────────────────────────────────────────────────────
     def is_market_open(self) -> bool:
