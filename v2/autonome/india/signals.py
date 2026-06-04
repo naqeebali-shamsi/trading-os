@@ -225,16 +225,88 @@ def generate_signals(portfolio: Dict[str, int] = None) -> List[IndiaSignal]:
     return signals
 
 
+def _fmt_price(val):
+    if val is None or val == 0:
+        return "N/A"
+    if val >= 100000:
+        return f"₹{val:,.0f}"
+    if val >= 1000:
+        return f"₹{val:,.0f}"
+    return f"₹{val:,.2f}"
+
+
+def _fmt_num(val, decimals=1):
+    if val is None:
+        return "N/A"
+    return f"{val:,.{decimals}f}"
+
+
+def _fmt_pct(val):
+    if val is None:
+        return "N/A"
+    return f"{val:.1f}%"
+
+
+def _fmt_cr(val):
+    """Format crores with Indian comma style."""
+    if val is None or val == 0:
+        return "N/A"
+    if val >= 100000:
+        return f"{val/100000:.1f}L Cr"
+    if val >= 1000:
+        return f"{val/1000:.1f}K Cr"
+    return f"{val:.0f} Cr"
+
+
+def _fetch_sparkline(symbol: str, days: int = 20) -> List[float]:
+    """Fetch recent closing prices for sparkline."""
+    from datetime import timedelta
+    try:
+        end = datetime.now(timezone.utc)
+        start = end - timedelta(days=days + 5)
+        bars = fetch_history(symbol, start=start, end=end, timeframe="1d")
+        return [b.close for b in bars[-days:]] if bars else []
+    except Exception as e:
+        log.warning("Sparkline fetch failed for %s: %s", symbol, e)
+        return []
+
+
 def write_signals_json(path: str = None) -> str:
-    """Write signals to JSON file for dashboard."""
+    """Write signals to JSON file for dashboard with formatted numbers and sparklines."""
     if path is None:
         path = "/mnt/e/NomadCrew[GROWTH]/trading-os/v2/swarm/intel/india_signals.json"
 
     signals = generate_signals()
+
+    # Enrich with formatted strings and sparklines
+    enriched = []
+    for s in signals:
+        d = asdict(s)
+        f = d["fundamentals"]
+
+        # Format all numbers
+        d["price_fmt"] = _fmt_price(d["price"])
+        d["target_fmt"] = _fmt_price(d["target"])
+        d["stop_fmt"] = _fmt_price(d["stop"])
+        d["confidence_pct"] = f"{d['confidence']*100:.0f}%"
+
+        # Format fundamentals
+        f["pe_fmt"] = _fmt_num(f.get("pe"), 1)
+        f["pb_fmt"] = _fmt_num(f.get("pb"), 1)
+        f["roe_fmt"] = _fmt_pct(f.get("roe"))
+        f["debt_equity_fmt"] = _fmt_num(f.get("debt_equity"), 2)
+        f["market_cap_fmt"] = _fmt_cr(f.get("market_cap_cr"))
+        f["distance_from_low_fmt"] = f"{f.get('distance_from_low', 0)*100:.0f}%"
+
+        # Sparkline
+        d["sparkline"] = _fetch_sparkline(s.symbol, days=20)
+
+        enriched.append(d)
+
     data = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "count": len(signals),
-        "signals": [asdict(s) for s in signals],
+        "signals": enriched,
     }
     import os
     os.makedirs(os.path.dirname(path), exist_ok=True)
