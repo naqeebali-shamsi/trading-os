@@ -140,7 +140,7 @@
   .conf-fill { height: 100%; border-radius: 2px; }
 
   /* Center: main content */
-  .signal-main { display: flex; flex-direction: column; gap: 6px; flex: 0 0 auto; }
+  .signal-main { display: flex; flex-direction: column; gap: 6px; flex: 0 0 350px; min-width: 0; overflow: hidden; }
   .signal-main h3 { font-size: 17px; color: #f8fafc; font-weight: 700; display: flex; align-items: center; gap: 10px; }
   .signal-main .sector-tag {
     font-size: 11px; color: #64748b; background: rgba(15,23,42,0.6);
@@ -167,9 +167,8 @@
     border-left: 1px solid rgba(30,41,59,0.5);
     border-right: 1px solid rgba(30,41,59,0.5);
     flex: 1 1 auto;
-    min-width: 120px;
   }
-  .sparkline-svg { width: 100%; height: 50px; }
+  .sparkline-svg { width: 100%; height: 55px; }
   .sparkline-label { font-size: 9px; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
 
   /* Right: metrics grid */
