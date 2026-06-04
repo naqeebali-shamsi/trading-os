@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>India Trading Dashboard — NomadCrew</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: linear-gradient(135deg, #0f1419 0%, #1a2332 50%, #0f1419 100%);
+    color: #e0e6ed;
+    min-height: 100vh;
+  }
+  .header {
+    background: rgba(15,20,30,0.95);
+    border-bottom: 1px solid #2a3a4f;
+    padding: 20px 30px;
+    display: flex; justify-content: space-between; align-items: center;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header h1 { font-size: 24px; color: #5eead4; letter-spacing: 1px; }
+  .header .subtitle { color: #8b9bb4; font-size: 13px; margin-top: 4px; }
+  .regime-badge {
+    padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .regime-AGGRESSIVE { background: #dc2626; color: white; }
+  .regime-BALANCED { background: #16a34a; color: white; }
+  .regime-CAUTIOUS { background: #ca8a04; color: white; }
+  .regime-DEFENSE { background: #dc2626; color: white; border: 2px solid #f87171; }
+
+  .container { padding: 20px 30px; max-width: 1600px; margin: 0 auto; }
+
+  /* Macro bar */
+  .macro-bar {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;
+    margin-bottom: 25px;
+  }
+  .macro-card {
+    background: rgba(30,45,65,0.6);
+    border: 1px solid #2a3a4f;
+    border-radius: 12px; padding: 18px 22px;
+  }
+  .macro-card .label { color: #8b9bb4; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+  .macro-card .value { font-size: 28px; font-weight: 700; margin-top: 8px; }
+  .macro-card .sub { font-size: 12px; color: #6b7d9a; margin-top: 4px; }
+
+  /* Portfolio section */
+  .portfolio-section {
+    background: rgba(30,45,65,0.4);
+    border: 1px solid #2a3a4f;
+    border-radius: 12px; padding: 20px 25px;
+    margin-bottom: 25px;
+  }
+  .portfolio-section h2 { font-size: 18px; color: #5eead4; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+  .portfolio-input {
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    gap: 10px; margin-bottom: 10px; align-items: center;
+  }
+  .portfolio-input input, .portfolio-input select {
+    background: #1a2332; border: 1px solid #2a3a4f; color: #e0e6ed;
+    padding: 10px 14px; border-radius: 8px; font-size: 14px;
+  }
+  .portfolio-input input:focus, .portfolio-input select:focus {
+    outline: none; border-color: #5eead4;
+  }
+  .btn {
+    background: #5eead4; color: #0f1419; border: none; padding: 10px 20px;
+    border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px;
+    transition: all 0.2s;
+  }
+  .btn:hover { background: #7fffe6; }
+  .btn-danger { background: #f87171; color: #1a0000; }
+  .btn-danger:hover { background: #fca5a5; }
+  .btn-small { padding: 6px 12px; font-size: 12px; }
+
+  #portfolioList { margin-top: 15px; }
+  .portfolio-item {
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr auto;
+    gap: 10px; padding: 12px 10px; border-bottom: 1px solid rgba(42,58,79,0.4);
+    align-items: center; font-size: 14px;
+  }
+  .portfolio-item .sym { font-weight: 600; color: #5eead4; }
+  .portfolio-item .pnl-pos { color: #4ade80; }
+  .portfolio-item .pnl-neg { color: #f87171; }
+
+  /* Signals */
+  .signals-grid {
+    display: grid; grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .signal-card {
+    background: rgba(30,45,65,0.5);
+    border: 1px solid #2a3a4f;
+    border-radius: 12px; padding: 20px 25px;
+    display: grid;
+    grid-template-columns: 120px 1fr 200px;
+    gap: 20px; align-items: start;
+    transition: all 0.3s;
+  }
+  .signal-card:hover { border-color: #4a6a8f; transform: translateY(-2px); }
+  .signal-action {
+    display: flex; align-items: center; justify-content: center;
+    padding: 15px; border-radius: 10px; font-weight: 700; font-size: 14px;
+    text-align: center; min-height: 80px;
+    flex-direction: column; gap: 8px;
+  }
+  .action-STRONG_BUY { background: rgba(34,197,94,0.15); border: 2px solid #22c55e; color: #4ade80; }
+  .action-BUY { background: rgba(34,197,94,0.08); border: 1px solid #22c55e; color: #4ade80; }
+  .action-HOLD { background: rgba(59,130,246,0.1); border: 1px solid #3b82f6; color: #60a5fa; }
+  .action-REDUCE { background: rgba(234,179,8,0.1); border: 1px solid #eab308; color: #facc15; }
+  .action-SELL { background: rgba(239,68,68,0.1); border: 1px solid #ef4444; color: #f87171; }
+  .action-WATCH { background: rgba(148,163,184,0.1); border: 1px solid #94a3b8; color: #cbd5e1; }
+
+  .signal-details h3 { font-size: 18px; color: #e0e6ed; margin-bottom: 8px; }
+  .signal-details .thesis { color: #8b9bb4; font-size: 14px; line-height: 1.6; margin-bottom: 10px; }
+  .signal-details .rationale { display: flex; flex-wrap: wrap; gap: 8px; }
+  .signal-details .rationale span {
+    background: rgba(30,45,65,0.8); border: 1px solid #2a3a4f;
+    padding: 4px 10px; border-radius: 6px; font-size: 12px; color: #a3b3cc;
+  }
+
+  .signal-metrics {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  .metric {
+    background: rgba(15,25,40,0.6); padding: 12px; border-radius: 8px;
+    text-align: center;
+  }
+  .metric .label { font-size: 11px; color: #6b7d9a; text-transform: uppercase; }
+  .metric .value { font-size: 18px; font-weight: 700; margin-top: 4px; }
+  .metric .target { color: #4ade80; }
+  .metric .stop { color: #f87171; }
+
+  .confidence-bar {
+    width: 100%; height: 6px; background: rgba(15,25,40,0.8);
+    border-radius: 3px; overflow: hidden; margin-top: 8px;
+  }
+  .confidence-fill {
+    height: 100%; border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+
+  .filter-bar {
+    display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .filter-btn {
+    background: rgba(30,45,65,0.6); border: 1px solid #2a3a4f;
+    color: #8b9bb4; padding: 8px 16px; border-radius: 8px;
+    cursor: pointer; font-size: 13px; transition: all 0.2s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: #5eead4; color: #0f1419; border-color: #5eead4;
+  }
+
+  .last-updated { color: #6b7d9a; font-size: 12px; margin-top: 20px; text-align: center; }
+
+  .empty-state {
+    text-align: center; padding: 60px 20px; color: #6b7d9a;
+  }
+  .empty-state h3 { color: #8b9bb4; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>🇮🇳 India Trading Desk</h1>
+    <div class="subtitle">Manual Execution Dashboard — NomadCrew</div>
+  </div>
+  <div class="regime-badge regime-DEFENSE" id="regimeBadge">DEFENSE</div>
+</div>
+
+<div class="container">
+
+  <!-- Macro Overview -->
+  <div class="macro-bar" id="macroBar">
+    <div class="macro-card">
+      <div class="label">USD/INR</div>
+      <div class="value" id="usdInr">--</div>
+      <div class="sub" id="inrTrend">Loading...</div>
+    </div>
+    <div class="macro-card">
+      <div class="label">Brent Oil</div>
+      <div class="value" id="oilPrice">--</div>
+      <div class="sub" id="oilRisk">Loading...</div>
+    </div>
+    <div class="macro-card">
+      <div class="label">Macro Risk</div>
+      <div class="value" id="riskScore">--</div>
+      <div class="sub">0 = safe, 10 = danger</div>
+    </div>
+    <div class="macro-card">
+      <div class="label">Total Signals</div>
+      <div class="value" id="signalCount">--</div>
+      <div class="sub" id="signalBreakdown">Loading...</div>
+    </div>
+  </div>
+
+  <!-- Portfolio -->
+  <div class="portfolio-section">
+    <h2>📊 My Portfolio</h2>
+    <div class="portfolio-input">
+      <input type="text" id="newSymbol" placeholder="Symbol (e.g., TCS.NS)" style="text-transform:uppercase">
+      <input type="number" id="newQty" placeholder="Quantity" min="1">
+      <input type="number" id="newAvg" placeholder="Avg Buy Price ₹" min="0" step="0.01">
+      <select id="newSector">
+        <option value="">Sector</option>
+        <option>Technology</option><option>Financial Services</option>
+        <option>Consumer Cyclical</option><option>Healthcare</option>
+        <option>Industrials</option><option>Energy</option>
+        <option>Consumer Defensive</option><option>Basic Materials</option>
+      </select>
+      <button class="btn" onclick="addHolding()">Add</button>
+    </div>
+    <div id="portfolioList">
+      <div class="empty-state">
+        <h3>No holdings added yet</h3>
+        <p>Add your Indian stock holdings above to get personalized SELL/HOLD signals</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterSignals('ALL')">All Signals</button>
+    <button class="filter-btn" onclick="filterSignals('STRONG_BUY')">🔥 Strong Buy</button>
+    <button class="filter-btn" onclick="filterSignals('BUY')">🟢 Buy</button>
+    <button class="filter-btn" onclick="filterSignals('SELL')">🔴 Sell</button>
+    <button class="filter-btn" onclick="filterSignals('REDUCE')">🟡 Reduce</button>
+    <button class="filter-btn" onclick="filterSignals('HOLD')">🔵 Hold</button>
+    <button class="filter-btn" onclick="filterSignals('WATCH')">👁 Watch</button>
+  </div>
+
+  <!-- Signals -->
+  <div class="signals-grid" id="signalsGrid">
+    <div class="empty-state">
+      <h3>Loading signals...</h3>
+      <p>Fetching latest India market data and computing fundamentals</p>
+    </div>
+  </div>
+
+  <div class="last-updated" id="lastUpdated">Last updated: --</div>
+
+</div>
+
+<script>
+// ============================================================================
+// STATE
+// ============================================================================
+let signals = [];
+let portfolio = JSON.parse(localStorage.getItem('indiaPortfolio') || '[]');
+let currentFilter = 'ALL';
+
+// Default portfolio for demo (user can clear)
+if (portfolio.length === 0) {
+  // Empty by default — user adds their own
+}
+
+// ============================================================================
+// DATA FETCHING
+// ============================================================================
+async function loadSignals() {
+  try {
+    // Try to load from generated file first
+    const resp = await fetch('/api/india_signals');
+    if (resp.ok) {
+      const data = await resp.json();
+      signals = data.signals || [];
+      updateMacro(data.macro || {});
+    } else {
+      // Fallback: load from JSON file
+      const resp2 = await fetch('/swarm/intel/india_signals.json');
+      if (resp2.ok) {
+        const data = await resp2.json();
+        signals = data.signals || [];
+      }
+    }
+    renderSignals();
+    updateSignalCount();
+  } catch (e) {
+    console.error('Failed to load signals:', e);
+    document.getElementById('signalsGrid').innerHTML = `
+      <div class="empty-state">
+        <h3>⚠️ Signal data unavailable</h3>
+        <p>Run: python3 scripts/run_india_signals.py</p>
+      </div>`;
+  }
+}
+
+function updateMacro(m) {
+  document.getElementById('usdInr').textContent = m.usd_inr ? m.usd_inr.toFixed(2) : '--';
+  document.getElementById('inrTrend').textContent = m.usd_inr > 85 ? '⚠️ Weak (FII outflow risk)' : 'OK';
+  document.getElementById('oilPrice').textContent = m.oil_usd ? '$' + m.oil_usd.toFixed(0) : '--';
+  document.getElementById('oilRisk').textContent = m.oil_usd > 85 ? '🔴 HIGH (import bill)' : 'OK';
+  document.getElementById('riskScore').textContent = m.risk_score !== undefined ? m.risk_score.toFixed(1) : '--';
+
+  const badge = document.getElementById('regimeBadge');
+  if (m.regime) {
+    badge.textContent = m.regime;
+    badge.className = 'regime-badge regime-' + m.regime;
+  }
+}
+
+// ============================================================================
+// RENDERING
+// ============================================================================
+function renderSignals() {
+  const grid = document.getElementById('signalsGrid');
+  const filtered = currentFilter === 'ALL'
+    ? signals
+    : signals.filter(s => s.action === currentFilter);
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <h3>No ${currentFilter === 'ALL' ? '' : currentFilter + ' '}signals found</h3>
+        <p>Check back after next market scan</p>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(s => `
+    <div class="signal-card">
+      <div class="signal-action action-${s.action}">
+        <div>${s.action.replace('_', ' ')}</div>
+        <div style="font-size:12px;opacity:0.7">${(s.confidence * 100).toFixed(0)}% conf</div>
+        <div class="confidence-bar">
+          <div class="confidence-fill" style="width:${s.confidence * 100}%;background:${confColor(s.confidence)}"></div>
+        </div>
+      </div>
+      <div class="signal-details">
+        <h3>${s.symbol} <span style="color:#6b7d9a;font-size:14px;font-weight:400">| ${s.sector}</span></h3>
+        <div class="thesis">${s.thesis}</div>
+        <div class="rationale">
+          ${(s.rationale || []).map(r => `<span>${r}</span>`).join('')}
+        </div>
+        <div style="margin-top:12px;font-size:12px;color:#6b7d9a">
+          PE: ${s.fundamentals.pe || 'N/A'} |
+          ROE: ${s.fundamentals.roe ? s.fundamentals.roe.toFixed(1) + '%' : 'N/A'} |
+          D/E: ${s.fundamentals.debt_equity || 'N/A'} |
+          FS: ${s.fundamentals.fundamental_score || 'N/A'} |
+          52w: ${s.fundamentals.distance_from_low !== undefined ? (s.fundamentals.distance_from_low * 100).toFixed(0) + '%' : 'N/A'}
+        </div>
+      </div>
+      <div class="signal-metrics">
+        <div class="metric">
+          <div class="label">Price</div>
+          <div class="value">₹${parseFloat(s.price).toLocaleString('en-IN')}</div>
+        </div>
+        <div class="metric">
+          <div class="label">Target</div>
+          <div class="value target">₹${parseFloat(s.target).toLocaleString('en-IN')}</div>
+        </div>
+        <div class="metric">
+          <div class="label">Stop Loss</div>
+          <div class="value stop">₹${parseFloat(s.stop).toLocaleString('en-IN')}</div>
+        </div>
+        <div class="metric">
+          <div class="label">Upside</div>
+          <div class="value target">${s.target > s.price ? '+' + ((s.target/s.price - 1) * 100).toFixed(1) + '%' : '--'}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('lastUpdated').textContent =
+    'Last updated: ' + new Date().toLocaleString('en-IN');
+}
+
+function confColor(c) {
+  if (c >= 0.8) return '#22c55e';
+  if (c >= 0.6) return '#3b82f6';
+  if (c >= 0.4) return '#eab308';
+  return '#94a3b8';
+}
+
+function updateSignalCount() {
+  const counts = {};
+  signals.forEach(s => { counts[s.action] = (counts[s.action] || 0) + 1; });
+  document.getElementById('signalCount').textContent = signals.length;
+  const parts = Object.entries(counts)
+    .sort((a,b) => b[1]-a[1])
+    .map(([k,v]) => `${v} ${k.replace('_',' ')}`);
+  document.getElementById('signalBreakdown').textContent = parts.join(' | ') || 'No signals';
+}
+
+// ============================================================================
+// PORTFOLIO
+// ============================================================================
+function addHolding() {
+  const sym = document.getElementById('newSymbol').value.trim().toUpperCase();
+  const qty = parseInt(document.getElementById('newQty').value) || 0;
+  const avg = parseFloat(document.getElementById('newAvg').value) || 0;
+  const sector = document.getElementById('newSector').value;
+
+  if (!sym || qty <= 0 || avg <= 0) {
+    alert('Enter symbol, quantity, and average price');
+    return;
+  }
+
+  const existing = portfolio.findIndex(p => p.symbol === sym);
+  if (existing >= 0) {
+    // Update average
+    const old = portfolio[existing];
+    const totalQty = old.qty + qty;
+    const totalCost = (old.qty * old.avg) + (qty * avg);
+    old.qty = totalQty;
+    old.avg = totalCost / totalQty;
+  } else {
+    portfolio.push({ symbol: sym, qty, avg, sector });
+  }
+
+  savePortfolio();
+  renderPortfolio();
+  clearInputs();
+}
+
+function removeHolding(idx) {
+  portfolio.splice(idx, 1);
+  savePortfolio();
+  renderPortfolio();
+}
+
+function savePortfolio() {
+  localStorage.setItem('indiaPortfolio', JSON.stringify(portfolio));
+}
+
+function clearInputs() {
+  document.getElementById('newSymbol').value = '';
+  document.getElementById('newQty').value = '';
+  document.getElementById('newAvg').value = '';
+  document.getElementById('newSector').selectedIndex = 0;
+}
+
+function renderPortfolio() {
+  const list = document.getElementById('portfolioList');
+  if (portfolio.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <h3>No holdings added yet</h3>
+        <p>Add your Indian stock holdings above to get personalized SELL/HOLD signals</p>
+      </div>`;
+    return;
+  }
+
+  // Get current prices from signals
+  const priceMap = {};
+  signals.forEach(s => { priceMap[s.symbol] = s.price; });
+
+  let totalInvested = 0;
+  let totalCurrent = 0;
+
+  const rows = portfolio.map((p, idx) => {
+    const currentPrice = priceMap[p.symbol] || p.avg;
+    const invested = p.qty * p.avg;
+    const current = p.qty * currentPrice;
+    const pnl = current - invested;
+    const pnlPct = (pnl / invested) * 100;
+    totalInvested += invested;
+    totalCurrent += current;
+
+    const pnlClass = pnl >= 0 ? 'pnl-pos' : 'pnl-neg';
+    const pnlSign = pnl >= 0 ? '+' : '';
+
+    return `
+      <div class="portfolio-item">
+        <div class="sym">${p.symbol}</div>
+        <div>${p.qty} qty</div>
+        <div>₹${p.avg.toLocaleString('en-IN', {maximumFractionDigits:2})}</div>
+        <div>₹${currentPrice.toLocaleString('en-IN', {maximumFractionDigits:2})}</div>
+        <div class="${pnlClass}">${pnlSign}₹${pnl.toLocaleString('en-IN', {maximumFractionDigits:0})}</div>
+        <div class="${pnlClass}">${pnlSign}${pnlPct.toFixed(1)}%</div>
+        <button class="btn btn-danger btn-small" onclick="removeHolding(${idx})">×</button>
+      </div>
+    `;
+  }).join('');
+
+  const totalPnl = totalCurrent - totalInvested;
+  const totalPnlPct = totalInvested > 0 ? (totalPnl / totalInvested) * 100 : 0;
+
+  list.innerHTML = `
+    <div class="portfolio-item" style="font-weight:600;border-bottom:2px solid #2a3a4f">
+      <div>Symbol</div><div>Qty</div><div>Avg</div><div>Current</div>
+      <div>P&L ₹</div><div>P&L %</div><div></div>
+    </div>
+    ${rows}
+    <div class="portfolio-item" style="font-weight:700;font-size:16px;margin-top:10px;background:rgba(94,234,212,0.05)">
+      <div>TOTAL</div><div></div><div></div><div>₹${totalCurrent.toLocaleString('en-IN', {maximumFractionDigits:0})}</div>
+      <div class="${totalPnl >= 0 ? 'pnl-pos' : 'pnl-neg'}">
+        ${totalPnl >= 0 ? '+' : ''}₹${totalPnl.toLocaleString('en-IN', {maximumFractionDigits:0})}
+      </div>
+      <div class="${totalPnl >= 0 ? 'pnl-pos' : 'pnl-neg'}">
+        ${totalPnl >= 0 ? '+' : ''}${totalPnlPct.toFixed(1)}%
+      </div>
+      <div></div>
+    </div>
+  `;
+}
+
+// ============================================================================
+// FILTERS
+// ============================================================================
+function filterSignals(type) {
+  currentFilter = type;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderSignals();
+}
+
+// ============================================================================
+// INIT
+// ============================================================================
+renderPortfolio();
+loadSignals();
+setInterval(loadSignals, 60000); // Refresh every minute
+</script>
+
+</body>
+</html>

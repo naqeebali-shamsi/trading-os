@@ -1,0 +1,2518 @@
+{
+  "generated_at": "2026-06-04T09:14:18.984734+00:00",
+  "count": 85,
+  "signals": [
+    {
+      "symbol": "APOLLOTYRE.NS",
+      "action": "STRONG_BUY",
+      "confidence": 0.72,
+      "price": 397.1,
+      "target": 468.58,
+      "stop": 357.39,
+      "thesis": "Strong value score 10.0 + reversal candle",
+      "rationale": [
+        "Near 52w low (18%)",
+        "Solid fundamentals: ROE=8.7%, PE=18.358763",
+        "Candle pattern: strong green reversal after decline"
+      ],
+      "sector": "Consumer Cyclical",
+      "fundamentals": {
+        "symbol": "APOLLOTYRE.NS",
+        "name": "Apollo Tyres Limited",
+        "sector": "Consumer Cyclical",
+        "price": 397.1,
+        "market_cap_cr": 25120.0,
+        "pe": 18.358763,
+        "pb": 1.5035061,
+        "roe": 8.719000000000001,
+        "debt_equity": 0.21986999999999998,
+        "distance_from_low": 0.18,
+        "is_in_dip": true,
+        "fundamental_score": 8.5,
+        "value_score": 10.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "INOXWIND.NS",
+      "action": "STRONG_BUY",
+      "confidence": 0.72,
+      "price": 86.17,
+      "target": 101.68,
+      "stop": 77.55,
+      "thesis": "Strong value score 9.0 + reversal candle",
+      "rationale": [
+        "Near 52w low (10%)",
+        "Solid fundamentals: ROE=N/A, PE=32.51698",
+        "Candle pattern: strong green reversal after decline"
+      ],
+      "sector": "Industrials",
+      "fundamentals": {
+        "symbol": "INOXWIND.NS",
+        "name": "Inox Wind Limited",
+        "sector": "Industrials",
+        "price": 86.17,
+        "market_cap_cr": 14892.0,
+        "pe": 32.51698,
+        "pb": 1.6925948,
+        "roe": null,
+        "debt_equity": 0.15713,
+        "distance_from_low": 0.1,
+        "is_in_dip": true,
+        "fundamental_score": 7.5,
+        "value_score": 9.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "COCHINSHIP.NS",
+      "action": "STRONG_BUY",
+      "confidence": 0.72,
+      "price": 1471.6,
+      "target": 1736.49,
+      "stop": 1324.44,
+      "thesis": "Strong value score 8.5 + reversal candle",
+      "rationale": [
+        "Near 52w low (21%)",
+        "Solid fundamentals: ROE=12.5%, PE=54.06319",
+        "Candle pattern: strong green reversal after decline"
+      ],
+      "sector": "Industrials",
+      "fundamentals": {
+        "symbol": "COCHINSHIP.NS",
+        "name": "Cochin Shipyard Limited",
+        "sector": "Industrials",
+        "price": 1471.6,
+        "market_cap_cr": 38715.0,
+        "pe": 54.06319,
+        "pb": 6.7907357,
+        "roe": 12.517,
+        "debt_equity": 0.28466,
+        "distance_from_low": 0.21,
+        "is_in_dip": true,
+        "fundamental_score": 7.0,
+        "value_score": 8.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "NHPC.NS",
+      "action": "STRONG_BUY",
+      "confidence": 0.72,
+      "price": 75.94,
+      "target": 89.61,
+      "stop": 68.35,
+      "thesis": "Strong value score 10.0 + reversal candle",
+      "rationale": [
+        "Near 52w low (21%)",
+        "Solid fundamentals: ROE=9.0%, PE=27.415163",
+        "Candle pattern: strong green reversal after decline"
+      ],
+      "sector": "Utilities",
+      "fundamentals": {
+        "symbol": "NHPC.NS",
+        "name": "NHPC Limited",
+        "sector": "Utilities",
+        "price": 75.94,
+        "market_cap_cr": 76282.0,
+        "pe": 27.415163,
+        "pb": 1.8440096,
+        "roe": 9.020999999999999,
+        "debt_equity": 1.13111,
+        "distance_from_low": 0.21,
+        "is_in_dip": true,
+        "fundamental_score": 7.5,
+        "value_score": 10.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "ICICIBANK.NS",
+      "action": "STRONG_BUY",
+      "confidence": 0.72,
+      "price": 1261.4,
+      "target": 1488.45,
+      "stop": 1135.26,
+      "thesis": "Strong value score 9.5 + reversal candle",
+      "rationale": [
+        "Near 52w low (24%)",
+        "Solid fundamentals: ROE=16.4%, PE=16.870403",
+        "Candle pattern: strong green reversal after decline"
+      ],
+      "sector": "Financial Services",
+      "fundamentals": {
+        "symbol": "ICICIBANK.NS",
+        "name": "ICICI Bank Limited",
+        "sector": "Financial Services",
+        "price": 1261.4,
+        "market_cap_cr": 904378.0,
+        "pe": 16.870403,
+        "pb": 2.4880373,
+        "roe": 16.359,
+        "debt_equity": null,
+        "distance_from_low": 0.24,
+        "is_in_dip": true,
+        "fundamental_score": 8.0,
+        "value_score": 9.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "RECLTD.NS",
+      "action": "STRONG_BUY",
+      "confidence": 0.72,
+      "price": 335.0,
+      "target": 395.3,
+      "stop": 301.5,
+      "thesis": "Strong value score 10.0 + reversal candle",
+      "rationale": [
+        "Near 52w low (25%)",
+        "Solid fundamentals: ROE=20.0%, PE=5.419835",
+        "Candle pattern: strong green reversal after decline"
+      ],
+      "sector": "Financial Services",
+      "fundamentals": {
+        "symbol": "RECLTD.NS",
+        "name": "REC Limited",
+        "sector": "Financial Services",
+        "price": 335.0,
+        "market_cap_cr": 88213.0,
+        "pe": 5.419835,
+        "pb": 1.056449,
+        "roe": 19.957,
+        "debt_equity": 6.07463,
+        "distance_from_low": 0.25,
+        "is_in_dip": true,
+        "fundamental_score": 8.5,
+        "value_score": 10.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "GODREJCP.NS",
+      "action": "STRONG_BUY",
+      "confidence": 0.72,
+      "price": 997.4,
+      "target": 1176.93,
+      "stop": 897.66,
+      "thesis": "Strong value score 9.0 + reversal candle",
+      "rationale": [
+        "Near 52w low (9%)",
+        "Solid fundamentals: ROE=15.1%, PE=54.95317",
+        "Candle pattern: strong green reversal after decline"
+      ],
+      "sector": "Consumer Defensive",
+      "fundamentals": {
+        "symbol": "GODREJCP.NS",
+        "name": "Godrej Consumer Products Limited",
+        "sector": "Consumer Defensive",
+        "price": 997.4,
+        "market_cap_cr": 102058.0,
+        "pe": 54.95317,
+        "pb": 8.056998,
+        "roe": 15.099000000000002,
+        "debt_equity": 0.34899,
+        "distance_from_low": 0.09,
+        "is_in_dip": true,
+        "fundamental_score": 7.5,
+        "value_score": 9.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "TCS.NS",
+      "action": "STRONG_BUY",
+      "confidence": 0.7,
+      "price": 2239.5,
+      "target": 2642.61,
+      "stop": 2015.55,
+      "thesis": "Strong value score 10.0 + reversal candle",
+      "rationale": [
+        "Near 52w low (2%)",
+        "Solid fundamentals: ROE=48.4%, PE=16.458439",
+        "Candle pattern: hammer candle (potential reversal)"
+      ],
+      "sector": "Technology",
+      "fundamentals": {
+        "symbol": "TCS.NS",
+        "name": "Tata Consultancy Services Limited",
+        "sector": "Technology",
+        "price": 2239.5,
+        "market_cap_cr": 810271.0,
+        "pe": 16.458439,
+        "pb": 7.138372,
+        "roe": 48.395002,
+        "debt_equity": 0.10389,
+        "distance_from_low": 0.02,
+        "is_in_dip": true,
+        "fundamental_score": 9.0,
+        "value_score": 10.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "TATAELXSI.NS",
+      "action": "STRONG_BUY",
+      "confidence": 0.7,
+      "price": 4310.4,
+      "target": 5086.27,
+      "stop": 3879.36,
+      "thesis": "Strong value score 8.5 + reversal candle",
+      "rationale": [
+        "Near 52w low (13%)",
+        "Solid fundamentals: ROE=21.3%, PE=42.740704",
+        "Candle pattern: hammer candle (potential reversal)"
+      ],
+      "sector": "Technology",
+      "fundamentals": {
+        "symbol": "TATAELXSI.NS",
+        "name": "Tata Elxsi Limited",
+        "sector": "Technology",
+        "price": 4310.4,
+        "market_cap_cr": 26853.0,
+        "pe": 42.740704,
+        "pb": 8.829439,
+        "roe": 21.298000000000002,
+        "debt_equity": 5.336,
+        "distance_from_low": 0.13,
+        "is_in_dip": true,
+        "fundamental_score": 7.0,
+        "value_score": 8.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "INFY.NS",
+      "action": "BUY",
+      "confidence": 0.51,
+      "price": 1203.8,
+      "target": 1420.48,
+      "stop": 1083.42,
+      "thesis": "Value score 9.5, in dip",
+      "rationale": [
+        "52w range: 18% from low",
+        "PE=15.757099 ROE=31.4%"
+      ],
+      "sector": "Technology",
+      "fundamentals": {
+        "symbol": "INFY.NS",
+        "name": "Infosys Limited",
+        "sector": "Technology",
+        "price": 1203.8,
+        "market_cap_cr": 487452.0,
+        "pe": 15.757099,
+        "pb": 5.211358,
+        "roe": 31.439,
+        "debt_equity": 9.827,
+        "distance_from_low": 0.18,
+        "is_in_dip": true,
+        "fundamental_score": 8.0,
+        "value_score": 9.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "HCLTECH.NS",
+      "action": "BUY",
+      "confidence": 0.51,
+      "price": 1171.1,
+      "target": 1381.9,
+      "stop": 1053.99,
+      "thesis": "Value score 9.5, in dip",
+      "rationale": [
+        "52w range: 10% from low",
+        "PE=19.101288 ROE=23.4%"
+      ],
+      "sector": "Technology",
+      "fundamentals": {
+        "symbol": "HCLTECH.NS",
+        "name": "HCL Technologies Limited",
+        "sector": "Technology",
+        "price": 1171.1,
+        "market_cap_cr": 316859.0,
+        "pe": 19.101288,
+        "pb": 4.1288266,
+        "roe": 23.357001,
+        "debt_equity": 6.935,
+        "distance_from_low": 0.1,
+        "is_in_dip": true,
+        "fundamental_score": 8.0,
+        "value_score": 9.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "SKFINDIA.NS",
+      "action": "BUY",
+      "confidence": 0.51,
+      "price": 1615.8,
+      "target": 1906.64,
+      "stop": 1454.22,
+      "thesis": "Value score 8.5, in dip",
+      "rationale": [
+        "52w range: 6% from low",
+        "PE=30.022297 ROE=13.5%"
+      ],
+      "sector": "Industrials",
+      "fundamentals": {
+        "symbol": "SKFINDIA.NS",
+        "name": "SKF India Limited",
+        "sector": "Industrials",
+        "price": 1615.8,
+        "market_cap_cr": 7988.0,
+        "pe": 30.022297,
+        "pb": 6.008724,
+        "roe": 13.543000999999999,
+        "debt_equity": 0.219,
+        "distance_from_low": 0.06,
+        "is_in_dip": true,
+        "fundamental_score": 7.0,
+        "value_score": 8.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "HINDUNILVR.NS",
+      "action": "BUY",
+      "confidence": 0.51,
+      "price": 2082.1,
+      "target": 2456.88,
+      "stop": 1873.89,
+      "thesis": "Value score 8.5, in dip",
+      "rationale": [
+        "52w range: 8% from low",
+        "PE=46.10496 ROE=21.6%"
+      ],
+      "sector": "Consumer Defensive",
+      "fundamentals": {
+        "symbol": "HINDUNILVR.NS",
+        "name": "Hindustan Unilever Limited",
+        "sector": "Consumer Defensive",
+        "price": 2082.1,
+        "market_cap_cr": 489208.0,
+        "pe": 46.10496,
+        "pb": 10.040556,
+        "roe": 21.603,
+        "debt_equity": 3.016,
+        "distance_from_low": 0.08,
+        "is_in_dip": true,
+        "fundamental_score": 7.0,
+        "value_score": 8.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "ASHOKLEY.NS",
+      "action": "BUY",
+      "confidence": 0.51,
+      "price": 144.99,
+      "target": 171.09,
+      "stop": 130.49,
+      "thesis": "Value score 9.5, in dip",
+      "rationale": [
+        "52w range: 30% from low",
+        "PE=24.532997 ROE=21.6%"
+      ],
+      "sector": "Industrials",
+      "fundamentals": {
+        "symbol": "ASHOKLEY.NS",
+        "name": "Ashok Leyland Limited",
+        "sector": "Industrials",
+        "price": 144.99,
+        "market_cap_cr": 85165.0,
+        "pe": 24.532997,
+        "pb": 5.498085,
+        "roe": 21.639,
+        "debt_equity": 3.4473700000000003,
+        "distance_from_low": 0.3,
+        "is_in_dip": true,
+        "fundamental_score": 7.5,
+        "value_score": 9.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "DABUR.NS",
+      "action": "BUY",
+      "confidence": 0.51,
+      "price": 426.9,
+      "target": 503.74,
+      "stop": 384.21,
+      "thesis": "Value score 9.5, in dip",
+      "rationale": [
+        "52w range: 14% from low",
+        "PE=40.046906 ROE=16.2%"
+      ],
+      "sector": "Consumer Defensive",
+      "fundamentals": {
+        "symbol": "DABUR.NS",
+        "name": "Dabur India Limited",
+        "sector": "Consumer Defensive",
+        "price": 426.9,
+        "market_cap_cr": 75719.0,
+        "pe": 40.046906,
+        "pb": 6.624767,
+        "roe": 16.239999,
+        "debt_equity": 0.10907,
+        "distance_from_low": 0.14,
+        "is_in_dip": true,
+        "fundamental_score": 8.0,
+        "value_score": 9.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "IOB.NS",
+      "action": "BUY",
+      "confidence": 0.51,
+      "price": 32.96,
+      "target": 38.89,
+      "stop": 29.66,
+      "thesis": "Value score 10.0, in dip",
+      "rationale": [
+        "52w range: 17% from low",
+        "PE=11.729537 ROE=15.7%"
+      ],
+      "sector": "Financial Services",
+      "fundamentals": {
+        "symbol": "IOB.NS",
+        "name": "Indian Overseas Bank",
+        "sector": "Financial Services",
+        "price": 32.96,
+        "market_cap_cr": 63470.0,
+        "pe": 11.729537,
+        "pb": 1.7158624,
+        "roe": 15.654999,
+        "debt_equity": null,
+        "distance_from_low": 0.17,
+        "is_in_dip": true,
+        "fundamental_score": 8.0,
+        "value_score": 10.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "MRF.NS",
+      "action": "BUY",
+      "confidence": 0.51,
+      "price": 124925.0,
+      "target": 147411.5,
+      "stop": 112432.5,
+      "thesis": "Value score 10.0, in dip",
+      "rationale": [
+        "52w range: 7% from low",
+        "PE=21.857689 ROE=12.3%"
+      ],
+      "sector": "Consumer Cyclical",
+      "fundamentals": {
+        "symbol": "MRF.NS",
+        "name": "MRF Limited",
+        "sector": "Consumer Cyclical",
+        "price": 124925.0,
+        "market_cap_cr": 52982.0,
+        "pe": 21.857689,
+        "pb": 2.5260408,
+        "roe": 12.295,
+        "debt_equity": 0.15288000000000002,
+        "distance_from_low": 0.07,
+        "is_in_dip": true,
+        "fundamental_score": 7.5,
+        "value_score": 10.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "SONATSOFTW.NS",
+      "action": "BUY",
+      "confidence": 0.51,
+      "price": 263.95,
+      "target": 311.46,
+      "stop": 237.56,
+      "thesis": "Value score 10.0, in dip",
+      "rationale": [
+        "52w range: 23% from low",
+        "PE=15.767623 ROE=25.7%"
+      ],
+      "sector": "Technology",
+      "fundamentals": {
+        "symbol": "SONATSOFTW.NS",
+        "name": "Sonata Software Limited",
+        "sector": "Technology",
+        "price": 263.95,
+        "market_cap_cr": 7306.0,
+        "pe": 15.767623,
+        "pb": 3.8388817,
+        "roe": 25.724000000000004,
+        "debt_equity": 0.37962,
+        "distance_from_low": 0.23,
+        "is_in_dip": true,
+        "fundamental_score": 8.0,
+        "value_score": 10.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "HDFCBANK.NS",
+      "action": "BUY",
+      "confidence": 0.51,
+      "price": 756.45,
+      "target": 892.61,
+      "stop": 680.81,
+      "thesis": "Value score 9.5, in dip",
+      "rationale": [
+        "52w range: 10% from low",
+        "PE=16.869982 ROE=13.8%"
+      ],
+      "sector": "Financial Services",
+      "fundamentals": {
+        "symbol": "HDFCBANK.NS",
+        "name": "HDFC Bank Limited",
+        "sector": "Financial Services",
+        "price": 756.45,
+        "market_cap_cr": 1164747.0,
+        "pe": 16.869982,
+        "pb": 1.9869559,
+        "roe": 13.818,
+        "debt_equity": null,
+        "distance_from_low": 0.1,
+        "is_in_dip": true,
+        "fundamental_score": 8.0,
+        "value_score": 9.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "MPHASIS.NS",
+      "action": "BUY",
+      "confidence": 0.51,
+      "price": 2317.1,
+      "target": 2734.18,
+      "stop": 2085.39,
+      "thesis": "Value score 10.0, in dip",
+      "rationale": [
+        "52w range: 30% from low",
+        "PE=24.574186 ROE=18.3%"
+      ],
+      "sector": "Technology",
+      "fundamentals": {
+        "symbol": "MPHASIS.NS",
+        "name": "Mphasis Limited",
+        "sector": "Technology",
+        "price": 2317.1,
+        "market_cap_cr": 44214.0,
+        "pe": 24.574186,
+        "pb": 4.343124,
+        "roe": 18.285999,
+        "debt_equity": 0.24383,
+        "distance_from_low": 0.3,
+        "is_in_dip": true,
+        "fundamental_score": 9.0,
+        "value_score": 10.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "MAZDOCK.NS",
+      "action": "BUY",
+      "confidence": 0.51,
+      "price": 2453.5,
+      "target": 2895.13,
+      "stop": 2208.15,
+      "thesis": "Value score 8.5, in dip",
+      "rationale": [
+        "52w range: 28% from low",
+        "PE=38.347923 ROE=28.8%"
+      ],
+      "sector": "Industrials",
+      "fundamentals": {
+        "symbol": "MAZDOCK.NS",
+        "name": "Mazagon Dock Shipbuilders Limited",
+        "sector": "Industrials",
+        "price": 2453.5,
+        "market_cap_cr": 98969.0,
+        "pe": 38.347923,
+        "pb": 10.145599,
+        "roe": 28.77,
+        "debt_equity": 4.481,
+        "distance_from_low": 0.28,
+        "is_in_dip": true,
+        "fundamental_score": 7.0,
+        "value_score": 8.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "BRITANNIA.NS",
+      "action": "BUY",
+      "confidence": 0.51,
+      "price": 5094.5,
+      "target": 6011.51,
+      "stop": 4585.05,
+      "thesis": "Value score 9.5, in dip",
+      "rationale": [
+        "52w range: 5% from low",
+        "PE=48.367035 ROE=53.3%"
+      ],
+      "sector": "Consumer Defensive",
+      "fundamentals": {
+        "symbol": "BRITANNIA.NS",
+        "name": "Britannia Industries Limited",
+        "sector": "Consumer Defensive",
+        "price": 5094.5,
+        "market_cap_cr": 122710.0,
+        "pe": 48.367035,
+        "pb": 24.031908,
+        "roe": 53.31399999999999,
+        "debt_equity": 0.26875,
+        "distance_from_low": 0.05,
+        "is_in_dip": true,
+        "fundamental_score": 8.0,
+        "value_score": 9.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "MARUTI.NS",
+      "action": "BUY",
+      "confidence": 0.51,
+      "price": 13105.0,
+      "target": 15463.9,
+      "stop": 11794.5,
+      "thesis": "Value score 9.5, in dip",
+      "rationale": [
+        "52w range: 20% from low",
+        "PE=28.0633 ROE=14.4%"
+      ],
+      "sector": "Consumer Cyclical",
+      "fundamentals": {
+        "symbol": "MARUTI.NS",
+        "name": "Maruti Suzuki India Limited",
+        "sector": "Consumer Cyclical",
+        "price": 13105.0,
+        "market_cap_cr": 412025.0,
+        "pe": 28.0633,
+        "pb": 3.8450625,
+        "roe": 14.434,
+        "debt_equity": 0.096,
+        "distance_from_low": 0.2,
+        "is_in_dip": true,
+        "fundamental_score": 8.0,
+        "value_score": 9.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "BAJFINANCE.NS",
+      "action": "BUY",
+      "confidence": 0.51,
+      "price": 875.5,
+      "target": 1033.09,
+      "stop": 787.95,
+      "thesis": "Value score 9.0, in dip",
+      "rationale": [
+        "52w range: 28% from low",
+        "PE=28.695509 ROE=17.9%"
+      ],
+      "sector": "Financial Services",
+      "fundamentals": {
+        "symbol": "BAJFINANCE.NS",
+        "name": "Bajaj Finance Limited",
+        "sector": "Financial Services",
+        "price": 875.5,
+        "market_cap_cr": 544375.0,
+        "pe": 28.695509,
+        "pb": 4.774448,
+        "roe": 17.907,
+        "debt_equity": 3.13407,
+        "distance_from_low": 0.28,
+        "is_in_dip": true,
+        "fundamental_score": 7.5,
+        "value_score": 9.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "RELIANCE.NS",
+      "action": "BUY",
+      "confidence": 0.51,
+      "price": 1305.5,
+      "target": 1540.49,
+      "stop": 1174.95,
+      "thesis": "Value score 8.5, in dip",
+      "rationale": [
+        "52w range: 5% from low",
+        "PE=21.849373 ROE=9.1%"
+      ],
+      "sector": "Energy",
+      "fundamentals": {
+        "symbol": "RELIANCE.NS",
+        "name": "Reliance Industries Limited",
+        "sector": "Energy",
+        "price": 1305.5,
+        "market_cap_cr": 1766664.0,
+        "pe": 21.849373,
+        "pb": 1.9542097,
+        "roe": 9.139,
+        "debt_equity": 0.36652999999999997,
+        "distance_from_low": 0.05,
+        "is_in_dip": true,
+        "fundamental_score": 7.0,
+        "value_score": 8.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "SAKSOFT.NS",
+      "action": "BUY",
+      "confidence": 0.51,
+      "price": 142.54,
+      "target": 168.2,
+      "stop": 128.29,
+      "thesis": "Value score 10.0, in dip",
+      "rationale": [
+        "52w range: 24% from low",
+        "PE=13.988224 ROE=19.1%"
+      ],
+      "sector": "Technology",
+      "fundamentals": {
+        "symbol": "SAKSOFT.NS",
+        "name": "Saksoft Limited",
+        "sector": "Technology",
+        "price": 142.54,
+        "market_cap_cr": 1822.0,
+        "pe": 13.988224,
+        "pb": 2.3398283,
+        "roe": 19.064999999999998,
+        "debt_equity": 5.607,
+        "distance_from_low": 0.24,
+        "is_in_dip": true,
+        "fundamental_score": 7.5,
+        "value_score": 10.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "WIPRO.NS",
+      "action": "BUY",
+      "confidence": 0.51,
+      "price": 204.36,
+      "target": 241.14,
+      "stop": 183.92,
+      "thesis": "Value score 10.0, in dip",
+      "rationale": [
+        "52w range: 21% from low",
+        "PE=16.283665 ROE=15.4%"
+      ],
+      "sector": "Technology",
+      "fundamentals": {
+        "symbol": "WIPRO.NS",
+        "name": "Wipro Limited",
+        "sector": "Technology",
+        "price": 204.36,
+        "market_cap_cr": 214381.0,
+        "pe": 16.283665,
+        "pb": 2.3870485,
+        "roe": 15.439998999999998,
+        "debt_equity": 0.22853,
+        "distance_from_low": 0.21,
+        "is_in_dip": true,
+        "fundamental_score": 9.0,
+        "value_score": 10.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "M&M.NS",
+      "action": "BUY",
+      "confidence": 0.51,
+      "price": 3028.3,
+      "target": 3573.39,
+      "stop": 2725.47,
+      "thesis": "Value score 10.0, in dip",
+      "rationale": [
+        "52w range: 14% from low",
+        "PE=19.915165 ROE=18.8%"
+      ],
+      "sector": "Consumer Cyclical",
+      "fundamentals": {
+        "symbol": "M&M.NS",
+        "name": "Mahindra & Mahindra Limited",
+        "sector": "Consumer Cyclical",
+        "price": 3028.3,
+        "market_cap_cr": 363627.0,
+        "pe": 19.915165,
+        "pb": 3.6348994,
+        "roe": 18.754,
+        "debt_equity": 1.25066,
+        "distance_from_low": 0.14,
+        "is_in_dip": true,
+        "fundamental_score": 8.0,
+        "value_score": 10.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "ITC.NS",
+      "action": "BUY",
+      "confidence": 0.51,
+      "price": 280.0,
+      "target": 330.4,
+      "stop": 252.0,
+      "thesis": "Value score 9.5, in dip",
+      "rationale": [
+        "52w range: 3% from low",
+        "PE=16.962446 ROE=29.3%"
+      ],
+      "sector": "Consumer Defensive",
+      "fundamentals": {
+        "symbol": "ITC.NS",
+        "name": "ITC Limited",
+        "sector": "Consumer Defensive",
+        "price": 280.0,
+        "market_cap_cr": 350888.0,
+        "pe": 16.962446,
+        "pb": 4.839629,
+        "roe": 29.34,
+        "debt_equity": 3.292,
+        "distance_from_low": 0.03,
+        "is_in_dip": true,
+        "fundamental_score": 8.0,
+        "value_score": 9.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "BHARTIARTL.NS",
+      "action": "BUY",
+      "confidence": 0.51,
+      "price": 1808.9,
+      "target": 2134.5,
+      "stop": 1628.01,
+      "thesis": "Value score 8.5, in dip",
+      "rationale": [
+        "52w range: 16% from low",
+        "PE=40.80532 ROE=19.4%"
+      ],
+      "sector": "Communication Services",
+      "fundamentals": {
+        "symbol": "BHARTIARTL.NS",
+        "name": "Bharti Airtel Limited",
+        "sector": "Communication Services",
+        "price": 1808.9,
+        "market_cap_cr": 1101886.0,
+        "pe": 40.80532,
+        "pb": 7.09456,
+        "roe": 19.358998999999997,
+        "debt_equity": 0.9971800000000001,
+        "distance_from_low": 0.16,
+        "is_in_dip": true,
+        "fundamental_score": 7.0,
+        "value_score": 8.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "CHOLAFIN.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 1491.2,
+      "target": 1714.88,
+      "stop": 1312.26,
+      "thesis": "Good fundamentals (FS=7.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Financial Services",
+      "fundamentals": {
+        "symbol": "CHOLAFIN.NS",
+        "name": "Cholamandalam Investment and Finance Company Limited",
+        "sector": "Financial Services",
+        "price": 1491.2,
+        "market_cap_cr": 127116.0,
+        "pe": 24.141169,
+        "pb": 4.1669226,
+        "roe": 19.334999,
+        "debt_equity": 6.9326099999999995,
+        "distance_from_low": 0.36,
+        "is_in_dip": false,
+        "fundamental_score": 7.5,
+        "value_score": 8.8
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "COFORGE.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 1431.8,
+      "target": 1646.57,
+      "stop": 1259.98,
+      "thesis": "Good fundamentals (FS=7.0) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Technology",
+      "fundamentals": {
+        "symbol": "COFORGE.NS",
+        "name": "Coforge Limited",
+        "sector": "Technology",
+        "price": 1431.8,
+        "market_cap_cr": 61567.0,
+        "pe": 32.71938,
+        "pb": 5.0422063,
+        "roe": 18.596001,
+        "debt_equity": 7.518,
+        "distance_from_low": 0.43,
+        "is_in_dip": false,
+        "fundamental_score": 7.0,
+        "value_score": 7.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "COLPAL.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 2016.1,
+      "target": 2318.51,
+      "stop": 1774.17,
+      "thesis": "Good fundamentals (FS=7.0) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Consumer Defensive",
+      "fundamentals": {
+        "symbol": "COLPAL.NS",
+        "name": "Colgate-Palmolive (India) Limited",
+        "sector": "Consumer Defensive",
+        "price": 2016.1,
+        "market_cap_cr": 54835.0,
+        "pe": 41.440903,
+        "pb": 34.616505,
+        "roe": 81.593,
+        "debt_equity": 2.993,
+        "distance_from_low": 0.32,
+        "is_in_dip": false,
+        "fundamental_score": 7.0,
+        "value_score": 7.8
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "BHEL.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 391.05,
+      "target": 424.9,
+      "stop": 344.12,
+      "thesis": "Good fundamentals (FS=6.0) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Industrials",
+      "fundamentals": {
+        "symbol": "BHEL.NS",
+        "name": "Bharat Heavy Electricals Limited",
+        "sector": "Industrials",
+        "price": 391.05,
+        "market_cap_cr": 136149.0,
+        "pe": 85.18518,
+        "pb": 5.2016125,
+        "roe": 6.292000000000001,
+        "debt_equity": 0.31312,
+        "distance_from_low": 0.85,
+        "is_in_dip": false,
+        "fundamental_score": 6.0,
+        "value_score": 6.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "DRREDDY.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 1268.1,
+      "target": 1379.7,
+      "stop": 1115.93,
+      "thesis": "Good fundamentals (FS=7.0) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Healthcare",
+      "fundamentals": {
+        "symbol": "DRREDDY.NS",
+        "name": "Dr. Reddy's Laboratories Limited",
+        "sector": "Healthcare",
+        "price": 1268.1,
+        "market_cap_cr": 105563.0,
+        "pe": 24.661612,
+        "pb": 2.8004258,
+        "roe": 11.834999999999999,
+        "debt_equity": 0.20328,
+        "distance_from_low": 0.52,
+        "is_in_dip": false,
+        "fundamental_score": 7.0,
+        "value_score": 7.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "JBMA.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 699.15,
+      "target": 790.0,
+      "stop": 615.25,
+      "thesis": "Good fundamentals (FS=6.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Consumer Cyclical",
+      "fundamentals": {
+        "symbol": "JBMA.NS",
+        "name": "JBM Auto Limited",
+        "sector": "Consumer Cyclical",
+        "price": 699.15,
+        "market_cap_cr": 16534.0,
+        "pe": 75.66559,
+        "pb": 11.641441,
+        "roe": 15.988,
+        "debt_equity": 1.9028200000000002,
+        "distance_from_low": 0.71,
+        "is_in_dip": false,
+        "fundamental_score": 6.5,
+        "value_score": 6.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "CIPLA.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 1391.3,
+      "target": 1599.99,
+      "stop": 1224.34,
+      "thesis": "Good fundamentals (FS=6.0) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Healthcare",
+      "fundamentals": {
+        "symbol": "CIPLA.NS",
+        "name": "Cipla Limited",
+        "sector": "Healthcare",
+        "price": 1391.3,
+        "market_cap_cr": 112389.0,
+        "pe": 28.991457,
+        "pb": 3.4139736,
+        "roe": 11.736,
+        "debt_equity": 1.778,
+        "distance_from_low": 0.44,
+        "is_in_dip": false,
+        "fundamental_score": 6.0,
+        "value_score": 6.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "TATACHEM.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 722.25,
+      "target": 830.59,
+      "stop": 635.58,
+      "thesis": "Good fundamentals (FS=6.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Basic Materials",
+      "fundamentals": {
+        "symbol": "TATACHEM.NS",
+        "name": "Tata Chemicals Limited",
+        "sector": "Basic Materials",
+        "price": 722.25,
+        "market_cap_cr": 18400.0,
+        "pe": null,
+        "pb": 0.82374907,
+        "roe": -7.678,
+        "debt_equity": 0.36081,
+        "distance_from_low": 0.32,
+        "is_in_dip": false,
+        "fundamental_score": 6.5,
+        "value_score": 7.3
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "SBIN.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 976.35,
+      "target": 1122.8,
+      "stop": 859.19,
+      "thesis": "Good fundamentals (FS=8.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Financial Services",
+      "fundamentals": {
+        "symbol": "SBIN.NS",
+        "name": "State Bank of India",
+        "sector": "Financial Services",
+        "price": 976.35,
+        "market_cap_cr": 901231.0,
+        "pe": 10.713816,
+        "pb": 1.5223095,
+        "roe": 15.476999999999999,
+        "debt_equity": null,
+        "distance_from_low": 0.43,
+        "is_in_dip": false,
+        "fundamental_score": 8.5,
+        "value_score": 8.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "UPL.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 641.35,
+      "target": 737.55,
+      "stop": 564.39,
+      "thesis": "Good fundamentals (FS=7.0) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Basic Materials",
+      "fundamentals": {
+        "symbol": "UPL.NS",
+        "name": "UPL Limited",
+        "sector": "Basic Materials",
+        "price": 641.35,
+        "market_cap_cr": 54212.0,
+        "pe": 28.77299,
+        "pb": 1.5602573,
+        "roe": 5.614,
+        "debt_equity": 0.57128,
+        "distance_from_low": 0.31,
+        "is_in_dip": false,
+        "fundamental_score": 7.0,
+        "value_score": 8.3
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "LT.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 3935.6,
+      "target": 4440.0,
+      "stop": 3463.33,
+      "thesis": "Good fundamentals (FS=6.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Industrials",
+      "fundamentals": {
+        "symbol": "LT.NS",
+        "name": "Larsen & Toubro Limited",
+        "sector": "Industrials",
+        "price": 3935.6,
+        "market_cap_cr": 541408.0,
+        "pe": 33.63473,
+        "pb": 4.953743,
+        "roe": 16.951999,
+        "debt_equity": 0.9764,
+        "distance_from_low": 0.56,
+        "is_in_dip": false,
+        "fundamental_score": 6.5,
+        "value_score": 6.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "HAL.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 4225.3,
+      "target": 4859.1,
+      "stop": 3718.26,
+      "thesis": "Good fundamentals (FS=8.0) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Industrials",
+      "fundamentals": {
+        "symbol": "HAL.NS",
+        "name": "Hindustan Aeronautics Limited",
+        "sector": "Industrials",
+        "price": 4225.3,
+        "market_cap_cr": 282577.0,
+        "pe": 30.965921,
+        "pb": 6.885532,
+        "roe": 23.979001,
+        "debt_equity": 0.027,
+        "distance_from_low": 0.45,
+        "is_in_dip": false,
+        "fundamental_score": 8.0,
+        "value_score": 8.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "BOSCHLTD.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 37170.0,
+      "target": 41945.0,
+      "stop": 32709.6,
+      "thesis": "Good fundamentals (FS=7.0) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Consumer Cyclical",
+      "fundamentals": {
+        "symbol": "BOSCHLTD.NS",
+        "name": "Bosch Limited",
+        "sector": "Consumer Cyclical",
+        "price": 37170.0,
+        "market_cap_cr": 109628.0,
+        "pe": 39.533302,
+        "pb": 7.385193,
+        "roe": 19.353001,
+        "debt_equity": 0.8,
+        "distance_from_low": 0.64,
+        "is_in_dip": false,
+        "fundamental_score": 7.0,
+        "value_score": 7.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "HEROMOTOCO.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 4902.0,
+      "target": 5637.3,
+      "stop": 4313.76,
+      "thesis": "Good fundamentals (FS=8.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Consumer Cyclical",
+      "fundamentals": {
+        "symbol": "HEROMOTOCO.NS",
+        "name": "Hero MotoCorp Limited",
+        "sector": "Consumer Cyclical",
+        "price": 4902.0,
+        "market_cap_cr": 98086.0,
+        "pe": 17.105171,
+        "pb": 4.537784,
+        "roe": 28.027,
+        "debt_equity": 3.57,
+        "distance_from_low": 0.33,
+        "is_in_dip": false,
+        "fundamental_score": 8.5,
+        "value_score": 10.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "NTPC.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 366.95,
+      "target": 414.4,
+      "stop": 322.92,
+      "thesis": "Good fundamentals (FS=8.0) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Utilities",
+      "fundamentals": {
+        "symbol": "NTPC.NS",
+        "name": "NTPC Limited",
+        "sector": "Utilities",
+        "price": 366.95,
+        "market_cap_cr": 355819.0,
+        "pe": 12.054862,
+        "pb": 1.7520196,
+        "roe": 13.694999999999999,
+        "debt_equity": 1.18127,
+        "distance_from_low": 0.52,
+        "is_in_dip": false,
+        "fundamental_score": 8.0,
+        "value_score": 8.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "GRSE.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 2683.5,
+      "target": 3086.02,
+      "stop": 2361.48,
+      "thesis": "Good fundamentals (FS=7.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Industrials",
+      "fundamentals": {
+        "symbol": "GRSE.NS",
+        "name": "Garden Reach Shipbuilders & Engineers Limited",
+        "sector": "Industrials",
+        "price": 2683.5,
+        "market_cap_cr": 30757.0,
+        "pe": 44.564316,
+        "pb": 11.711287,
+        "roe": 31.791002000000002,
+        "debt_equity": 1.424,
+        "distance_from_low": 0.46,
+        "is_in_dip": false,
+        "fundamental_score": 7.5,
+        "value_score": 7.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "ASIANPAINT.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 2660.4,
+      "target": 2985.7,
+      "stop": 2341.15,
+      "thesis": "Good fundamentals (FS=8.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Basic Materials",
+      "fundamentals": {
+        "symbol": "ASIANPAINT.NS",
+        "name": "Asian Paints Limited",
+        "sector": "Basic Materials",
+        "price": 2660.4,
+        "market_cap_cr": 255038.0,
+        "pe": 59.133137,
+        "pb": 11.930419,
+        "roe": 20.889999,
+        "debt_equity": 0.17847000000000002,
+        "distance_from_low": 0.63,
+        "is_in_dip": false,
+        "fundamental_score": 8.5,
+        "value_score": 9.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "PIDILITIND.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 1475.2,
+      "target": 1574.95,
+      "stop": 1298.18,
+      "thesis": "Good fundamentals (FS=7.0) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Basic Materials",
+      "fundamentals": {
+        "symbol": "PIDILITIND.NS",
+        "name": "Pidilite Industries Limited",
+        "sector": "Basic Materials",
+        "price": 1475.2,
+        "market_cap_cr": 150142.0,
+        "pe": 61.594986,
+        "pb": 13.864531,
+        "roe": 23.523001,
+        "debt_equity": 3.776,
+        "distance_from_low": 0.68,
+        "is_in_dip": false,
+        "fundamental_score": 7.0,
+        "value_score": 7.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "BEL.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 410.85,
+      "target": 472.48,
+      "stop": 361.55,
+      "thesis": "Good fundamentals (FS=8.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Industrials",
+      "fundamentals": {
+        "symbol": "BEL.NS",
+        "name": "Bharat Electronics Limited",
+        "sector": "Industrials",
+        "price": 410.85,
+        "market_cap_cr": 300322.0,
+        "pe": 49.55971,
+        "pb": 12.519425,
+        "roe": 27.556000000000004,
+        "debt_equity": 0.273,
+        "distance_from_low": 0.44,
+        "is_in_dip": false,
+        "fundamental_score": 8.5,
+        "value_score": 8.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "NESTLEIND.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 1385.2,
+      "target": 1498.1,
+      "stop": 1218.98,
+      "thesis": "Good fundamentals (FS=7.0) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Consumer Defensive",
+      "fundamentals": {
+        "symbol": "NESTLEIND.NS",
+        "name": "Nestl\u00e9 India Limited",
+        "sector": "Consumer Defensive",
+        "price": 1385.2,
+        "market_cap_cr": 267110.0,
+        "pe": 76.572685,
+        "pb": 51.79673,
+        "roe": 76.338995,
+        "debt_equity": 8.613,
+        "distance_from_low": 0.73,
+        "is_in_dip": false,
+        "fundamental_score": 7.0,
+        "value_score": 7.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "BANKBARODA.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 271.0,
+      "target": 311.65,
+      "stop": 238.48,
+      "thesis": "Good fundamentals (FS=8.0) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Financial Services",
+      "fundamentals": {
+        "symbol": "BANKBARODA.NS",
+        "name": "Bank of Baroda Limited",
+        "sector": "Financial Services",
+        "price": 271.0,
+        "market_cap_cr": 140144.0,
+        "pe": 7.05913,
+        "pb": 0.8446947,
+        "roe": 12.738,
+        "debt_equity": null,
+        "distance_from_low": 0.43,
+        "is_in_dip": false,
+        "fundamental_score": 8.0,
+        "value_score": 8.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "SUNPHARMA.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 1783.9,
+      "target": 1916.6,
+      "stop": 1569.83,
+      "thesis": "Good fundamentals (FS=6.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Healthcare",
+      "fundamentals": {
+        "symbol": "SUNPHARMA.NS",
+        "name": "Sun Pharmaceutical Industries Limited",
+        "sector": "Healthcare",
+        "price": 1783.9,
+        "market_cap_cr": 427873.0,
+        "pe": 37.3466,
+        "pb": 5.4961753,
+        "roe": 14.719999999999999,
+        "debt_equity": 5.517,
+        "distance_from_low": 0.64,
+        "is_in_dip": false,
+        "fundamental_score": 6.5,
+        "value_score": 6.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "PFC.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 425.55,
+      "target": 486.5,
+      "stop": 374.48,
+      "thesis": "Good fundamentals (FS=8.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Financial Services",
+      "fundamentals": {
+        "symbol": "PFC.NS",
+        "name": "Power Finance Corporation Limited",
+        "sector": "Financial Services",
+        "price": 425.55,
+        "market_cap_cr": 140436.0,
+        "pe": 5.4217095,
+        "pb": 1.0569335,
+        "roe": 20.466,
+        "debt_equity": 5.86017,
+        "distance_from_low": 0.61,
+        "is_in_dip": false,
+        "fundamental_score": 8.5,
+        "value_score": 9.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "CANBK.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 132.6,
+      "target": 152.49,
+      "stop": 116.69,
+      "thesis": "Good fundamentals (FS=8.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Financial Services",
+      "fundamentals": {
+        "symbol": "CANBK.NS",
+        "name": "Canara Bank",
+        "sector": "Financial Services",
+        "price": 132.6,
+        "market_cap_cr": 120277.0,
+        "pe": 6.1021633,
+        "pb": 1.0224382,
+        "roe": 15.935999,
+        "debt_equity": null,
+        "distance_from_low": 0.49,
+        "is_in_dip": false,
+        "fundamental_score": 8.5,
+        "value_score": 8.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "TATACONSUM.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 1151.1,
+      "target": 1282.7,
+      "stop": 1012.97,
+      "thesis": "Good fundamentals (FS=6.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Consumer Defensive",
+      "fundamentals": {
+        "symbol": "TATACONSUM.NS",
+        "name": "Tata Consumer Products Limited",
+        "sector": "Consumer Defensive",
+        "price": 1151.1,
+        "market_cap_cr": 113917.0,
+        "pe": 73.97814,
+        "pb": 5.603559,
+        "roe": 6.94,
+        "debt_equity": 0.12159,
+        "distance_from_low": 0.52,
+        "is_in_dip": false,
+        "fundamental_score": 6.5,
+        "value_score": 6.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "AXISBANK.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 1253.6,
+      "target": 1418.3,
+      "stop": 1103.17,
+      "thesis": "Good fundamentals (FS=7.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Financial Services",
+      "fundamentals": {
+        "symbol": "AXISBANK.NS",
+        "name": "Axis Bank Limited",
+        "sector": "Financial Services",
+        "price": 1253.6,
+        "market_cap_cr": 389877.0,
+        "pe": 14.840772,
+        "pb": 1.8112519,
+        "roe": 13.152,
+        "debt_equity": null,
+        "distance_from_low": 0.56,
+        "is_in_dip": false,
+        "fundamental_score": 7.5,
+        "value_score": 7.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "LUPIN.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 2254.3,
+      "target": 2494.0,
+      "stop": 1983.78,
+      "thesis": "Good fundamentals (FS=9.0) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Healthcare",
+      "fundamentals": {
+        "symbol": "LUPIN.NS",
+        "name": "Lupin Limited",
+        "sector": "Healthcare",
+        "price": 2254.3,
+        "market_cap_cr": 103070.0,
+        "pe": 19.358524,
+        "pb": 4.5885606,
+        "roe": 26.906999999999996,
+        "debt_equity": 0.29388000000000003,
+        "distance_from_low": 0.64,
+        "is_in_dip": false,
+        "fundamental_score": 9.0,
+        "value_score": 10.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "PARAS.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 883.9,
+      "target": 942.0,
+      "stop": 777.83,
+      "thesis": "Good fundamentals (FS=6.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Industrials",
+      "fundamentals": {
+        "symbol": "PARAS.NS",
+        "name": "Paras Defence and Space Technologies Limited",
+        "sector": "Industrials",
+        "price": 883.9,
+        "market_cap_cr": 7123.0,
+        "pe": 81.01742,
+        "pb": 10.608752,
+        "roe": 13.137999,
+        "debt_equity": 3.731,
+        "distance_from_low": 0.84,
+        "is_in_dip": false,
+        "fundamental_score": 6.5,
+        "value_score": 7.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "KOTAKBANK.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 382.6,
+      "target": 439.99,
+      "stop": 336.69,
+      "thesis": "Good fundamentals (FS=6.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Financial Services",
+      "fundamentals": {
+        "symbol": "KOTAKBANK.NS",
+        "name": "Kotak Mahindra Bank Limited",
+        "sector": "Financial Services",
+        "price": 382.6,
+        "market_cap_cr": 380552.0,
+        "pe": 19.731821,
+        "pb": 2.100778,
+        "roe": 11.389000000000001,
+        "debt_equity": null,
+        "distance_from_low": 0.34,
+        "is_in_dip": false,
+        "fundamental_score": 6.5,
+        "value_score": 7.3
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "TVSMOTOR.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 3376.2,
+      "target": 3882.63,
+      "stop": 2971.06,
+      "thesis": "Good fundamentals (FS=6.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Consumer Cyclical",
+      "fundamentals": {
+        "symbol": "TVSMOTOR.NS",
+        "name": "TVS Motor Company Limited",
+        "sector": "Consumer Cyclical",
+        "price": 3376.2,
+        "market_cap_cr": 160446.0,
+        "pe": 53.018215,
+        "pb": 48.016724,
+        "roe": 31.619000000000003,
+        "debt_equity": 3.0608999999999997,
+        "distance_from_low": 0.55,
+        "is_in_dip": false,
+        "fundamental_score": 6.5,
+        "value_score": 6.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "POWERGRID.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 283.95,
+      "target": 324.95,
+      "stop": 249.88,
+      "thesis": "Good fundamentals (FS=8.0) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Utilities",
+      "fundamentals": {
+        "symbol": "POWERGRID.NS",
+        "name": "Power Grid Corporation of India Limited",
+        "sector": "Utilities",
+        "price": 283.95,
+        "market_cap_cr": 264091.0,
+        "pe": 14.1128235,
+        "pb": 2.6269534,
+        "roe": 16.492,
+        "debt_equity": 1.50993,
+        "distance_from_low": 0.45,
+        "is_in_dip": false,
+        "fundamental_score": 8.0,
+        "value_score": 8.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "TITAN.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 4200.0,
+      "target": 4605.0,
+      "stop": 3696.0,
+      "thesis": "Good fundamentals (FS=6.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Consumer Cyclical",
+      "fundamentals": {
+        "symbol": "TITAN.NS",
+        "name": "Titan Company Limited",
+        "sector": "Consumer Cyclical",
+        "price": 4200.0,
+        "market_cap_cr": 372559.0,
+        "pe": 73.37526,
+        "pb": 23.745583,
+        "roe": 37.127998,
+        "debt_equity": 1.95001,
+        "distance_from_low": 0.69,
+        "is_in_dip": false,
+        "fundamental_score": 6.5,
+        "value_score": 6.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "ATUL.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 6740.0,
+      "target": 7751.0,
+      "stop": 5931.2,
+      "thesis": "Good fundamentals (FS=6.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Basic Materials",
+      "fundamentals": {
+        "symbol": "ATUL.NS",
+        "name": "Atul Ltd",
+        "sector": "Basic Materials",
+        "price": 6740.0,
+        "market_cap_cr": 19844.0,
+        "pe": 29.268717,
+        "pb": 3.189228,
+        "roe": 11.529,
+        "debt_equity": 2.907,
+        "distance_from_low": 0.53,
+        "is_in_dip": false,
+        "fundamental_score": 6.5,
+        "value_score": 7.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "ALKEM.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 5304.0,
+      "target": 5933.5,
+      "stop": 4667.52,
+      "thesis": "Good fundamentals (FS=8.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Healthcare",
+      "fundamentals": {
+        "symbol": "ALKEM.NS",
+        "name": "Alkem Laboratories Limited",
+        "sector": "Healthcare",
+        "price": 5304.0,
+        "market_cap_cr": 63417.0,
+        "pe": 27.553247,
+        "pb": 4.590324,
+        "roe": 17.557000000000002,
+        "debt_equity": 0.14267,
+        "distance_from_low": 0.48,
+        "is_in_dip": false,
+        "fundamental_score": 8.5,
+        "value_score": 8.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "SCHAEFFLER.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 3996.5,
+      "target": 4467.7,
+      "stop": 3516.92,
+      "thesis": "Good fundamentals (FS=6.0) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Consumer Cyclical",
+      "fundamentals": {
+        "symbol": "SCHAEFFLER.NS",
+        "name": "Schaeffler India Limited",
+        "sector": "Consumer Cyclical",
+        "price": 3996.5,
+        "market_cap_cr": 62467.0,
+        "pe": 51.395317,
+        "pb": 10.328554,
+        "roe": null,
+        "debt_equity": 0.904,
+        "distance_from_low": 0.5,
+        "is_in_dip": false,
+        "fundamental_score": 6.0,
+        "value_score": 6.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "UNIONBANK.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 166.36,
+      "target": 191.31,
+      "stop": 146.4,
+      "thesis": "Good fundamentals (FS=8.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Financial Services",
+      "fundamentals": {
+        "symbol": "UNIONBANK.NS",
+        "name": "Union Bank of India",
+        "sector": "Financial Services",
+        "price": 166.36,
+        "market_cap_cr": 126993.0,
+        "pe": 6.5341716,
+        "pb": 0.9515911,
+        "roe": 15.708,
+        "debt_equity": null,
+        "distance_from_low": 0.52,
+        "is_in_dip": false,
+        "fundamental_score": 8.5,
+        "value_score": 8.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "EICHERMOT.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 7114.0,
+      "target": 8181.1,
+      "stop": 6260.32,
+      "thesis": "Good fundamentals (FS=7.0) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Consumer Cyclical",
+      "fundamentals": {
+        "symbol": "EICHERMOT.NS",
+        "name": "Eicher Motors Limited",
+        "sector": "Consumer Cyclical",
+        "price": 7114.0,
+        "market_cap_cr": 195291.0,
+        "pe": 35.383198,
+        "pb": 7.7751546,
+        "roe": 23.774,
+        "debt_equity": 2.048,
+        "distance_from_low": 0.63,
+        "is_in_dip": false,
+        "fundamental_score": 7.0,
+        "value_score": 7.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "SRF.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 2732.0,
+      "target": 3141.8,
+      "stop": 2404.16,
+      "thesis": "Good fundamentals (FS=6.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Industrials",
+      "fundamentals": {
+        "symbol": "SRF.NS",
+        "name": "SRF Limited",
+        "sector": "Industrials",
+        "price": 2732.0,
+        "market_cap_cr": 80978.0,
+        "pe": 44.078735,
+        "pb": 5.7682767,
+        "roe": 13.763,
+        "debt_equity": 0.36195,
+        "distance_from_low": 0.39,
+        "is_in_dip": false,
+        "fundamental_score": 6.5,
+        "value_score": 7.3
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "IPCALAB.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 1600.0,
+      "target": 1678.3,
+      "stop": 1408.0,
+      "thesis": "Good fundamentals (FS=6.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Healthcare",
+      "fundamentals": {
+        "symbol": "IPCALAB.NS",
+        "name": "Ipca Laboratories Limited",
+        "sector": "Healthcare",
+        "price": 1600.0,
+        "market_cap_cr": 40593.0,
+        "pe": 35.61095,
+        "pb": 5.03314,
+        "roe": 13.217,
+        "debt_equity": 8.492,
+        "distance_from_low": 0.82,
+        "is_in_dip": false,
+        "fundamental_score": 6.5,
+        "value_score": 6.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "PERSISTENT.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 5151.0,
+      "target": 5923.65,
+      "stop": 4532.88,
+      "thesis": "Good fundamentals (FS=7.0) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Technology",
+      "fundamentals": {
+        "symbol": "PERSISTENT.NS",
+        "name": "Persistent Systems Limited",
+        "sector": "Technology",
+        "price": 5151.0,
+        "market_cap_cr": 80475.0,
+        "pe": 43.369537,
+        "pb": 10.281622,
+        "roe": 26.349002,
+        "debt_equity": 6.092,
+        "distance_from_low": 0.33,
+        "is_in_dip": false,
+        "fundamental_score": 7.0,
+        "value_score": 7.8
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "MARICO.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 819.0,
+      "target": 848.8,
+      "stop": 720.72,
+      "thesis": "Good fundamentals (FS=8.0) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Consumer Defensive",
+      "fundamentals": {
+        "symbol": "MARICO.NS",
+        "name": "Marico Limited",
+        "sector": "Consumer Defensive",
+        "price": 819.0,
+        "market_cap_cr": 106128.0,
+        "pe": 60.08804,
+        "pb": 25.021387,
+        "roe": 41.393003,
+        "debt_equity": 0.12394,
+        "distance_from_low": 0.82,
+        "is_in_dip": false,
+        "fundamental_score": 8.0,
+        "value_score": 8.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "AARTIIND.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 460.55,
+      "target": 523.1,
+      "stop": 405.28,
+      "thesis": "Good fundamentals (FS=5.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Basic Materials",
+      "fundamentals": {
+        "symbol": "AARTIIND.NS",
+        "name": "Aarti Industries Limited",
+        "sector": "Basic Materials",
+        "price": 460.55,
+        "market_cap_cr": 16721.0,
+        "pe": 39.87446,
+        "pb": 2.7956004,
+        "roe": 7.249,
+        "debt_equity": 0.83392,
+        "distance_from_low": 0.66,
+        "is_in_dip": false,
+        "fundamental_score": 5.5,
+        "value_score": 6.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "TORNTPHARM.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 4339.7,
+      "target": 4712.9,
+      "stop": 3818.94,
+      "thesis": "Good fundamentals (FS=7.0) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Healthcare",
+      "fundamentals": {
+        "symbol": "TORNTPHARM.NS",
+        "name": "Torrent Pharmaceuticals Limited",
+        "sector": "Healthcare",
+        "price": 4339.7,
+        "market_cap_cr": 146875.0,
+        "pe": 68.04171,
+        "pb": 17.39589,
+        "roe": 16.986,
+        "debt_equity": 0.85446,
+        "distance_from_low": 0.76,
+        "is_in_dip": false,
+        "fundamental_score": 7.0,
+        "value_score": 7.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "TECHM.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 1489.5,
+      "target": 1712.92,
+      "stop": 1310.76,
+      "thesis": "Good fundamentals (FS=7.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Technology",
+      "fundamentals": {
+        "symbol": "TECHM.NS",
+        "name": "Tech Mahindra Limited",
+        "sector": "Technology",
+        "price": 1489.5,
+        "market_cap_cr": 131928.0,
+        "pe": 27.491693,
+        "pb": 4.459007,
+        "roe": 16.608,
+        "debt_equity": 7.269,
+        "distance_from_low": 0.34,
+        "is_in_dip": false,
+        "fundamental_score": 7.5,
+        "value_score": 8.3
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "DEEPAKNTR.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 1684.1,
+      "target": 1936.71,
+      "stop": 1482.01,
+      "thesis": "Good fundamentals (FS=6.0) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Basic Materials",
+      "fundamentals": {
+        "symbol": "DEEPAKNTR.NS",
+        "name": "Deepak Nitrite Limited",
+        "sector": "Basic Materials",
+        "price": 1684.1,
+        "market_cap_cr": 22970.0,
+        "pe": 41.654713,
+        "pb": 3.9382544,
+        "roe": 9.751,
+        "debt_equity": 0.27903,
+        "distance_from_low": 0.55,
+        "is_in_dip": false,
+        "fundamental_score": 6.0,
+        "value_score": 6.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "TIMKEN.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 3552.5,
+      "target": 3775.0,
+      "stop": 3126.2,
+      "thesis": "Good fundamentals (FS=7.5) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Industrials",
+      "fundamentals": {
+        "symbol": "TIMKEN.NS",
+        "name": "Timken India Limited",
+        "sector": "Industrials",
+        "price": 3552.5,
+        "market_cap_cr": 26721.0,
+        "pe": 64.391884,
+        "pb": 9.657574,
+        "roe": 14.407,
+        "debt_equity": 0.5,
+        "distance_from_low": 0.77,
+        "is_in_dip": false,
+        "fundamental_score": 7.5,
+        "value_score": 7.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "LINDEINDIA.NS",
+      "action": "WATCH",
+      "confidence": 0.4,
+      "price": 7080.5,
+      "target": 8049.0,
+      "stop": 6230.84,
+      "thesis": "Good fundamentals (FS=6.0) but not in dip yet",
+      "rationale": [
+        "Wait for price to come closer to 52w low"
+      ],
+      "sector": "Basic Materials",
+      "fundamentals": {
+        "symbol": "LINDEINDIA.NS",
+        "name": "Linde India Limited",
+        "sector": "Basic Materials",
+        "price": 7080.5,
+        "market_cap_cr": 60385.0,
+        "pe": 109.418945,
+        "pb": 15.807968,
+        "roe": null,
+        "debt_equity": null,
+        "distance_from_low": 0.59,
+        "is_in_dip": false,
+        "fundamental_score": 6.0,
+        "value_score": 6.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "JUBLFOOD.NS",
+      "action": "WATCH",
+      "confidence": 0.35,
+      "price": 431.35,
+      "target": 508.99,
+      "stop": 388.22,
+      "thesis": "Value score 8.0, in dip; DEFENSE regime: only highest conviction dips",
+      "rationale": [
+        "52w range: 7% from low",
+        "PE=76.21025 ROE=16.9%"
+      ],
+      "sector": "Consumer Cyclical",
+      "fundamentals": {
+        "symbol": "JUBLFOOD.NS",
+        "name": "Jubilant FoodWorks Limited",
+        "sector": "Consumer Cyclical",
+        "price": 431.35,
+        "market_cap_cr": 28369.0,
+        "pe": 76.21025,
+        "pb": 12.403669,
+        "roe": 16.893,
+        "debt_equity": 2.655,
+        "distance_from_low": 0.07,
+        "is_in_dip": true,
+        "fundamental_score": 6.5,
+        "value_score": 8.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "POONAWALLA.NS",
+      "action": "WATCH",
+      "confidence": 0.35,
+      "price": 394.4,
+      "target": 465.39,
+      "stop": 354.96,
+      "thesis": "Value score 7.5, in dip; DEFENSE regime: only highest conviction dips",
+      "rationale": [
+        "52w range: 16% from low",
+        "PE=57.745243 ROE=5.9%"
+      ],
+      "sector": "Financial Services",
+      "fundamentals": {
+        "symbol": "POONAWALLA.NS",
+        "name": "Poonawalla Fincorp Limited",
+        "sector": "Financial Services",
+        "price": 394.4,
+        "market_cap_cr": 34536.0,
+        "pe": 57.745243,
+        "pb": 3.0827672,
+        "roe": 5.8500000000000005,
+        "debt_equity": 4.70362,
+        "distance_from_low": 0.16,
+        "is_in_dip": true,
+        "fundamental_score": 6.0,
+        "value_score": 7.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "HAVELLS.NS",
+      "action": "WATCH",
+      "confidence": 0.35,
+      "price": 1166.8,
+      "target": 1376.82,
+      "stop": 1050.12,
+      "thesis": "Value score 8.5, in dip; DEFENSE regime: only highest conviction dips",
+      "rationale": [
+        "52w range: 9% from low",
+        "PE=43.31106 ROE=19.0%"
+      ],
+      "sector": "Industrials",
+      "fundamentals": {
+        "symbol": "HAVELLS.NS",
+        "name": "Havells India Limited",
+        "sector": "Industrials",
+        "price": 1166.8,
+        "market_cap_cr": 73188.0,
+        "pe": 43.31106,
+        "pb": 7.740327,
+        "roe": 18.969999,
+        "debt_equity": 2.801,
+        "distance_from_low": 0.09,
+        "is_in_dip": true,
+        "fundamental_score": 6.5,
+        "value_score": 8.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "ZENSARTECH.NS",
+      "action": "WATCH",
+      "confidence": 0.35,
+      "price": 484.75,
+      "target": 572.0,
+      "stop": 436.28,
+      "thesis": "Value score 9.0, in dip; DEFENSE regime: only highest conviction dips",
+      "rationale": [
+        "52w range: 3% from low",
+        "PE=14.388543"
+      ],
+      "sector": "Technology",
+      "fundamentals": {
+        "symbol": "ZENSARTECH.NS",
+        "name": "Zensar Technologies Limited",
+        "sector": "Technology",
+        "price": 484.75,
+        "market_cap_cr": 10990.0,
+        "pe": 14.388543,
+        "pb": 2.3286366,
+        "roe": null,
+        "debt_equity": 1.68,
+        "distance_from_low": 0.03,
+        "is_in_dip": true,
+        "fundamental_score": 6.5,
+        "value_score": 9.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "BAJAJFINSV.NS",
+      "action": "WATCH",
+      "confidence": 0.35,
+      "price": 1713.1,
+      "target": 2021.46,
+      "stop": 1541.79,
+      "thesis": "Value score 7.5, in dip; DEFENSE regime: only highest conviction dips",
+      "rationale": [
+        "52w range: 19% from low",
+        "PE=28.060606 ROE=14.6%"
+      ],
+      "sector": "Financial Services",
+      "fundamentals": {
+        "symbol": "BAJAJFINSV.NS",
+        "name": "Bajaj Finserv Ltd.",
+        "sector": "Financial Services",
+        "price": 1713.1,
+        "market_cap_cr": 273840.0,
+        "pe": 28.060606,
+        "pb": 3.5105371,
+        "roe": 14.602,
+        "debt_equity": 2.5636,
+        "distance_from_low": 0.19,
+        "is_in_dip": true,
+        "fundamental_score": 6.0,
+        "value_score": 7.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "UBL.NS",
+      "action": "WATCH",
+      "confidence": 0.35,
+      "price": 1350.3,
+      "target": 1593.35,
+      "stop": 1215.27,
+      "thesis": "Value score 7.5, in dip; DEFENSE regime: only highest conviction dips",
+      "rationale": [
+        "52w range: 9% from low",
+        "PE=86.06119 ROE=9.3%"
+      ],
+      "sector": "Consumer Defensive",
+      "fundamentals": {
+        "symbol": "UBL.NS",
+        "name": "United Breweries Limited",
+        "sector": "Consumer Defensive",
+        "price": 1350.3,
+        "market_cap_cr": 35703.0,
+        "pe": 86.06119,
+        "pb": 8.217503,
+        "roe": 9.292,
+        "debt_equity": 0.29076,
+        "distance_from_low": 0.09,
+        "is_in_dip": true,
+        "fundamental_score": 6.0,
+        "value_score": 7.5
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "DEVYANI.NS",
+      "action": "WATCH",
+      "confidence": 0.35,
+      "price": 113.84,
+      "target": 134.33,
+      "stop": 102.46,
+      "thesis": "Value score 7.0, in dip; DEFENSE regime: only highest conviction dips",
+      "rationale": [
+        "52w range: 22% from low",
+        "ROE=-2.6%"
+      ],
+      "sector": "Consumer Cyclical",
+      "fundamentals": {
+        "symbol": "DEVYANI.NS",
+        "name": "Devyani International Limited",
+        "sector": "Consumer Cyclical",
+        "price": 113.84,
+        "market_cap_cr": 14036.0,
+        "pe": null,
+        "pb": 9.268848,
+        "roe": -2.5880001,
+        "debt_equity": 2.03327,
+        "distance_from_low": 0.22,
+        "is_in_dip": true,
+        "fundamental_score": 5.5,
+        "value_score": 7.0
+      },
+      "regime": "DEFENSE"
+    },
+    {
+      "symbol": "ULTRACEMCO.NS",
+      "action": "WATCH",
+      "confidence": 0.35,
+      "price": 10997.0,
+      "target": 12976.46,
+      "stop": 9897.3,
+      "thesis": "Value score 7.5, in dip; DEFENSE regime: only highest conviction dips",
+      "rationale": [
+        "52w range: 24% from low",
+        "PE=39.624546 ROE=10.6%"
+      ],
+      "sector": "Basic Materials",
+      "fundamentals": {
+        "symbol": "ULTRACEMCO.NS",
+        "name": "UltraTech Cement Limited",
+        "sector": "Basic Materials",
+        "price": 10997.0,
+        "market_cap_cr": 323498.0,
+        "pe": 39.624546,
+        "pb": 4.4906077,
+        "roe": 10.593,
+        "debt_equity": 0.29431999999999997,
+        "distance_from_low": 0.24,
+        "is_in_dip": true,
+        "fundamental_score": 6.0,
+        "value_score": 7.5
+      },
+      "regime": "DEFENSE"
+    }
+  ]
+}
