@@ -159,15 +159,18 @@
   .fund-row span { display: flex; align-items: center; gap: 4px; }
   .fund-row .hl { color: #a1a1aa; font-weight: 600; }
 
-  /* Sparkline column */
+  /* Sparkline column — fills all available space */
   .sparkline-col {
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    padding: 8px 4px;
+    padding: 8px 12px;
     border-left: 1px solid rgba(30,41,59,0.5);
     border-right: 1px solid rgba(30,41,59,0.5);
+    flex: 1;              /* <-- fills available space */
+    min-width: 80px;      /* <-- don't get too small */
+    max-width: 300px;     /* <-- cap on wide screens */
   }
-  .sparkline-svg { width: 120px; height: 45px; }
+  .sparkline-svg { width: 100%; height: 50px; }
   .sparkline-label { font-size: 9px; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
 
   /* Right: metrics grid */
@@ -293,12 +296,14 @@ function updateMacro(m) {
   if (m.regime) { badge.textContent = m.regime; badge.className = 'regime-badge regime-' + m.regime; }
 }
 
-// SVG sparkline
-function makeSparkline(data, w, h) {
-  if (!data || data.length < 2) return '<div style="width:'+w+'px;height:'+h+'px"></div>';
+// SVG sparkline — fills container width
+function makeSparkline(data) {
+  if (!data || data.length < 2) return '<div style="width:100%;height:50px"></div>';
   const min = Math.min(...data), max = Math.max(...data);
   const range = max - min || 1;
   const pad = 3;
+  const w = 300;  // internal coordinate space
+  const h = 50;
   const pts = data.map((v, i) => {
     const x = (i / (data.length - 1)) * (w - pad * 2) + pad;
     const y = h - pad - ((v - min) / range) * (h - pad * 2);
@@ -307,9 +312,9 @@ function makeSparkline(data, w, h) {
   const color = data[data.length - 1] >= data[0] ? '#4ade80' : '#f87171';
   const lastX = w - pad;
   const lastY = h - pad - ((data[data.length-1] - min) / range) * (h - pad * 2);
-  return `<svg class="sparkline-svg" viewBox="0 0 ${w} ${h}">
-    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="${lastX}" cy="${lastY}" r="2" fill="${color}"/>
+  return `<svg class="sparkline-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+    <circle cx="${lastX}" cy="${lastY}" r="3" fill="${color}" vector-effect="non-scaling-stroke"/>
   </svg>`;
 }
 
@@ -326,7 +331,7 @@ function renderSignals() {
     const f = s.fundamentals || {};
     const sym = s.display_symbol || s.symbol.replace('.NS', '');
     const upside = s.target > s.price ? '+' + ((s.target/s.price - 1) * 100).toFixed(0) + '%' : '--';
-    const spark = makeSparkline(s.sparkline || [], 120, 45);
+    const spark = makeSparkline(s.sparkline || []);
 
     return `
     <div class="signal-card">
