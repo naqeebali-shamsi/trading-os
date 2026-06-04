@@ -284,7 +284,8 @@ def write_signals_json(path: str = None) -> str:
         d = asdict(s)
         f = d["fundamentals"]
 
-        # Format all numbers
+        # Enrich with formatted strings and sparklines
+        d["display_symbol"] = s.symbol.replace(".NS", "")
         d["price_fmt"] = _fmt_price(d["price"])
         d["target_fmt"] = _fmt_price(d["target"])
         d["stop_fmt"] = _fmt_price(d["stop"])
