@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-06-04T08:28:00.937961+00:00",
+  "usd_inr": 95.7699966430664,
+  "oil_usd": 96.73999786376953,
+  "risk_score": 9.5,
+  "fear_indicator": "EXTREME",
+  "thesis": "Risks: USD/INR above 85 (95.8) \u2014 FII outflow pressure; Oil above $85 \u2014 inflation & import bill pressure",
+  "recommended_regime": "DEFENSE",
+  "tailwinds": [],
+  "headwinds": [
+    "USD/INR above 85 (95.8) \u2014 FII outflow pressure",
+    "Oil above $85 \u2014 inflation & import bill pressure",
+    "Gold elevated \u2014 safe-haven demand (risk-off)"
+  ]
+}
