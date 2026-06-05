@@ -112,7 +112,7 @@ class StrategyRouter:
         if not buf or len(buf) < 55:
             return None
 
-        if self._last_signal_bar is not None and global_bar_idx < self._last_signal_bar + self.min_gap:
+        if self._last_idx.get(symbol) is not None and global_bar_idx < self._last_idx[symbol] + self.min_gap:
             return None
 
         regime = self._regime_score(list(buf))

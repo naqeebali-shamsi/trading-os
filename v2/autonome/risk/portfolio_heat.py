@@ -95,8 +95,8 @@ class PortfolioHeat:
 
     def unregister(self, symbol: str):
         """Remove a symbol from heat tracking (e.g., on failed fill)."""
-        if symbol in self.positions:
-            del self.positions[symbol]
+        if symbol in self._position_heat:
+            del self._position_heat[symbol]
 
     def conviction_weight(self, symbol: str, base_size: float) -> float:
         """Scale position by conviction relative to portfolio average."""

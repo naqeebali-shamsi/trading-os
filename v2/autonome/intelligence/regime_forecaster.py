@@ -1,11 +1,8 @@
 """
-autonome/intelligence/regime_forecaster.py  v1.0
+autonome/intelligence/regime_forecaster.py  v1.1
 Augments the static regime filter with forward-looking TimesFM forecasts.
 
-Rules:
-  * Forecast down > 2 %  → override regime to HIGH_VOL (avoid new risk)
-  * Forecast up   > 2 %  → boost conviction on existing OK regime
-  * Otherwise            → pass-through from base RegimeFilter
+Fixed for actual TimesFMAdapter API.
 """
 from __future__ import annotations
 
@@ -14,11 +11,7 @@ from typing import Dict, List, Optional
 
 from autonome.data.bars import Bar
 from autonome.strategy.regime import RegimeFilter
-from autonome.intelligence.timesfm_adapter import (
-    TimesFmAdapter,
-    ForecastResult,
-    get_adapter,
-)
+from autonome.intelligence.timesfm_adapter import TimesFMAdapter
 
 log = logging.getLogger("intel.regime_forecaster")
 
@@ -28,39 +21,61 @@ UP_CONVICTION_PCT = 2.0       # forecast rally => boost conviction
 BOOST_AMOUNT = 0.15           # add to confidence when up > threshold
 
 
+def _expected_return(forecast: dict) -> float:
+    """Extract expected return % from TimesFM forecast dict."""
+    point = forecast.get("point", [])
+    if len(point) < 2:
+        return 0.0
+    start = point[0]
+    end = point[-1]
+    if not start:
+        return 0.0
+    return (end - start) / start * 100
+
+
 def augment_regime(
     symbol: str,
     base_filter: RegimeFilter,
     history_bars: List[Bar],
     current_confidence: float = 0.5,
-    adapter: Optional[TimesFmAdapter] = None,
+    adapter: Optional[TimesFMAdapter] = None,
 ) -> Dict[str, object]:
     """
     Query TimesFM forecast and produce a regime override dict.
 
     Returns:
         {
-            "regime": str,               # e.g. "ok", "HIGH_VOL", "below_ema50", ...
-            "allowed": bool,             # final trading permission
-            "confidence_boost": float,   # delta added to signal confidence
-            "forecast_return_pct": float,# raw expected return from forecast
-            "reason": str,               # human-readable rationale
+            "regime": str,
+            "allowed": bool,
+            "confidence_boost": float,
+            "forecast_return_pct": float,
+            "reason": str,
         }
     """
     if adapter is None:
-        adapter = get_adapter()
+        try:
+            adapter = TimesFMAdapter()
+        except Exception:
+            log.warning("TimesFM unavailable; falling back to base regime")
+            base_allowed, base_reason = base_filter.check(history_bars[-1].t) if history_bars else (False, "no_history")
+            return {
+                "regime": base_reason,
+                "allowed": base_allowed,
+                "confidence_boost": 0.0,
+                "forecast_return_pct": 0.0,
+                "reason": f"Base regime={base_reason} (TimesFM unavailable)",
+            }
 
     forecast = adapter.forecast(symbol, history_bars, horizon=5)
     base_allowed, base_reason = base_filter.check(history_bars[-1].t) if history_bars else (False, "no_history")
 
-    ret = forecast.expected_return_pct
+    ret = _expected_return(forecast)
+    confidence = forecast.get("confidence", 0.0)
 
-    # --------------------------------------------------------------
-    # DOWN > 2 %  →  HIGH_VOL override (block new entries)
-    # --------------------------------------------------------------
+    # DOWN > 2 %  ->  HIGH_VOL override (block new entries)
     if ret <= DOWN_VOLATILITY_PCT:
         log.warning(
-            "REGIME OVERRIDE %s → HIGH_VOL (forecast %.2f%%)", symbol, ret
+            "REGIME OVERRIDE %s -> HIGH_VOL (forecast %.2f%%)", symbol, ret
         )
         return {
             "regime": "HIGH_VOL",
@@ -68,16 +83,14 @@ def augment_regime(
             "confidence_boost": 0.0,
             "forecast_return_pct": ret,
             "reason": (
-                f"TimesFM predicts -{abs(ret):.2f}% over next 5 bars; "
+                f"TimesFM predicts {ret:.2f}% over next 5 bars; "
                 "regime forced HIGH_VOL"
             ),
         }
 
-    # --------------------------------------------------------------
-    # UP > 2 %  →  boost conviction if base regime is OK
-    # --------------------------------------------------------------
+    # UP > 2 %  ->  boost conviction if base regime is OK
     if ret >= UP_CONVICTION_PCT and base_allowed:
-        boost = BOOST_AMOUNT * forecast.trend_strength
+        boost = BOOST_AMOUNT * confidence
         log.info(
             "REGIME BOOST %s | +%.2f confidence (forecast +%.2f%%)",
             symbol, boost, ret,
@@ -93,9 +106,7 @@ def augment_regime(
             ),
         }
 
-    # --------------------------------------------------------------
     # Pass-through
-    # --------------------------------------------------------------
     return {
         "regime": base_reason,
         "allowed": base_allowed,
@@ -114,10 +125,14 @@ class RegimeForecaster:
     def __init__(
         self,
         daily_bars: List[Bar],
-        adapter: Optional[TimesFmAdapter] = None,
+        adapter: Optional[TimesFMAdapter] = None,
     ):
         self.base = RegimeFilter(daily_bars)
-        self.adapter = adapter or get_adapter()
+        try:
+            self.adapter = adapter or TimesFMAdapter()
+        except Exception:
+            log.warning("TimesFM init failed; regime forecaster running without forecasts")
+            self.adapter = None
 
     def check(
         self,

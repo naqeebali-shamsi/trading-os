@@ -86,6 +86,13 @@ class State:
             except Exception:
                 log.warning("Failed to init earnings calendar")
 
+        # TimesFM forecaster (lazy init — may fail gracefully)
+        try:
+            self.forecaster = TimesFMAdapter()
+        except Exception:
+            log.warning("TimesFM init failed; forecasts disabled")
+            self.forecaster = None
+
         self.global_bar_idx = 0
         self.last_equity_log = datetime.min.replace(tzinfo=timezone.utc)
         self.last_daily_reset = datetime.now(timezone.utc).date()
@@ -332,7 +339,7 @@ def loop(st: State):
 
                             # ── TimesFM forecast filter ───────────────────────
                             hist = st.store.history(sym, 50)
-                            if hist and len(hist) >= 20:
+                            if st.forecaster and hist and len(hist) >= 20:
                                 fc = st.forecaster.forecast(sym, hist, horizon=5)
                                 if not st.forecaster.should_trade(fc, sig.direction):
                                     log.warning("TIMESFM BLOCKED %s — forecast contradicts %s (regime=%s)",
