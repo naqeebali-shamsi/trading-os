@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Long-Term Value Gems — NomadCrew</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0b0f19; color: #cbd5e1;
+    min-height: 100vh; padding: 20px;
+  }
+  .header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid #1e293b;
+  }
+  h1 { font-size: 24px; color: #f8fafc; }
+  .subtitle { font-size: 12px; color: #64748b; margin-top: 4px; }
+  .tabs {
+    display: flex; gap: 8px;
+  }
+  .tab {
+    padding: 8px 18px; border-radius: 8px; background: #1e293b; color: #94a3b8;
+    border: none; cursor: pointer; font-size: 13px; font-weight: 600;
+  }
+  .tab.active { background: #22c55e; color: #0f172a; }
+  .tab:hover { color: #f8fafc; }
+  .tab.inactive { background: #1e293b; }
+
+  .summary-bar {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: rgba(30,41,59,0.45); border: 1px solid #1e293b;
+    border-radius: 10px; padding: 16px;
+  }
+  .stat-card .label { font-size: 11px; color: #475569; text-transform: uppercase; }
+  .stat-card .value { font-size: 22px; font-weight: 700; color: #f8fafc; margin-top: 4px; }
+  .stat-card .sub { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+  .filters {
+    display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .filter-btn {
+    padding: 6px 14px; border-radius: 6px; border: 1px solid #334155;
+    background: transparent; color: #94a3b8; cursor: pointer; font-size: 12px;
+  }
+  .filter-btn.active { background: #22c55e; color: #0f172a; border-color: #22c55e; }
+
+  .gems-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  .gem-card {
+    background: rgba(30,41,59,0.4); border: 1px solid #1e293b;
+    border-radius: 14px; padding: 16px 20px;
+    display: flex; gap: 14px; align-items: stretch; transition: all 0.2s;
+  }
+  .gem-card:hover { border-color: #334155; transform: translateY(-1px); }
+
+  .gem-score {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 10px 8px; border-radius: 10px; text-align: center;
+    flex: 0 0 75px; gap: 4px;
+  }
+  .gem-score .score-num { font-size: 22px; font-weight: 800; }
+  .gem-score .score-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; }
+
+  .gem-main {
+    display: flex; flex-direction: column; gap: 5px;
+    flex: 0 0 280px; min-width: 0; overflow: hidden;
+  }
+  .gem-main h3 {
+    font-size: 17px; color: #f8fafc; font-weight: 700;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .gem-main .name { font-size: 12px; color: #475569; }
+  .gem-main .thesis {
+    font-size: 12px; color: #94a3b8; line-height: 1.5;
+  }
+
+  .gem-metrics {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+    flex: 0 0 170px;
+  }
+  .m {
+    background: rgba(15,23,42,0.5); padding: 8px 4px; border-radius: 6px;
+    text-align: center; border: 1px solid #1e293b;
+  }
+  .m .lbl { font-size: 9px; color: #475569; text-transform: uppercase; }
+  .m .val { font-size: 13px; font-weight: 700; margin-top: 2px; }
+  .m .green { color: #4ade80; }
+  .m .red { color: #f87171; }
+  .m .blue { color: #60a5fa; }
+
+  .score-breakdown {
+    display: flex; gap: 6px; margin-top: 4px;
+  }
+  .s { font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+  .s-q { background: rgba(59,130,246,0.12); color: #60a5fa; }
+  .s-v { background: rgba(34,197,94,0.12); color: #4ade80; }
+  .s-g { background: rgba(168,85,247,0.12); color: #a78bfa; }
+  .s-r { background: rgba(239,68,68,0.12); color: #f87171; }
+
+  .rec-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+  }
+  .rec-STRONG_BUY { background: rgba(34,197,94,0.15); color: #4ade80; }
+  .rec-BUY { background: rgba(34,197,94,0.08); color: #22c55e; }
+  .rec-HOLD { background: rgba(59,130,246,0.08); color: #60a5fa; }
+  .rec-WATCH { background: rgba(100,116,139,0.08); color: #94a3b8; }
+
+  .empty { text-align: center; padding: 50px 20px; color: #475569; }
+  .last-upd { color: #475569; font-size: 11px; margin-top: 20px; text-align: center; }
+
+  .spark-col {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 8px 12px;
+    border-left: 1px solid rgba(30,41,59,0.5);
+    border-right: 1px solid rgba(30,41,59,0.5);
+    flex: 1 1 auto;
+  }
+  .spark-svg { width: 100%; height: 55px; }
+  .spark-label { font-size: 9px; color: #475569; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Long-Term Value Gems</h1>
+    <div class="subtitle">Quality businesses at reasonable prices — 2-7 year horizon</div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('us')">🇺🇸 US &amp; Canada</button>
+    <button class="tab" onclick="showTab('india')">🇮🇳 India</button>
+  </div>
+</div>
+
+<div class="summary-bar" id="summary">
+  <!-- filled by JS -->
+</div>
+
+<div class="filters" id="filters">
+  <button class="filter-btn active" onclick="filterGems('all')">All</button>
+  <button class="filter-btn" onclick="filterGems('strong')">🔥 Score ≥14</button>
+  <button class="filter-btn" onclick="filterGems('buy')">🟢 Score 10-13</button>
+  <button class="filter-btn" onclick="filterGems('dividend')">💰 High Dividend</button>
+  <button class="filter-btn" onclick="filterGems('quality')">⭐ Quality ≥8</button>
+</div>
+
+<div class="gems-grid" id="gems"></div>
+<div class="last-upd" id="last-upd"></div>
+
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// DATA
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let usData = [], indiaData = [], activeTab = 'us';
+
+fetch('/api/us_gems')
+  .then(r => r.json())
+  .then(d => { usData = d.gems || d; render(); })
+  .catch(() => { document.getElementById('gems').innerHTML = '<div class="empty">Loading US data...</div>'; });
+
+fetch('/api/india_gems')
+  .then(r => r.json())
+  .then(d => { indiaData = d.gems || d; render(); })
+  .catch(() => {});
+
+function showTab(t) {
+  activeTab = t;
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', false));
+  event.target.classList.add('active');
+  render();
+}
+
+function filterGems(type) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', false));
+  event.target.classList.add('active');
+  render(type);
+}
+
+function sparkline(data) {
+  if (!data || data.length < 2) return '<svg class="spark-svg" viewBox="0 0 100 50" preserveAspectRatio="none"><line x1="0" y1="25" x2="100" y2="25" stroke="#334155" stroke-width="1"/></svg>';
+  const n = data.length, min = Math.min(...data), max = Math.max(...data);
+  const range = max - min || 1;
+  const pts = data.map((v,i) => `${(i/(n-1)*100).toFixed(1)},${50-((v-min)/range*45+2.5).toFixed(1)}`).join(' ');
+  const color = data[data.length-1] >= data[0] ? '#22c55e' : '#ef4444';
+  return `<svg class="spark-svg" viewBox="0 0 100 50" preserveAspectRatio="none">` +
+    `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" vector-effect="non-scaling-stroke"/>` +
+    `</svg>`;
+}
+
+function fmtScoreColor(s) {
+  if (s >= 14) return '#22c55e';
+  if (s >= 10) return '#4ade80';
+  if (s >= 6) return '#facc15';
+  return '#ef4444';
+}
+
+function recFromScore(s) {
+  if (s >= 14) return 'STRONG_BUY';
+  if (s >= 10) return 'BUY';
+  if (s >= 6) return 'HOLD';
+  return 'WATCH';
+}
+
+function render(filter='all') {
+  const gems = activeTab === 'us' ? usData : indiaData;
+  let filtered = [...gems];
+  if (filter === 'strong') filtered = gems.filter(g => g.total_score >= 14);
+  else if (filter === 'buy') filtered = gems.filter(g => g.total_score >= 10 && g.total_score < 14);
+  else if (filter === 'dividend') filtered = gems.filter(g => (g.dividend_yield||0) > 2.5);
+  else if (filter === 'quality') filtered = gems.filter(g => g.quality_score >= 8);
+
+  // Summary
+  const avgScore = gems.length ? (gems.reduce((a,g) => a+g.total_score,0)/gems.length).toFixed(1) : 0;
+  const strongCount = gems.filter(g => g.total_score >= 14).length;
+  const buyCount = gems.filter(g => g.total_score >= 10 && g.total_score < 14).length;
+  document.getElementById('summary').innerHTML = `
+    <div class="stat-card"><div class="label">Gems Screened</div><div class="value">${gems.length}</div><div class="sub">quality + value + growth</div></div>
+    <div class="stat-card"><div class="label">Avg Score</div><div class="value" style="color:${fmtScoreColor(avgScore)}">${avgScore}</div><div class="sub">out of 30</div></div>
+    <div class="stat-card"><div class="label">Strong Buy</div><div class="value" style="color:#4ade80">${strongCount}</div><div class="sub">score ≥ 14</div></div>
+    <div class="stat-card"><div class="label">Buy Zone</div><div class="value" style="color:#facc15">${buyCount}</div><div class="sub">score 10-13</div></div>
+  `;
+
+  // Gems
+  const html = filtered.map(g => `
+    <div class="gem-card">
+      <div class="gem-score" style="border:1.5px solid ${fmtScoreColor(g.total_score)}">
+        <div class="score-num" style="color:${fmtScoreColor(g.total_score)}">${g.total_score}</div>
+        <div class="score-label">Score</div>
+        <span class="rec-badge rec-${recFromScore(g.total_score)}">${recFromScore(g.total_score).replace('_',' ')}</span>
+      </div>
+      <div class="gem-main">
+        <h3>${g.display_symbol} <span style="font-weight:400;font-size:13px;color:#64748b">${g.sector}</span></h3>
+        <div class="name">${g.name}</div>
+        <div class="score-breakdown">
+          <span class="s s-q">Q ${g.quality_score}</span>
+          <span class="s s-v">V ${g.value_score}</span>
+          <span class="s s-g">G ${g.growth_score}</span>
+          <span class="s s-r">R ${g.risk_score}</span>
+        </div>
+        <div class="thesis">${thesisText(g)}</div>
+      </div>
+      <div class="spark-col">${activeTab==='us'?sparkline([]):sparkline([])}<div class="spark-label">5Y TREND</div></div>
+      <div class="gem-metrics">
+        <div class="m"><div class="lbl">Price</div><div class="val blue">${g.price_fmt}</div></div>
+        <div class="m"><div class="lbl">PE</div><div class="val">${g.pe_fmt}</div></div>
+        <div class="m"><div class="lbl">ROE</div><div class="val green">${g.roe_fmt}</div></div>
+        <div class="m"><div class="lbl">D/E</div><div class="val ${g.debt_equity<1?'green':'red'}">${g.de_fmt}</div></div>
+        <div class="m"><div class="lbl">52w Range</div><div class="val">${g['52w_range_fmt']}</div></div>
+        <div class="m"><div class="lbl">Cap</div><div class="val">${g.mkt_cap_fmt}</div></div>
+        <div class="m"><div class="lbl">Margin</div><div class="val">${g.margin_fmt}</div></div>
+        <div class="m"><div class="lbl">Div Yield</div><div class="val">${g.dividend_yield ? g.dividend_yield.toFixed(1)+'%' : 'N/A'}</div></div>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('gems').innerHTML = html || '<div class="empty">No gems match this filter</div>';
+}
+
+function thesisText(g) {
+  const parts = [];
+  if (g.quality_score >= 8) parts.push("high quality business");
+  else if (g.quality_score >= 6) parts.push("solid quality");
+  if (g.value_score >= 7) parts.push("deeply undervalued");
+  else if (g.value_score >= 5) parts.push("reasonably priced");
+  if (g.growth_score >= 4) parts.push("strong growth");
+  else if (g.growth_score >= 2) parts.push("steady growth");
+  if (g.risk_score >= 3) parts.push("but elevated risk");
+  return parts.length ? parts.join(', ') + '.' : 'Mixed factors.';
+}
+
+render();
+</script>
+</body>
+</html>

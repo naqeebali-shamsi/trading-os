@@ -20,6 +20,7 @@ log = logging.getLogger("india.dashboard")
 PORT = 8766
 INTEL_DIR = "/mnt/e/NomadCrew[GROWTH]/trading-os/v2/swarm/intel"
 DASHBOARD_HTML = "/mnt/e/NomadCrew[GROWTH]/trading-os/v2/dashboard/india.html"
+LONGTERM_HTML = "/mnt/e/NomadCrew[GROWTH]/trading-os/v2/dashboard/longterm.html"
 
 
 def load_signals():
@@ -53,17 +54,23 @@ class Handler(BaseHTTPRequestHandler):
         path = parsed.path
 
         if path == "/" or path == "/india":
-            self._serve_html()
+            self._serve_html(DASHBOARD_HTML)
+        elif path == "/longterm":
+            self._serve_html(LONGTERM_HTML)
         elif path == "/api/india_signals":
             self._serve_signals()
         elif path == "/api/india_macro":
             self._serve_macro()
+        elif path == "/api/us_gems":
+            self._serve_us_gems()
+        elif path == "/api/india_gems":
+            self._serve_india_gems()
         else:
             self.send_error(404)
 
-    def _serve_html(self):
+    def _serve_html(self, filepath):
         try:
-            with open(DASHBOARD_HTML, "r") as f:
+            with open(filepath, "r") as f:
                 html = f.read()
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
@@ -109,6 +116,28 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps(data, indent=2, default=str).encode())
         except Exception as e:
+            self.send_error(500)
+
+    def _serve_us_gems(self):
+        self._serve_json_file("longterm_gems.json", key=lambda d: d.get("us_gems", {}).get("gems", []))
+
+    def _serve_india_gems(self):
+        self._serve_json_file("longterm_gems.json", key=lambda d: d.get("india_gems", {}).get("gems", []))
+
+    def _serve_json_file(self, filename, key=None):
+        try:
+            path = os.path.join(INTEL_DIR, filename)
+            with open(path, "r") as f:
+                data = json.load(f)
+            payload = key(data) if key else data
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Cache-Control", "no-cache")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps({"gems": payload} if isinstance(payload, list) else payload, indent=2, default=str).encode())
+        except Exception as e:
+            log.error("Serve %s error: %s", filename, e)
             self.send_error(500)
 
 
